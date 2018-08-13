@@ -171,7 +171,7 @@ public class Screen {
 		for(Physical obj: w.physicals){
 			for(Shape shape:obj.shapes){
 				if(obj == selectedObject)
-					drawShape(shape, shape.properties.color.darker(0.9));
+					drawShape(shape, shape.properties.color.darker(0.8));
 				else
 					drawShape(shape, shape.properties.color);
 				
@@ -211,10 +211,8 @@ public class Screen {
 		}
 		
 		if(selectedObject != null){
-			Font.Text text = font.new Text(selectedObject.describe(), 36f, 1f);
 			color(Color.BLACK);
-			text.draw(-0.999f, 0.999f);
-			// font.drawString(, -1, 1, 36f);
+			font.drawString(selectedObject.describe(), 36f, 1f, -0.999f * width/height, 0.999f);
 		}
 		
 		glfwSwapBuffers(window);

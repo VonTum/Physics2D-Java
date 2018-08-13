@@ -127,6 +127,16 @@ public class Font {
 		glDeleteTextures(id);
 	}
 	
+	public void drawString(String text, float fontSize, float lineSpacing, float x, float y){
+		Text t = new Text(text, fontSize, lineSpacing);
+		t.draw(x, y);
+	}
+	
+	public void drawString(String text, float fontSize, float lineSpacing, Vec2 pos){
+		Text t = new Text(text, fontSize, lineSpacing);
+		t.draw(pos);
+	}
+	
 	private void drawChar(char c, float x, float y, float dx, float dy){
 		byte bc = (byte) c;
 		
