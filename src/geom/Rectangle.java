@@ -1,0 +1,70 @@
+package geom;
+
+import java.util.Iterator;
+
+import physics.PhysicalProperties;
+import math.CFrame;
+import math.Vec2;
+
+public class Rectangle extends ConvexPolygon {
+	
+	public double width, height;
+	
+	public Rectangle(PhysicalProperties properties, CFrame cframe, double width, double height) {
+		super(properties, cframe, new Vec2[]{	new Vec2(width/2, height/2), 
+												new Vec2(-width/2, height/2), 
+												new Vec2(-width/2, -height/2), 
+												new Vec2(width/2, -height/2)});
+		
+		this.width = width;
+		this.height = height;
+	}
+	
+	@Override
+	public double getArea() {
+		return width * height;
+	}
+	
+	@Override
+	public double getInertia() {
+		return getMass()*(width*width+height*height)/12;
+	}
+	
+	@Override
+	public Vec2 getCenterOfMass(){
+		return getCFrame().position;
+	}
+	
+	@Override
+	public boolean containsPoint(Vec2 point) {
+		Vec2 localPoint = getCFrame().globalToLocal(point);
+		return Math.abs(localPoint.x) <= width/2 && Math.abs(localPoint.y) <= height/2;
+	}
+	
+	@Override
+	public String toString(){
+		return String.format("Rectangle(%s, w=%.9f, h=%.9f)", getCFrame(), width, height);
+	}
+	
+	@Override
+	public Iterator<Vec2> iterator(){
+		return new Iterator<Vec2>() {
+			double curX = -width/2, curY = -height/2;
+			@Override
+			public boolean hasNext() {
+				return curX < width/2 && curY < height/2;
+			}
+
+			@Override
+			public Vec2 next() {
+				Vec2 v = new Vec2(curX, curY);
+				curX += width * 0.05;
+				if(curX >= width/2){
+					curX = -width/2;
+					curY += height * 0.05;
+				}
+				return getCFrame().localToGlobal(v);
+			}
+		};
+	}
+}
