@@ -37,7 +37,7 @@ public abstract class Shape implements Locatable, Iterable<Vec2> {
 	}
 	
 	public void detach(){
-		if(parent != null){
+		if(isAttached()){
 			parent.detachShape(this);
 			cframe = getCFrame();
 			parent = null;
@@ -46,17 +46,21 @@ public abstract class Shape implements Locatable, Iterable<Vec2> {
 	
 	@Override
 	public CFrame getCFrame(){
-		if(parent == null)
-			return cframe;
-		else
+		if(isAttached())
 			return parent.cframe.localToGlobal(cframe);
+		else
+			return cframe;
 	}
 	
 	public Vec2 getSpeedOfPoint(Vec2 point){
-		if(parent == null)
+		if(isAttached())
 			return Vec2.ZERO;
 		else
 			return parent.getSpeedOfPoint(point);
+	}
+	
+	public boolean isAttached(){
+		return parent != null;
 	}
 	
 	/**
