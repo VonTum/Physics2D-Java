@@ -47,9 +47,12 @@ public class World {
 			// p.applyTorque(-p.angularVelocity * AIRROTFRICTIONFACTOR);
 		}
 		
+		
+		
 		for(int i = 0; i < physicals.size(); i++){
 			for(int j = i+1; j < physicals.size(); j++){
 				physicals.get(i).interactWith(physicals.get(j));
+				Debug.logInteraction(null, null);
 			}
 		}
 		
@@ -58,8 +61,6 @@ public class World {
 		for(Physical p:physicals){
 			p.update(deltaT);
 		}
-		
-		Debug.commit();
 	}
 	
 	private void executeConstraints(){

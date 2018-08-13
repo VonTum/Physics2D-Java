@@ -9,6 +9,7 @@ import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.*;
+import game.Debug;
 import game.input.InputHandler;
 import geom.Polygon;
 import geom.Shape;
@@ -53,7 +54,7 @@ public class Screen {
 	public static final boolean DRAW_BLOCK_TORQUE = false;
 	public static final boolean DRAW_BLOCK_NORMALVECS = false;
 	public static final boolean DRAW_LOCAL_AXES = false;
-	public static final boolean DRAW_VERTEX_ORIENTATION = true;
+	public static final boolean DRAW_VERTEX_ORIENTATION = false;
 	public static final boolean DRAW_BLOCK_SPEEDS = false;
 	public static final boolean DRAW_CENTER_OF_MASS = true;
 	
@@ -179,8 +180,10 @@ public class Screen {
 				
 			}
 			
-			color(0.7, 0.3, 0.3, 1.0);
-			drawVector(obj.cframe.position, obj.cframe.rotation.mul(Vec2.UNITX));
+			if(DRAW_BLOCK_DIRECTION){
+				color(0.7, 0.3, 0.3, 1.0);
+				drawVector(obj.cframe.position, obj.cframe.rotation.mul(Vec2.UNITX));
+			}
 			color(0.2, 0.2, 0.2, 1.0);
 			for(Shape shape:obj.shapes)
 				drawLine(obj.cframe.position, shape.getCFrame().position);
@@ -205,15 +208,19 @@ public class Screen {
 		applyMarkings();
 		
 		
-		for(Physical obj:w.physicals){
+		/*for(Physical obj:w.physicals){
 			Font.Text text = font.new Text("Hello", 36f, 1f);
 			annotate(text, obj.getCenterOfMass());
-		}
+		}*/
 		
+		color(Color.BLACK);
 		if(selectedObject != null){
-			color(Color.BLACK);
 			font.drawString(selectedObject.describe(), 36f, 1f, -0.999f * width/height, 0.999f);
 		}
+		
+		Font.Text text = font.createText(Debug.getDebugInfo(), 36f, 1f);
+		double textHeight = text.getTextDimentions().height;
+		text.draw(-0.999f * width/height, -0.999f+(float)textHeight);
 		
 		glfwSwapBuffers(window);
 	}

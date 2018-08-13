@@ -77,6 +77,10 @@ public class StandardInputHandler implements InputHandler {
 			world.tick(Physics2D.deltaT);
 			System.out.println("Proceeded one step");
 			break;
+		case GLFW.GLFW_KEY_G:
+			System.out.println("Garbagecollecting!");
+			System.gc();
+			break;
 		}
 	}
 	

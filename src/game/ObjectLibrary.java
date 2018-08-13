@@ -8,6 +8,7 @@ import math.RotMat2;
 import math.Vec2;
 import physics.Physical;
 import physics.PhysicalProperties;
+import util.Color;
 
 public class ObjectLibrary {
 	
@@ -23,6 +24,10 @@ public class ObjectLibrary {
 		Shape veryLightArm = new Rectangle(armProperties, cframe.localToGlobal(new CFrame(-0.3, 0.5, Mat2.IDENTITY)), 0.2, 0.03);
 		Physical hammer = new Physical(heavyCube, veryLightArm);
 		return hammer;
+	}
+	
+	public static Physical createHammer(CFrame cframe){
+		return createHammer(cframe, new PhysicalProperties(1000.0, 0.05, 0.0, Color.DARK_GREY.alpha(0.6)), new PhysicalProperties(10.0));
 	}
 	
 	public static Physical createBowl(CFrame cframe, PhysicalProperties properties){

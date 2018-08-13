@@ -4,12 +4,16 @@ package game;
 import game.gui.Screen;
 import game.input.InputHandler;
 import game.input.StandardInputHandler;
+
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import math.CFrame;
 import math.Vec2;
+import physics.PhysicalProperties;
 import physics.World;
+import util.Color;
 
 public class Physics2D {
 	
@@ -22,9 +26,13 @@ public class Physics2D {
 	public static void main(String[] args) throws IOException {
 		World w = new World(new Vec2(0.0, -2.0));
 		InputHandler handler = new StandardInputHandler(w);
+		Debug.setWorld(w);
 		Screen.init(handler);
 		
-		new MultiMassWorld().build(w);
+		new PyramidWorld(20).build(w);
+		
+		w.addObject(ObjectLibrary.createHammer(new CFrame(3.0, 0.0), new PhysicalProperties(1000, 0.05, 0.0, Color.DARK_GREY.alpha(0.6)), new PhysicalProperties(10.0, 0.05, 0.0, Color.DEFAULT_BRICK_COLOR)));
+		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), new PhysicalProperties(10.0)));
 		
 		Timer worldRefresh = new Timer(true);
 		
@@ -32,13 +40,13 @@ public class Physics2D {
 		
 		worldRefresh.schedule(new TimerTask() {
 			@Override public void run() {
-				if(!SIMULATION_PAUSED)
-					for(int i = 0; i < SIMULATION_REPEATS_PER_TICK * SIMULATION_SPEED; i++)
+				if(!SIMULATION_PAUSED){
+					for(int i = 0; i < SIMULATION_REPEATS_PER_TICK * SIMULATION_SPEED; i++){
+						Debug.startTick();
 						w.tick(deltaT);
-				
-				// w.objects.get(0).cframe.position = new Vec2(0.0, 0.068);
-				
-				// Screen.camera.position = new RotMat2(0.01).mul(Screen.camera.position);
+						Debug.endTick();
+					}
+				}
 			}
 		}, 0, (int) (10));
 		
