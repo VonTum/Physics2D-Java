@@ -28,18 +28,9 @@ public class MultiPartWorld implements WorldBuilder {
 		Physical block = new Physical(blockShape);
 		w.addObject(block);
 		
-		Shape floorShape = new Rectangle(basicProperties, new CFrame(0.0, 0.0, 0.0), 20.0, 0.2);
-		Physical floor = new Physical(floorShape);
-		w.addObject(floor);
+		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0, 0.0), basicProperties));
 		
-		RotMat2 rotMat = new RotMat2(0.7);
-		Shape bowlLeft = new Rectangle(basicProperties, new CFrame(rotMat.inv().mul(new Vec2(0, -0.4)), -0.7), 0.2, 0.05);
-		Shape bowlBottom = new Rectangle(basicProperties, new CFrame(new Vec2(0, -0.4), 0.0), 0.2, 0.05);
-		Shape bowlRight = new Rectangle(basicProperties, new CFrame(rotMat.mul(new Vec2(0, -0.4)), 0.7), 0.2, 0.05);
-		
-		Physical bowl = new Physical(bowlBottom, bowlLeft, bowlRight);
-		bowl.cframe.move(new Vec2(-0.2, 1.0));
-		w.addObject(bowl);
+		w.addObject(ObjectLibrary.createBowl(new CFrame(-0.2, 1.0, 0.0), basicProperties));
 		
 		Triangle t = new Triangle(basicProperties, new CFrame(new Vec2(0.9, 1.2), 0), 0.3, new Vec2(0.2, 0.2));
 		Physical trianglePhysical = new Physical(t);
@@ -56,8 +47,6 @@ public class MultiPartWorld implements WorldBuilder {
 		
 		Physical circleThing = new Physical(squares);
 		w.addObject(circleThing);
-		
-		floor.anchor();
 		
 		physical.angularVelocity = -1.0;
 		physical.velocity = new Vec2(0.0, 0.0);
