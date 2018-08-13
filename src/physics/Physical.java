@@ -49,20 +49,21 @@ public class Physical implements Locatable, Describable {
 	}
 	
 	public void interactWith(Physical otherObj){
-		double smallestMass = Math.min(getMass(), otherObj.getMass());
 		for(Shape shape:shapes){
 			for(Shape otherShape:otherObj.shapes){
 				shape.getIntersectionPoints(otherShape).forEach((point) -> {
-					handleIntersectionPoint(otherShape, smallestMass, point);
+					double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
+					handleIntersectionPoint(otherShape, smallestInertia, point);
 				});
 				otherShape.getIntersectionPoints(shape).forEach((point) -> {
-					otherObj.handleIntersectionPoint(shape, smallestMass, point);
+					double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
+					otherObj.handleIntersectionPoint(shape, smallestInertia, point);
 				});
 			}
 		}
 	}
 	
-	private void handleIntersectionPoint(Shape otherShape, double smallestMass, OrientedPoint point) {
+	private void handleIntersectionPoint(Shape otherShape, double smallestInertia, OrientedPoint point) {
 		Vec2 position = point.position;
 		DepthWithDirection d = otherShape.getNormalVecAndDepthToSurface(point);
 		
@@ -70,7 +71,7 @@ public class Physical implements Locatable, Describable {
 		
 		Debug.logVector(position, normalVec, Color.CYAN.darker());
 		
-		Vec2 repulsionForce = d.getVecToSurface().mul(REPULSION_FACTOR*smallestMass);
+		Vec2 repulsionForce = d.getVecToSurface().mul(REPULSION_FACTOR*smallestInertia);
 		
 		Vec2 relativeVelocity = this.getSpeedOfPoint(position).subtract(otherShape.getSpeedOfPoint(position));
 		
@@ -85,8 +86,8 @@ public class Physical implements Locatable, Describable {
 		
 		sidewaysComponent = sidewaysComponent * otherShape.properties.friction;
 		
-		Vec2 normalForce = normalVec.mul(-normalComponent * VELOCITY_STOP_FACTOR * smallestMass);
-		Vec2 frictionForce = normalVec.rotate90CounterClockwise().mul(-sidewaysComponent * VELOCITY_STOP_FACTOR * smallestMass);
+		Vec2 normalForce = normalVec.mul(-normalComponent * VELOCITY_STOP_FACTOR * smallestInertia);
+		Vec2 frictionForce = normalVec.rotate90CounterClockwise().mul(-sidewaysComponent * VELOCITY_STOP_FACTOR * smallestInertia);
 		
 		this.actionReaction(otherShape.parent, position, repulsionForce);
 		this.actionReaction(otherShape.parent, position, normalForce);
@@ -100,6 +101,24 @@ public class Physical implements Locatable, Describable {
 	
 	public Vec2 getSpeedOfPoint(Vec2 point) {
 		return velocity.add(point.subtract(getCenterOfMass()).cross(-angularVelocity));
+	}
+	
+	public double getPointInertia(OrientedPoint point){
+		return getPointInertia(point.position.subtract(getCenterOfMass()), point.orientation);
+	}
+	/**
+	 * gets the point inertia of a given point in a given direction, the ratio of Force to Acceleration
+	 * 
+	 * getPointInertia(...) == F / a
+	 * 
+	 * @param relativePosition position relative to center of mass
+	 * @param direction direction, absolute
+	 * @return The inertia of the given point in the given direction
+	 */
+	public double getPointInertia(Vec2 relativePosition, NormalizedVec2 direction){
+		double movementFactor = 1/getMass();
+		double rotationFactor = Math.abs(relativePosition.cross(relativePosition.cross(direction)).dot(direction) / getInertia());
+		return 1/(movementFactor + rotationFactor);
 	}
 	
 	public Vec2 getConcentratedForceInPoint(Vec2 point){
