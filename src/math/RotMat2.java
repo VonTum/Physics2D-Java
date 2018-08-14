@@ -52,6 +52,6 @@ public class RotMat2 extends Mat2 {
 	}
 	
 	public NormalizedVec2 getOrientation(){
-		return new NormalizedVec2(a, b);
+		return new NormalizedVec2(a, c);
 	}
 }
