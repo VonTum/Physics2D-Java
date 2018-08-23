@@ -1,10 +1,13 @@
 package game;
 
+import java.io.IOException;
+
 import physics.Locatable;
 import physics.Physical;
 import physics.World;
 import util.Color;
 import game.gui.Screen;
+import game.input.StandardInputHandler;
 import math.Vec2;
 
 public class Debug {
@@ -23,7 +26,7 @@ public class Debug {
 	private static CircularQueue lastNanos = new CircularQueue(500);
 	private static CircularQueue lastTPS = new CircularQueue(40);
 	
-	private static int age = 0;
+	public static int age = 0;
 	private static long startTime = System.nanoTime();
 	
 	private static int curTPS = 0;
@@ -89,8 +92,32 @@ public class Debug {
 		
 		Screen.commitDrawings();
 	}
+	
 	public static synchronized String getDebugInfo(){
 		return DEBUG_INFO;
+	}
+	
+	/**
+	 * Sets up the debug screen, giving it an empty world.
+	 */
+	public static void setupDebugScreen(){
+		World emptyWorld = new World(Vec2.ZERO);
+		try{
+			Screen.init(new StandardInputHandler(emptyWorld));
+			Screen.setWorld(emptyWorld);
+		}catch(IOException ex){
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	/**
+	 * halt further code to inspect screen
+	 * 
+	 * Should be called after setupDebugScreen
+	 */
+	public static void halt() {
+		while(!Screen.shouldClose())
+			Screen.refresh();
 	}
 	
 	private static final class CircularQueue {
