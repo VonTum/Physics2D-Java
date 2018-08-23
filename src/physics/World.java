@@ -1,5 +1,6 @@
 package physics;
 
+import game.Constants;
 import game.Debug;
 import geom.Shape;
 
@@ -14,8 +15,8 @@ public class World {
 	public final double AIRFRICTIONFACTOR = 0.01;
 	public final double AIRROTFRICTIONFACTOR = 0.001;
 	
-	private static final double MAGNET_MOVEMENT_CANCEL_FACTOR = 200;
-	private static final double MAGNET_STRENGTH = 10000.0;
+	private static final double MAGNET_MOVEMENT_CANCEL_FACTOR = Constants.VELOCITY_STOP_FACTOR;
+	private static final double MAGNET_STRENGTH = 1000.0;
 	
 	public final ArrayList<Physical> physicals = new ArrayList<>();
 	public final ArrayList<Constraint> constraints = new ArrayList<>();
@@ -39,6 +40,10 @@ public class World {
 	
 	public void tick(double deltaT) {
 		for(Physical p:physicals){
+			p.update(deltaT);
+		}
+		
+		for(Physical p:physicals){
 			// gravity
 			p.applyForce(gravity.mul(p.getMass()));
 			
@@ -46,8 +51,6 @@ public class World {
 			// p.applyForce(p.velocity.mul(-AIRFRICTIONFACTOR));
 			// p.applyTorque(-p.angularVelocity * AIRROTFRICTIONFACTOR);
 		}
-		
-		
 		
 		for(int i = 0; i < physicals.size(); i++){
 			for(int j = i+1; j < physicals.size(); j++){
@@ -57,10 +60,6 @@ public class World {
 		}
 		
 		executeConstraints();
-		
-		for(Physical p:physicals){
-			p.update(deltaT);
-		}
 	}
 	
 	private void executeConstraints(){

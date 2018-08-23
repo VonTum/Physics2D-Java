@@ -1,5 +1,6 @@
 package physics;
 
+import game.Constants;
 import game.Debug;
 import game.gui.Describable;
 import geom.Shape;
@@ -7,6 +8,7 @@ import geom.Shape;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import util.Color;
 import math.CFrame;
@@ -16,10 +18,6 @@ import math.RotMat2;
 import math.Vec2;
 
 public class Physical implements Locatable, Describable {
-	private static final double REPULSION_FACTOR = 30000.0;
-	private static final double VELOCITY_STOP_FACTOR = 2000.0;
-	
-	
 	public CFrame cframe;
 	
 	public final List<Shape> shapes;
@@ -34,6 +32,8 @@ public class Physical implements Locatable, Describable {
 	private double inertia;
 	
 	private boolean anchored = false;
+	
+	public String name = super.toString();
 	
 	public Physical(Shape... shapes){
 		this.shapes = new ArrayList<>();
@@ -55,7 +55,8 @@ public class Physical implements Locatable, Describable {
 					double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
 					handleIntersectionPoint(otherShape, smallestInertia, point);
 				});
-				otherShape.getIntersectionPoints(shape).forEach((point) -> {
+				Stream<? extends OrientedPoint> pointStream = otherShape.getIntersectionPoints(shape);
+				pointStream.forEach((point) -> {
 					double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
 					otherObj.handleIntersectionPoint(shape, smallestInertia, point);
 				});
@@ -67,11 +68,17 @@ public class Physical implements Locatable, Describable {
 		Vec2 position = point.position;
 		DepthWithDirection d = otherShape.getNormalVecAndDepthToSurface(point);
 		
+		// System.out.println("normal vecs gotten");
+		
+		if(Debug.age >= 5667 && Double.isNaN(smallestInertia)){
+			int i = 0;
+		}
+		
 		NormalizedVec2 normalVec = d.direction;
 		
 		Debug.logVector(position, normalVec, Color.CYAN.darker());
 		
-		Vec2 repulsionForce = d.getVecToSurface().mul(REPULSION_FACTOR*smallestInertia);
+		Vec2 repulsionForce = d.getVecToSurface().mul(Constants.REPULSION_FACTOR*smallestInertia);
 		
 		Vec2 relativeVelocity = this.getSpeedOfPoint(position).subtract(otherShape.getSpeedOfPoint(position));
 		
@@ -86,8 +93,8 @@ public class Physical implements Locatable, Describable {
 		
 		sidewaysComponent = sidewaysComponent * otherShape.properties.friction;
 		
-		Vec2 normalForce = normalVec.mul(-normalComponent * VELOCITY_STOP_FACTOR * smallestInertia);
-		Vec2 frictionForce = normalVec.rotate90CounterClockwise().mul(-sidewaysComponent * VELOCITY_STOP_FACTOR * smallestInertia);
+		Vec2 normalForce = normalVec.mul(-normalComponent * Constants.VELOCITY_STOP_FACTOR * smallestInertia);
+		Vec2 frictionForce = normalVec.rotate90CounterClockwise().mul(-sidewaysComponent * Constants.VELOCITY_STOP_FACTOR * smallestInertia);
 		
 		this.actionReaction(otherShape.parent, position, repulsionForce);
 		this.actionReaction(otherShape.parent, position, normalForce);
@@ -183,14 +190,14 @@ public class Physical implements Locatable, Describable {
 		Vec2 acceleration = totalForce.div(mass);
 		double angularAcceleration = totalMoment / inertia;
 		
-		//Vec2 movement = velocity.mul(deltaT).add(acceleration.mul(deltaT*deltaT/2));
-		//double rotation = angularVelocity * deltaT + angularAcceleration*deltaT*deltaT/2;
+		Vec2 movement = velocity.mul(deltaT).add(acceleration.mul(deltaT*deltaT/2));
+		double rotation = angularVelocity * deltaT + angularAcceleration*deltaT*deltaT/2;
 		
 		velocity = velocity.add(acceleration.mul(deltaT));
 		angularVelocity += angularAcceleration * deltaT;
 		
-		Vec2 movement = velocity.mul(deltaT);
-		double rotation = angularVelocity * deltaT;
+		// Vec2 movement = velocity.mul(deltaT);
+		// double rotation = angularVelocity * deltaT;
 		
 		cframe.move(movement);
 		cframe.rotate(rotation);
@@ -255,6 +262,18 @@ public class Physical implements Locatable, Describable {
 		return false;
 	}
 	
+	public double getKineticEnergy(){
+		return getMass()*velocity.lengthSquared()/2 + getInertia()*angularVelocity*angularVelocity/2;
+	}
+	
+	public double getPotentialEnergy(Vec2 gravity){
+		return -getMass()*getCenterOfMass().dot(gravity);
+	}
+	
+	public double getEnergy(Vec2 gravity){
+		return getKineticEnergy()+getPotentialEnergy(gravity);
+	}
+	
 	@Override
 	public CFrame getCFrame(){return cframe;}
 	
@@ -270,6 +289,15 @@ public class Physical implements Locatable, Describable {
 		cframe.rotate(angle);
 	}
 	
+	public Vec2 getAcceleration(){return totalForce.div(mass);}
+	public double getRotAccelertation(){return totalMoment / inertia;}
+	/**
+	 * 
+	 * @param relativePoint relative to Center Of Mass
+	 * @return acceleration of the given point
+	 */
+	// public Vec2 getAccelerationOfPoint(Vec2 relativePoint){}
+	
 	public void anchor() {anchored = true;}
 	public void unAnchor() {anchored = false;}
 	public boolean isAnchored(){return anchored;}
@@ -284,8 +312,8 @@ public class Physical implements Locatable, Describable {
 
 	@Override
 	public String describe() {
-		return String.format("Physical{\n  cframe: %s\n  mass: %.9f\n  inertia: %.9f\n  velocity: %s\n  angularVel: %s\n  anchored: %s\n  F: %s\n  M: %.9f\n}", 
-				cframe.describe().replace("\n", "\n  "), mass, inertia, velocity, angularVelocity, anchored, totalForce, totalMoment);
+		return String.format("%s{\n  cframe: %s\n  mass: %.9f\n  inertia: %.9f\n  velocity: %s\n  angularVel: %s\n  anchored: %s\n  F: %s\n  M: %.9f\n}", 
+				name, cframe.describe().replace("\n", "\n  "), mass, inertia, velocity, angularVelocity, anchored, totalForce, totalMoment);
 		
 	}
 }
