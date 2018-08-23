@@ -213,27 +213,47 @@ public class Font {
 			draw((float) position.x, (float) position.y);
 		}
 		
+		public void drawRightAligned(Vec2 position){
+			drawRightAligned((float) position.x, (float) position.y);
+		}
+		
+		public void drawRightAligned(float x, float y) {
+			float actualFontSize = getActualFontSize();
+			String[] lines = text.split("\n");
+			bind();
+			for(String line:lines){
+				float actualX = x-getLineLength(line);
+				drawLine(line, actualX, y, actualFontSize);
+				y -= actualFontSize + getActualLineSpacing();
+			}
+			unbind();
+		}
+
 		public void draw(float x, float y){
 			float actualFontSize = getActualFontSize();
+			String[] lines = text.split("\n");
 			bind();
+			for(String line:lines){
+				drawLine(line, x, y, actualFontSize);
+				y -= actualFontSize + getActualLineSpacing();
+			}
+			unbind();
+		}
+		
+		private void drawLine(String line, float x, float y, float actualFontSize){
 			float curX = 0;
-			for(char c:text.toCharArray()){
+			for(char c:line.toCharArray()){
 				switch(c){
-				case '\n':
-					y -= actualFontSize + getActualLineSpacing();
-					break;
 				case '\t':
+					curX = getNextTabTarget(curX, actualFontSize);
 					break;
 				default:
 					float w = (actualFontSize * (getWidthOfChar(c)+1)*16)/textureWidth;
 					drawChar(c, curX+x, y, actualFontSize, actualFontSize);
 					curX += w;
-					continue;
+					break;
 				}
-				
-				curX = computeNextXPos(curX, c, actualFontSize);
 			}
-			unbind();
 		}
 		
 		private float getLineLength(String line){
