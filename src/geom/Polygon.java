@@ -113,4 +113,29 @@ public abstract class Polygon extends Shape {
 			return other.containsPoint(vertex.position);
 		});
 	}
+	
+	@Override
+	public boolean containsPoint(Vec2 point){
+		boolean withinShape = false;
+		
+		for(int i = 0; i < vertexes.length; i++){
+			Vec2 previous = vertexes[(vertexes.length + i - 1)%vertexes.length].position.subtract(point);
+			Vec2 current = vertexes[i].position.subtract(point);
+			Vec2 next = vertexes[(i+1)%vertexes.length].position.subtract(point);
+			
+			// from here on it is assumed 'point' lies at 0, 0 all coordinates are relative to this
+			
+			boolean goingUp = current.y <= 0 && next.y > 0;
+			boolean goingDown = current.y >= 0 && next.y < 0;
+			boolean intersectingCorner = current.y == 0;
+			
+			if(goingUp || goingDown) // check that line y=0 through point crosses this edge
+				if(next.x*Math.abs(current.y) + current.x*Math.abs(next.y) >= 0) // check that edge lies to the right of point
+					if(!intersectingCorner || previous.y * next.y <= 0)
+						withinShape = !withinShape;
+			
+		}
+		
+		return withinShape;
+	}
 }
