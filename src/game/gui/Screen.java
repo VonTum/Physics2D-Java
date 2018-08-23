@@ -51,9 +51,8 @@ public class Screen {
 	private static ArrayList<Drawable> markings = new ArrayList<>();
 	
 	public static final boolean DRAW_BLOCK_DIRECTION = false;
-	public static final boolean DRAW_BLOCK_TORQUE = false;
 	public static final boolean DRAW_BLOCK_NORMALVECS = false;
-	public static final boolean DRAW_LOCAL_AXES = false;
+	public static final boolean DRAW_LOCAL_AXES = true;
 	public static final boolean DRAW_VERTEX_ORIENTATION = false;
 	public static final boolean DRAW_BLOCK_SPEEDS = false;
 	public static final boolean DRAW_CENTER_OF_MASS = true;
@@ -78,7 +77,7 @@ public class Screen {
 		window = glfwCreateWindow(DEFAULT_SIZE, DEFAULT_SIZE, "Test Prog", 0, 0);
 		
 		// TODO debug, remove
-		GLFW.glfwSetWindowPos(window, -1000, 50);
+		// GLFW.glfwSetWindowPos(window, -1000, 50);
 		
 		glfwShowWindow(window);
 		
@@ -215,25 +214,35 @@ public class Screen {
 		
 		color(Color.BLACK);
 		if(selectedObject != null){
-			font.drawString(selectedObject.describe(), 36f, 1f, -0.999f * width/height, 0.999f);
+			font.drawString(selectedObject.describe(), 36f, 1f, 0.999f * (float) getLeftBorderX(), 0.999f);
 		}
 		
 		Font.Text text = font.createText(Debug.getDebugInfo(), 36f, 1f);
 		double textHeight = text.getTextDimentions().height;
-		text.draw(-0.999f * width/height, -0.999f+(float)textHeight);
+		text.draw(0.999f * (float) getLeftBorderX(), -0.999f+(float)textHeight);
+		
+		Font.Text mouseCoordsText = font.createText(String.format("%.6f\n%.6f", worldMousePos.x, worldMousePos.y), 36f, 0.999f);
+		Dimentions textDims = mouseCoordsText.getTextDimentions();
+		mouseCoordsText.drawRightAligned(0.999f * (float) getRightBorderX(), -0.999f + (float) textDims.height);
+		
+		
 		
 		glfwSwapBuffers(window);
 	}
 	
 	private static void drawShape(Shape shape, Color c){
+		drawPolygon(shape.getDrawingVertexes(), c);
+	}
+	
+	private static void drawPolygon(Vec2[] vertexes, Color c){
 		color(c);
 		glBegin(GL11.GL_POLYGON);
-		for(Vec2 vertex:shape.getDrawingVertexes())
+		for(Vec2 vertex:vertexes)
 			vertex(vertex);
 		glEnd();
 		color(0.0, 0.0, 0.0, 1.0);
 		glBegin(GL11.GL_LINE_LOOP);
-		for(Vec2 vertex:shape.getDrawingVertexes())
+		for(Vec2 vertex:vertexes)
 			vertex(vertex);
 		glEnd();
 	}
@@ -265,13 +274,10 @@ public class Screen {
 		
 		color(Color.BLACK);
 		drawCirclePart(centerOfMass, Vec2.UNITX.mul(pointRadius), Math.PI/2, Math.PI/4+0.000000001);
-		color(Color.YELLOW);
-		drawCirclePart(centerOfMass, Vec2.UNITY.mul(pointRadius), Math.PI/2, Math.PI/4+0.000000001);
-		color(Color.BLACK);
 		drawCirclePart(centerOfMass, Vec2.UNITNEGX.mul(pointRadius), Math.PI/2, Math.PI/4+0.000000001);
 		color(Color.YELLOW);
+		drawCirclePart(centerOfMass, Vec2.UNITY.mul(pointRadius), Math.PI/2, Math.PI/4+0.000000001);
 		drawCirclePart(centerOfMass, Vec2.UNITNEGY.mul(pointRadius), Math.PI/2, Math.PI/4+0.000000001);
-		
 	}
 	
 	private static void drawShapeNormalVecs(Shape shape){
@@ -423,6 +429,10 @@ public class Screen {
 		markingsBuf.add(new MarkedVector(origin, vector, color));
 	}
 	
+	public static void markPolygon(Vec2[] polygon, Color color){
+		markingsBuf.add(new MarkedPolygon(polygon, color));
+	}
+	
 	/**
 	 * Commits all drawings to the next frame
 	 * 
@@ -450,6 +460,11 @@ public class Screen {
 	public static Vec2 mouseToWorldCoords(Vec2 mouseCoords){
 		return camera.fromCameraSpace(mouseToScreenCoords(mouseCoords));
 	}
+	
+	public static double getTopBorderY(){return 1.0;}
+	public static double getBottomBorderY(){return -1.0;}
+	public static double getLeftBorderX(){return -(double) width/height;}
+	public static double getRightBorderX(){return (double) width/height;}
 	
 	public static boolean shouldClose(){return glfwWindowShouldClose(window);}
 	public static void terminate(){glfwTerminate();}
@@ -481,6 +496,20 @@ public class Screen {
 		@Override
 		public void draw(){
 			drawVector(point, vector);
+		}
+	}
+	
+	private static final class MarkedPolygon extends Drawable {
+		public final Vec2[] polygon;
+		
+		public MarkedPolygon(Vec2[] polygon, Color fillColor) {
+			super(fillColor);
+			this.polygon = polygon;
+		}
+		
+		@Override
+		public void draw(){
+			drawPolygon(polygon, color);
 		}
 	}
 }

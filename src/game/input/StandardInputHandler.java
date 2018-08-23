@@ -22,7 +22,6 @@ public class StandardInputHandler implements InputHandler {
 	
 	@Override
 	public void mouseDown(Vec2 screenPos, int button, int modifiers) {
-		System.out.println("Mouse Down! " + button + " @ " + screenPos);
 		mouseDown[button] = true;
 		if(button == GLFW.GLFW_MOUSE_BUTTON_1){
 			Vec2 worldPos = Screen.mouseToWorldCoords(screenPos);
@@ -33,7 +32,6 @@ public class StandardInputHandler implements InputHandler {
 
 	@Override
 	public void mouseUp(Vec2 screenPos, int button, int modifiers) {
-		System.out.println("Mouse Up! " + button + " @ " + screenPos);
 		mouseDown[button] = false;
 		if(button == GLFW.GLFW_MOUSE_BUTTON_1){
 			world.dropBlock();
@@ -74,7 +72,7 @@ public class StandardInputHandler implements InputHandler {
 			System.out.println("Simulation speed: " + Physics2D.SIMULATION_SPEED);
 			break;
 		case GLFW.GLFW_KEY_O:
-			world.tick(Physics2D.deltaT);
+			Physics2D.runTick(world);
 			System.out.println("Proceeded one step");
 			break;
 		case GLFW.GLFW_KEY_G:
