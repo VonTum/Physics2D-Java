@@ -175,4 +175,19 @@ public class Vec2 {
 	public String toString(){
 		return String.format("{x: %.9f, y: %.9f}", x, y);
 	}
+	
+	@Override
+	public boolean equals(Object other){
+		if(other instanceof Vec2){
+			Vec2 oVec = (Vec2) other;
+			return this.x == oVec.x && this.y == oVec.y;
+		}else
+			return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		long bits = Double.doubleToLongBits(this.x)+Double.doubleToLongBits(this.y);
+		return (int) (bits >> 32 + bits);
+	}
 }

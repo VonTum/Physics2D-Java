@@ -8,4 +8,9 @@ public class OrientedPoint {
 		this.position = position;
 		this.orientation = orientation;
 	}
+	
+	@Override
+	public String toString(){
+		return "OrientedPoint(" + position + ", " + orientation + ")";
+	}
 }

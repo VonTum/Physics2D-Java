@@ -1,5 +1,7 @@
 package util;
 
+import math.Vec2;
+
 public class Dimentions {
 	public final double width, height;
 	
@@ -10,5 +12,9 @@ public class Dimentions {
 	
 	public Dimentions expand(double delta){
 		return new Dimentions(width+delta, height+delta);
+	}
+	
+	public Vec2 getDiagonal(){
+		return new Vec2(width, height);
 	}
 }
