@@ -6,8 +6,8 @@ import game.gui.Describable;
 public final class CFrame implements Describable {
 	
 	public static final CFrame IDENTITY = new CFrame(0.0, 0.0, 0.0);
-	public Vec2 position;
-	public RotMat2 rotation;
+	public final Vec2 position;
+	public final RotMat2 rotation;
 	public CFrame(Vec2 position, RotMat2 rotation){
 		this.position = position;
 		this.rotation = rotation;
@@ -73,11 +73,14 @@ public final class CFrame implements Describable {
 		return newVecs;
 	}
 	
-	public void move(Vec2 offset){position = position.add(offset);}
+	public CFrame add(Vec2 offset){return new CFrame(position.add(offset), rotation);}
+	public CFrame rotated(RotMat2 rotation){return new CFrame(position, this.rotation.mul(rotation));}
+	public CFrame rotated(double angle){return rotated(new RotMat2(angle));}
+	/*public void move(Vec2 offset){position = position.add(offset);}
 	public void subtract(Vec2 offset){position = position.subtract(offset);}
 	public void rotate(RotMat2 rotMat){rotation = rotation.mul(rotMat);}
-	public void rotate(double angle){rotation = rotation.mul(new RotMat2(angle));}
-	public CFrame copy(){return new CFrame(position, rotation);}
+	public void rotate(double angle){rotation = rotation.mul(new RotMat2(angle));}*/
+	// public CFrame copy(){return new CFrame(position, rotation);}
 	
 	
 	@Override

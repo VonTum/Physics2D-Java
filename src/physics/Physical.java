@@ -68,12 +68,6 @@ public class Physical implements Locatable, Describable {
 		Vec2 position = point.position;
 		DepthWithDirection d = otherShape.getNormalVecAndDepthToSurface(point);
 		
-		// System.out.println("normal vecs gotten");
-		
-		if(Debug.age >= 5667 && Double.isNaN(smallestInertia)){
-			int i = 0;
-		}
-		
 		NormalizedVec2 normalVec = d.direction;
 		
 		Debug.logVector(position, normalVec, Color.CYAN.darker());
@@ -199,8 +193,8 @@ public class Physical implements Locatable, Describable {
 		// Vec2 movement = velocity.mul(deltaT);
 		// double rotation = angularVelocity * deltaT;
 		
-		cframe.move(movement);
-		cframe.rotate(rotation);
+		move(movement);
+		rotate(rotation);
 		
 		totalForce = Vec2.ZERO;
 		totalMoment = 0.0;
@@ -282,11 +276,11 @@ public class Physical implements Locatable, Describable {
 	}
 	
 	public void move(Vec2 delta){
-		cframe.move(delta);
+		cframe = cframe.add(delta);
 	}
 	
 	public void rotate(double angle){
-		cframe.rotate(angle);
+		cframe = cframe.rotated(angle);
 	}
 	
 	public Vec2 getAcceleration(){return totalForce.div(mass);}

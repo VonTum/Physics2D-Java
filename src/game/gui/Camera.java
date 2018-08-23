@@ -33,14 +33,12 @@ public class Camera{
 			Vec2 worldPosStart = fromCameraSpace(zoomCenter);
 			zoomFactor *= zoomAmount;
 			Vec2 zoomCenterMoved = worldPosStart.subtract(fromCameraSpace(zoomCenter));
-			cframe.move(zoomCenterMoved);
+			cframe = cframe.add(zoomCenterMoved);
 		}
 	}
 	
 	public void move(Vec2 delta){
-		if(attachedToObject)
-			cframe = cframe.copy();
-		cframe.move(delta);
+		cframe = cframe.add(delta);
 	}
 	
 	public void attachToObject(CFrame cframe){
