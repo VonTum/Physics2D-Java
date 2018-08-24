@@ -1,3 +1,4 @@
+package physics.tests;
 import static org.junit.Assert.*;
 import geom.Box;
 import math.CFrame;
@@ -12,7 +13,7 @@ import org.junit.Test;
 import physics.PhysicalProperties;
 import util.Color;
 
-import static util.TestUtil.*;
+import static physics.tests.util.TestUtil.*;
 
 public class MathTests {
 	

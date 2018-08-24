@@ -1,8 +1,8 @@
+package physics.tests;
 import static org.junit.Assert.*;
 import game.ObjectLibrary;
 import geom.Box;
 import math.CFrame;
-import math.NormalizedVec2;
 import math.Vec2;
 
 import org.junit.Before;
@@ -12,7 +12,7 @@ import physics.Physical;
 import physics.PhysicalProperties;
 import physics.World;
 import util.Color;
-import static util.TestUtil.*;
+import static physics.tests.util.TestUtil.*;
 
 public class PhysicsTest {
 	
@@ -95,5 +95,21 @@ public class PhysicsTest {
 			assertTrue("energy has increased randomly " + lastEnergy + " => " + testBox.getEnergy(gravity) + " at tick " + i + " with delta " + (testBox.getEnergy(gravity) - lastEnergy), lastEnergy+1E-8 >= testBox.getEnergy(gravity));
 			lastEnergy = testBox.getEnergy(gravity);
 		}
+	}
+	
+	@Test
+	public void testImpulse(){
+		Box box = new Box(new CFrame(0.0, 0.0), 0.6, 0.6, properties);
+		
+		Vec2 point = new Vec2(0.3, -0.3);
+		
+		Vec2 accel = new Vec2(0.7, 0.3);
+		
+		double inertia = box.getPointInertia(point, accel.normalize());
+		
+		Vec2 impulse = accel.mul(inertia);
+		box.applyImpulse(impulse, point);
+		
+		assertEquals(accel.length(), box.getSpeedOfPoint(point).dot(accel.normalize()), DELTA);
 	}
 }

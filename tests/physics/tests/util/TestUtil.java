@@ -1,4 +1,4 @@
-package util;
+package physics.tests.util;
 import static org.junit.Assert.fail;
 import math.Mat2;
 import math.Vec2;
