@@ -19,7 +19,7 @@ import util.Color;
 public class Physics2D {
 	
 	public static double SIMULATION_SPEED = 1.0;
-	public static final int SIMULATION_REPEATS_PER_TICK = 1;
+	public static final int SIMULATION_REPEATS_PER_TICK = 10;
 	public static boolean SIMULATION_PAUSED = false;
 	
 	public static final double deltaT = 0.01 / SIMULATION_REPEATS_PER_TICK;

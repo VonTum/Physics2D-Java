@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import util.Color;
+import math.BoundingBox;
 import math.CFrame;
 import math.NormalizedVec2;
 import math.OrientedPoint;
@@ -35,6 +36,8 @@ public class Physical implements Locatable, Describable {
 	
 	public String name = super.toString();
 	
+	BoundingBox boundsCache;
+	
 	public Physical(Shape... shapes){
 		this.shapes = new ArrayList<>();
 		for(Shape s:shapes)
@@ -46,6 +49,8 @@ public class Physical implements Locatable, Describable {
 			CFrame relativecframe = this.cframe.globalToLocal(shape.getCFrame());
 			shape.attach(this, relativecframe);
 		}
+		
+		boundsCache = calculateBoundingBox();
 	}
 	
 	public void interactWith(Physical otherObj){
@@ -117,6 +122,7 @@ public class Physical implements Locatable, Describable {
 	 * @return The inertia of the given point in the given direction
 	 */
 	public double getPointInertia(Vec2 relativePosition, NormalizedVec2 direction){
+		if(anchored) return Double.POSITIVE_INFINITY;
 		double movementFactor = 1/getMass();
 		double rotationFactor = Math.abs(relativePosition.cross(relativePosition.cross(direction)).dot(direction) / getInertia());
 		return 1/(movementFactor + rotationFactor);
@@ -198,7 +204,19 @@ public class Physical implements Locatable, Describable {
 		
 		totalForce = Vec2.ZERO;
 		totalMoment = 0.0;
+		
+		boundsCache = calculateBoundingBox();
 	}
+	
+	private BoundingBox calculateBoundingBox(){
+		BoundingBox[] boxes = new BoundingBox[shapes.size()];
+		for(int i = 0; i < shapes.size(); i++)
+			boxes[i] = shapes.get(i).getBoundingBox();
+		
+		return BoundingBox.mergeBoxes(boxes);
+	}
+	
+	public BoundingBox getBoundingBox(){return boundsCache;}
 	
 	private void recalculate(){
 		recalculateCenterOfMass();

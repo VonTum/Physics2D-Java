@@ -1,5 +1,9 @@
 package math;
 
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+
+
 public class BoundingBox {
 	public final double xmin, xmax, ymin, ymax;
 	
@@ -20,5 +24,28 @@ public class BoundingBox {
 	@Override
 	public String toString(){
 		return "BoundingBox("+new Vec2(xmin, ymin)+","+new Vec2(xmax, ymax)+")";
+	}
+	
+	public boolean intersects(BoundingBox b){
+		return xmin < b.xmax && b.xmin < xmax && 
+				ymin < b.ymax && b.ymin < ymax;
+	}
+	
+
+	public static BoundingBox mergeBoxes(BoundingBox[] boxes) {
+		BoundingBox total = boxes[0];
+		for(int i = 1; i < boxes.length; i++)
+			total = total.merge(boxes[i]);
+		
+		return total;
+	}
+	
+	public BoundingBox merge(BoundingBox o){
+		return new BoundingBox(
+				min(xmin, o.xmin),
+				min(ymin, o.ymin),
+				max(xmax, o.xmax),
+				max(ymax, o.ymax)
+		);
 	}
 }

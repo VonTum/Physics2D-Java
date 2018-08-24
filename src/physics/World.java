@@ -7,6 +7,7 @@ import geom.Shape;
 import java.util.ArrayList;
 
 import util.Color;
+import math.BoundingBox;
 import math.Vec2;
 
 
@@ -16,7 +17,6 @@ public class World {
 	public final double AIRROTFRICTIONFACTOR = 0.001;
 	
 	private static final double MAGNET_MOVEMENT_CANCEL_FACTOR = Constants.VELOCITY_STOP_FACTOR;
-	private static final double MAGNET_STRENGTH = 1000.0;
 	
 	public final ArrayList<Physical> physicals = new ArrayList<>();
 	public final ArrayList<Constraint> constraints = new ArrayList<>();
@@ -53,9 +53,12 @@ public class World {
 		}
 		
 		for(int i = 0; i < physicals.size(); i++){
+			BoundingBox curBox = physicals.get(i).getBoundingBox();
 			for(int j = i+1; j < physicals.size(); j++){
-				physicals.get(i).interactWith(physicals.get(j));
-				Debug.logInteraction(null, null);
+				if(curBox.intersects(physicals.get(j).getBoundingBox())){
+					physicals.get(i).interactWith(physicals.get(j));
+					Debug.logInteraction(physicals.get(i), physicals.get(j));
+				}
 			}
 		}
 		
@@ -80,7 +83,7 @@ public class World {
 					relSpeedForce.add(delta.mul(relSpeedForce.dot(delta)));
 				}
 				
-				Vec2 deltaForce = delta.mul(magnetSubject.getMass() * MAGNET_STRENGTH);
+				Vec2 deltaForce = delta.mul(magnetSubject.getMass() * Constants.MAGNET_STRENGTH);
 				
 				magnetSubject.applyForce(deltaForce, attachPoint);
 				magnetSubject.applyForce(relSpeedForce, attachPoint);
