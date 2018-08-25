@@ -8,11 +8,11 @@ import math.Vec2;
 /**
  * A PinConstraint keeps the two attachments together, but allows free rotation around the axle of the constraint
  */
-public class PinConstraint extends Constraint {
+public class SpringPinConstraint extends Constraint {
 	
 	private final double pinForce;
 	
-	public PinConstraint(Physical part1, Physical part2, CFrame attach1, CFrame attach2, double pinForce) {
+	public SpringPinConstraint(Physical part1, Physical part2, CFrame attach1, CFrame attach2, double pinForce) {
 		super(part1, part2, attach1, attach2);
 		this.pinForce = pinForce;
 	}
