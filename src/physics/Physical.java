@@ -29,8 +29,8 @@ public class Physical implements Locatable, Describable {
 	private Vec2 totalForce = Vec2.ZERO;
 	private double totalMoment = 0;	// counterclockwise is positive
 	
-	private double mass;
-	private double inertia;
+	public double mass;
+	public double inertia;
 	
 	private boolean anchored = false;
 	
@@ -160,6 +160,32 @@ public class Physical implements Locatable, Describable {
 	}
 	
 	/**
+	 * Applies a given impulse at the given position. 
+	 * 
+	 * Afterwards the speed of the given point will have changed by<br><br>
+	 * <code>impulse/getPointInertia(attachment, impulse.normalize())</code>
+	 * 
+	 * @param impulse
+	 * @param attachment the point at which the impulse must attach, global coordinates
+	 */
+	public void applyImpulse(Vec2 impulse, Vec2 attachment){
+		if(anchored) return;
+		
+		velocity = velocity.add(impulse.div(mass));
+		angularVelocity += attachment.subtract(getCenterOfMass()).cross(impulse) / inertia;
+	}
+	
+	/**
+	 * Applies the given impulse at the center of mass, accellerating the object by 
+	 * <code>impulse/mass</code>
+	 * @param impulse
+	 */
+	public void applyImpulse(Vec2 impulse){
+		if(anchored) return;
+		velocity = velocity.add(impulse.div(mass));
+	}
+	
+	/**
 	 * Applies a given torque to the object.
 	 * 
 	 * @param torque torque
@@ -187,8 +213,8 @@ public class Physical implements Locatable, Describable {
 	public void update(double deltaT){
 		if(anchored) return;
 		
-		Vec2 acceleration = totalForce.div(mass);
-		double angularAcceleration = totalMoment / inertia;
+		Vec2 acceleration = getAcceleration();
+		double angularAcceleration = getRotAccelertation();
 		
 		Vec2 movement = velocity.mul(deltaT).add(acceleration.mul(deltaT*deltaT/2));
 		double rotation = angularVelocity * deltaT + angularAcceleration*deltaT*deltaT/2;
@@ -301,6 +327,14 @@ public class Physical implements Locatable, Describable {
 		cframe = cframe.rotated(angle);
 	}
 	
+	public Vec2 getAccelerationOfPoint(Vec2 point){
+		Vec2 relativeDist = point.subtract(getCenterOfMass());
+		Vec2 accelerationOfCenterOfMass = getAcceleration();
+		Vec2 rotAcceleration = relativeDist.rotate90CounterClockwise().mul(getRotAccelertation());
+		Vec2 centripetalAcceleration = relativeDist.mul(-angularVelocity*angularVelocity);
+		return Vec2.sum(accelerationOfCenterOfMass, rotAcceleration, centripetalAcceleration);
+	}
+	
 	public Vec2 getAcceleration(){return totalForce.div(mass);}
 	public double getRotAccelertation(){return totalMoment / inertia;}
 	/**
@@ -316,6 +350,8 @@ public class Physical implements Locatable, Describable {
 
 	public double getMass() {return mass;}
 	public double getInertia() {return inertia;}
+	
+	
 	
 	@Override
 	public String toString(){
