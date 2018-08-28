@@ -10,6 +10,7 @@ import math.Vec2;
 import physics.Constraint;
 import physics.Physical;
 import physics.PhysicalProperties;
+import physics.PinConstraint;
 import physics.SpringPinConstraint;
 import physics.World;
 import util.Color;
@@ -18,7 +19,7 @@ public class ShowcaseWorld implements WorldBuilder {
 	
 	@Override
 	public void build(World w) {
-PhysicalProperties basicProperties = new PhysicalProperties(10.0, 0.1, 0.0, new Color(0.8, 0.8, 0.6, 0.6));
+		PhysicalProperties basicProperties = new PhysicalProperties(10.0, 0.1, 0.0, new Color(0.8, 0.8, 0.6, 0.6));
 		
 		Shape s = new Rectangle(basicProperties, new CFrame(0.4, 0.8, 0.1), 0.3, 0.2);
 		Shape s2 = new Rectangle(basicProperties, new CFrame(0.2, 0.6, 0.7), 0.1, 0.2);
@@ -52,7 +53,7 @@ PhysicalProperties basicProperties = new PhysicalProperties(10.0, 0.1, 0.0, new 
 		
 		Box b1 = new Box(new CFrame(-2.0, 0.5), 0.3, 0.1, basicProperties);
 		Box b2 = new Box(new CFrame(-1.6, 0.5), 0.3, 0.3, basicProperties);
-		Constraint link = new SpringPinConstraint(b1, b2, new CFrame(0.2, 0.0, 0.0), new CFrame(-0.2, 0.0, 0.0), 300);
+		Constraint link = new PinConstraint(b1, b2, new CFrame(0.2, 0.0, 0.0), new CFrame(-0.2, 0.0, 0.0));
 		
 		w.addObject(b1);
 		w.addObject(b2);

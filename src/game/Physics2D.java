@@ -30,16 +30,16 @@ public class Physics2D {
 		Debug.setWorld(w);
 		Screen.init(handler);
 		
-		new ShowcaseWorld().build(w);
+		new ConstrainedWorld().build(w);
 		
-		for(Physical p:w.physicals){
+		/*for(Physical p:w.physicals){
 			boolean anchored = p.isAnchored();
 			p.unAnchor();
 			p.move(new Vec2(4.0, 0.0));
 			if(anchored) p.anchor();
 		}
 		
-		new FluidWorld(15).build(w);
+		new FluidWorld(15).build(w);*/
 		
 		
 		

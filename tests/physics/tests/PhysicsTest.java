@@ -1,24 +1,17 @@
 package physics.tests;
 import static org.junit.Assert.*;
-import game.ObjectLibrary;
 import geom.Box;
 import math.CFrame;
 import math.Mat2;
 import math.Vec2;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import physics.Physical;
 import physics.PhysicalProperties;
-import physics.World;
 import util.Color;
 import static physics.tests.util.TestUtil.*;
 
 public class PhysicsTest {
-	
-	private static final double MAX_VELOCITY = 5.0;
-	private static final double MAX_ANGULAR_VELOCITY = Math.PI*2;
 	
 	private static final double deltaT = 0.01;
 	

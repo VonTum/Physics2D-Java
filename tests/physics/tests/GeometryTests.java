@@ -3,16 +3,12 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
-import game.Debug;
-import game.gui.Screen;
 import geom.Polygon;
 import math.CFrame;
 import math.Vec2;
 import math.Vertex2;
 
 import org.junit.Test;
-
-import util.Color;
 
 
 public class GeometryTests {

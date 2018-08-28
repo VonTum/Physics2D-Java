@@ -332,9 +332,6 @@ public class Screen {
 	}
 	
 	private static void drawVector(Vec2 origin, Vec2 vector){
-		
-		vector = vector.maxLength(0.3);
-		
 		Vec2 end = origin.add(vector);
 		glBegin(GL11.GL_LINES);
 		vertex(origin);
