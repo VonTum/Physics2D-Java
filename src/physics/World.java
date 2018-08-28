@@ -47,7 +47,7 @@ public class World {
 	public void applyExternalForces(double deltaT) {
 		for(Physical p:physicals){
 			// gravity
-			p.applyForce(gravity.mul(p.getMass()));
+			p.applyForceAtCenterOfMass(gravity.mul(p.getMass()));
 		}
 	}
 	

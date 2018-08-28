@@ -58,7 +58,7 @@ public class PhysicsTest {
 		double lastEnergy = testBox.getEnergy(gravity);
 		
 		for(int i = 0; i < 10000; i++){
-			testBox.applyForce(gravity.mul(testBox.getMass()));
+			testBox.applyForceAtCenterOfMass(gravity.mul(testBox.getMass()));
 			testBox.update(deltaT);
 			assertTrue("energy has increased randomly " + lastEnergy + " => " + testBox.getEnergy(gravity) + " at tick " + i + " with delta " + (testBox.getEnergy(gravity) - lastEnergy), lastEnergy+1E-8 >= testBox.getEnergy(gravity));
 			lastEnergy = testBox.getEnergy(gravity);

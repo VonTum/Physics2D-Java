@@ -152,7 +152,7 @@ public class Physical implements Locatable, Describable {
 	 * 
 	 * @param force force vector to be applied <br><i>local to this physical</i>
 	 */
-	public void applyForce(Vec2 force){
+	/*public void applyForceAtCenterOfMass(Vec2 force){
 		if(anchored) return;
 		totalForce = totalForce.add(force);
 		
