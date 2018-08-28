@@ -17,7 +17,7 @@ public class PyramidWorld implements WorldBuilder {
 	@Override
 	public void build(World w) {
 		PhysicalProperties properties = new PhysicalProperties(10.0).withColor(Color.RED.alpha(0.6));
-		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), properties.withColor(Color.DEFAULT_BRICK_COLOR)));
+		// w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), properties.withColor(Color.DEFAULT_BRICK_COLOR)));
 		
 		for(int y = 0; y < pyramidSize; y++){
 			for(int x = 0; x < pyramidSize-y; x++){

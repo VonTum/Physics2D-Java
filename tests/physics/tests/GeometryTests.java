@@ -44,21 +44,6 @@ public class GeometryTests {
 			outsidePoints[givenOutsidePoints.length + i] = vertexes[i].position.add(vertexes[i].orientation.mul(0.1));
 		}
 		
-		// DEBUG
-		Debug.setupDebugScreen();
-		Screen.markPolygon(polygon, Color.TRANSPARENT);
-		
-		for(Vec2 point:insidePoints)
-			Screen.markPoint(point, p.containsPoint(point)?Color.GREEN:Color.RED);
-		
-		for(Vec2 point:outsidePoints)
-			Screen.markPoint(point, p.containsPoint(point)?Color.GREEN:Color.RED);
-		
-		Screen.commitDrawings();
-		
-		Debug.halt();
-		// /DEBUG
-		
 		for(Vec2 point:insidePoints)
 			assertTrue("Point " + point + " was shown to be outside while it was actually inside", p.containsPoint(point));
 		

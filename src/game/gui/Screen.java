@@ -52,7 +52,7 @@ public class Screen {
 	
 	public static final boolean DRAW_BLOCK_DIRECTION = false;
 	public static final boolean DRAW_BLOCK_NORMALVECS = false;
-	public static final boolean DRAW_LOCAL_AXES = true;
+	public static final boolean DRAW_LOCAL_AXES = false;
 	public static final boolean DRAW_VERTEX_ORIENTATION = false;
 	public static final boolean DRAW_BLOCK_SPEEDS = false;
 	public static final boolean DRAW_CENTER_OF_MASS = true;
@@ -77,7 +77,7 @@ public class Screen {
 		window = glfwCreateWindow(DEFAULT_SIZE, DEFAULT_SIZE, "Test Prog", 0, 0);
 		
 		// TODO debug, remove
-		// GLFW.glfwSetWindowPos(window, -1000, 50);
+		if(Boolean.getBoolean("devMode")) GLFW.glfwSetWindowPos(window, -1000, 50);
 		
 		glfwShowWindow(window);
 		

@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import math.CFrame;
 import math.Vec2;
-import physics.PhysicalProperties;
+import physics.Physical;
 import physics.World;
 import util.Color;
 
@@ -30,11 +30,30 @@ public class Physics2D {
 		Debug.setWorld(w);
 		Screen.init(handler);
 		
-		new FluidWorld(10).build(w);
+		new ShowcaseWorld().build(w);
+		
+		for(Physical p:w.physicals){
+			boolean anchored = p.isAnchored();
+			p.unAnchor();
+			p.move(new Vec2(4.0, 0.0));
+			if(anchored) p.anchor();
+		}
+		
+		new FluidWorld(15).build(w);
 		
 		
 		
-		w.addObject(ObjectLibrary.createHammer(new CFrame(3.0, 0.0), new PhysicalProperties(1000, 0.1, 0.0, Color.DARK_GREY.alpha(0.6)), new PhysicalProperties(10.0, 0.05, 0.0, Color.DEFAULT_BRICK_COLOR)));
+		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), ObjectLibrary.BASIC));
+		
+		
+		
+		/*Box b = new Box(CFrame.IDENTITY, 0.3, 0.15, ObjectLibrary.BASIC);
+		
+		w.addObject(b);
+		
+		b.applyImpulse(new Vec2(0.0, 0.1), new Vec2(0.15, 0.0));*/
+		
+		// w.addObject(ObjectLibrary.createHammer(new CFrame(3.0, 0.0), new PhysicalProperties(1000, 0.1, 0.0, Color.DARK_GREY.alpha(0.6)), new PhysicalProperties(10.0, 0.05, 0.0, Color.DEFAULT_BRICK_COLOR)));
 		// w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), new PhysicalProperties(10.0)));
 		
 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);

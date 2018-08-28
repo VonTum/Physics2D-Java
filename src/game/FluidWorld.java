@@ -17,7 +17,7 @@ public class FluidWorld implements WorldBuilder {
 	@Override
 	public void build(World w) {
 		PhysicalProperties properties = new PhysicalProperties(10.0).withColor(Color.RED.alpha(0.6));
-		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), properties.withColor(Color.DEFAULT_BRICK_COLOR)));
+		
 		
 		Box leftSide = new Box(new CFrame(0.0, 1.0), 0.05, 2.0, properties);
 		leftSide.anchor();
@@ -31,7 +31,7 @@ public class FluidWorld implements WorldBuilder {
 		
 		for(int y = 0; y < pyramidSize; y++){
 			for(int x = 0; x < pyramidSize; x++){
-				w.addObject(new Box(new CFrame(x*0.0500001 + 0.075, 0.05*y+0.15), 0.025, 0.025, properties));
+				w.addObject(new Box(new CFrame(x*0.0300001 + 0.075 + 0.00001*(y%2), 0.03*y+0.15), 0.025, 0.025, properties));
 			}
 		}
 	}

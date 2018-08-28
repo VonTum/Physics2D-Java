@@ -26,7 +26,7 @@ public class ConstrainedWorld implements WorldBuilder {
 		Box b1 = new Box(new CFrame(0.0, 0.5, 0.0), 0.3, 0.1, properties);
 		Box b2 = new Box(new CFrame(0.4, 0.5, 0.0), 0.3, 0.3, properties);
 		
-		Constraint pin = new PinConstraint(b1, b2, new CFrame(0.2, 0.0, 0.0), new CFrame(-0.2, 0.0, 0.0), 200);
+		Constraint pin = new PinConstraint(b1, b2, new CFrame(0.2, 0.0, 0.0), new CFrame(-0.2, 0.0, 0.0));
 		
 		world.addObject(b1);
 		world.addObject(b2);

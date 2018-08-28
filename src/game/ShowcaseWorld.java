@@ -10,7 +10,7 @@ import math.Vec2;
 import physics.Constraint;
 import physics.Physical;
 import physics.PhysicalProperties;
-import physics.PinConstraint;
+import physics.SpringPinConstraint;
 import physics.World;
 import util.Color;
 
@@ -30,7 +30,7 @@ PhysicalProperties basicProperties = new PhysicalProperties(10.0, 0.1, 0.0, new 
 		Physical block = new Physical(blockShape);
 		w.addObject(block);
 		
-		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0, 0.0), basicProperties));
+		
 		
 		w.addObject(ObjectLibrary.createBowl(new CFrame(-0.2, 1.0, 0.0), basicProperties));
 		
@@ -52,7 +52,7 @@ PhysicalProperties basicProperties = new PhysicalProperties(10.0, 0.1, 0.0, new 
 		
 		Box b1 = new Box(new CFrame(-2.0, 0.5), 0.3, 0.1, basicProperties);
 		Box b2 = new Box(new CFrame(-1.6, 0.5), 0.3, 0.3, basicProperties);
-		Constraint link = new PinConstraint(b1, b2, new CFrame(0.2, 0.0, 0.0), new CFrame(-0.2, 0.0, 0.0), 2000);
+		Constraint link = new SpringPinConstraint(b1, b2, new CFrame(0.2, 0.0, 0.0), new CFrame(-0.2, 0.0, 0.0), 300);
 		
 		w.addObject(b1);
 		w.addObject(b2);

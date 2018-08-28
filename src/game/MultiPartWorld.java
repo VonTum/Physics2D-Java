@@ -28,7 +28,7 @@ public class MultiPartWorld implements WorldBuilder {
 		Physical block = new Physical(blockShape);
 		w.addObject(block);
 		
-		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0, 0.0), basicProperties));
+		// w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0, 0.0), basicProperties));
 		
 		w.addObject(ObjectLibrary.createBowl(new CFrame(-0.2, 1.0, 0.0), basicProperties));
 		
