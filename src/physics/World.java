@@ -38,20 +38,20 @@ public class World {
 		constraints.add(c);
 	}
 	
-	public void tick(double deltaT) {
+	public void updatePhysicals(double deltaT) {
 		for(Physical p:physicals){
 			p.update(deltaT);
 		}
-		
+	}
+	
+	public void applyExternalForces(double deltaT) {
 		for(Physical p:physicals){
 			// gravity
 			p.applyForce(gravity.mul(p.getMass()));
-			
-			// air friction
-			// p.applyForce(p.velocity.mul(-AIRFRICTIONFACTOR));
-			// p.applyTorque(-p.angularVelocity * AIRROTFRICTIONFACTOR);
 		}
-		
+	}
+	
+	public void computeInteractions(double deltaT) {
 		for(int i = 0; i < physicals.size(); i++){
 			BoundingBox curBox = physicals.get(i).getBoundingBox();
 			for(int j = i+1; j < physicals.size(); j++){
@@ -61,18 +61,22 @@ public class World {
 				}
 			}
 		}
-		
-		executeConstraints();
 	}
 	
-	private void executeConstraints(){
+	public void tick(double deltaT) {
+		updatePhysicals(deltaT);
+		applyExternalForces(deltaT);
+		computeInteractions(deltaT);
+		executeConstraints(deltaT);
+	}
+	
+	private void executeConstraints(double deltaT){
 		for(Constraint c:constraints){
 			c.enact();
 		}
 		synchronized (magnetLock) {
 			if(magnetSubject != null){
-				Vec2 attachPoint = magnetSubject.cframe.localToGlobal(magnetAttachPoint);
-				Vec2 delta = magnetTarget.subtract(attachPoint);
+				/*Vec2 delta = magnetTarget.subtract(attachPoint);
 				
 				Debug.logPoint(attachPoint, Color.RED);
 				Debug.logVector(attachPoint, delta, Color.GREEN);
@@ -86,7 +90,13 @@ public class World {
 				Vec2 deltaForce = delta.mul(magnetSubject.getMass() * Constants.MAGNET_STRENGTH);
 				
 				magnetSubject.applyForce(deltaForce, attachPoint);
-				magnetSubject.applyForce(relSpeedForce, attachPoint);
+				magnetSubject.applyForce(relSpeedForce, attachPoint);*/
+				double accel = 100;
+				Vec2 force = magnetSubject.getPullForceTowardsPointDampenedOnlyAlong(magnetAttachPoint, magnetTarget, Vec2.ZERO, accel);
+				
+				System.out.println(force);
+				
+				magnetSubject.applyForce(force, magnetSubject.cframe.localToGlobal(magnetAttachPoint));
 			}
 		}
 	}
