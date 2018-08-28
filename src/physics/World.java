@@ -16,8 +16,6 @@ public class World {
 	public final double AIRFRICTIONFACTOR = 0.01;
 	public final double AIRROTFRICTIONFACTOR = 0.001;
 	
-	private static final double MAGNET_MOVEMENT_CANCEL_FACTOR = Constants.VELOCITY_STOP_FACTOR;
-	
 	public final ArrayList<Physical> physicals = new ArrayList<>();
 	public final ArrayList<Constraint> constraints = new ArrayList<>();
 	
@@ -76,12 +74,17 @@ public class World {
 		}
 		synchronized (magnetLock) {
 			if(magnetSubject != null){
-				/*Vec2 delta = magnetTarget.subtract(attachPoint);
+				Vec2 attachPoint = magnetSubject.cframe.localToGlobal(magnetAttachPoint);
+				Vec2 delta = magnetTarget.subtract(attachPoint);
 				
 				Debug.logPoint(attachPoint, Color.RED);
 				Debug.logVector(attachPoint, delta, Color.GREEN);
 				
-				Vec2 relSpeedForce = magnetSubject.getSpeedOfPoint(attachPoint).mul(-MAGNET_MOVEMENT_CANCEL_FACTOR*magnetSubject.getMass());
+				double rotTorque = -magnetSubject.angularVelocity * Constants.MAGNET_ROTATION_CANCEL_FACTOR * magnetSubject.inertia;
+				
+				magnetSubject.applyTorque(rotTorque);
+				
+				Vec2 relSpeedForce = magnetSubject.getSpeedOfPoint(attachPoint).mul(-Constants.MAGNET_MOVEMENT_CANCEL_FACTOR*magnetSubject.mass);
 				
 				if(relSpeedForce.dot(delta) > 0){
 					relSpeedForce.add(delta.mul(relSpeedForce.dot(delta)));
@@ -90,13 +93,16 @@ public class World {
 				Vec2 deltaForce = delta.mul(magnetSubject.getMass() * Constants.MAGNET_STRENGTH);
 				
 				magnetSubject.applyForce(deltaForce, attachPoint);
-				magnetSubject.applyForce(relSpeedForce, attachPoint);*/
-				double accel = 100;
-				Vec2 force = magnetSubject.getPullForceTowardsPointDampenedOnlyAlong(magnetAttachPoint, magnetTarget, Vec2.ZERO, accel);
+				magnetSubject.applyForce(relSpeedForce, attachPoint);
+				
+				
+				
+				/*double accel = 100;
+				Vec2 force = magnetSubject.getPullForceTowardsPointDampened(magnetAttachPoint, magnetTarget, Vec2.ZERO, accel);
 				
 				System.out.println(force);
 				
-				magnetSubject.applyForce(force, magnetSubject.cframe.localToGlobal(magnetAttachPoint));
+				magnetSubject.applyForce(force, magnetSubject.cframe.localToGlobal(magnetAttachPoint));*/
 			}
 		}
 	}

@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import util.Color;
 import math.BoundingBox;
 import math.CFrame;
+import math.Mat2;
 import math.NormalizedVec2;
 import math.OrientedPoint;
 import math.RotMat2;
@@ -133,12 +134,13 @@ public class Physical implements Locatable, Describable {
 	 * 
 	 * PointAccel = M*Force
 	 * 
-	 * @param relativePosition
+	 * @param point <i>global</i>
 	 * @return
 	 */
-	public Mat2 getPointInertialMatrix(Vec2 relativePosition) {
-		double x = relativePosition.x;
-		double y = relativePosition.y;
+	public Mat2 getPointInertialMatrix(Vec2 point) {
+		Vec2 relativePoint = point.subtract(getCenterOfMass());
+		double x = relativePoint.x;
+		double y = relativePoint.y;
 		
 		Mat2 massFactor = Mat2.IDENTITY.mul(1/mass);
 		Mat2 rotFactor = new Mat2(-y*y, x*y, x*y, -x*x).mul(-1/inertia);
