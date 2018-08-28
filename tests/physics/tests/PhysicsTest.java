@@ -3,6 +3,7 @@ import static org.junit.Assert.*;
 import game.ObjectLibrary;
 import geom.Box;
 import math.CFrame;
+import math.Mat2;
 import math.Vec2;
 
 import org.junit.Before;
@@ -123,5 +124,18 @@ public class PhysicsTest {
 			lastVelocity = curVelocity;
 			testBox.update(deltaT);
 		}
+	}
+	
+	@Test
+	public void testGetPointInertialMatrix() {
+		Vec2 relativePos = new Vec2(0.15, 0.05);
+		
+		Vec2 force = new Vec2(0.7, 0.5);
+		
+		Mat2 inertialMat = testBox.getPointInertialMatrix(relativePos);
+		
+		testBox.applyForce(force, relativePos);
+		
+		assertVecEquals(testBox.getAccelerationOfPoint(relativePos), inertialMat.mul(force));
 	}
 }

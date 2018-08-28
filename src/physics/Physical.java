@@ -128,6 +128,24 @@ public class Physical implements Locatable, Describable {
 		return 1/(movementFactor + rotationFactor);
 	}
 	
+	/**
+	 * Returns a matrix describing the given point's reaction to a force
+	 * 
+	 * PointAccel = M*Force
+	 * 
+	 * @param relativePosition
+	 * @return
+	 */
+	public Mat2 getPointInertialMatrix(Vec2 relativePosition) {
+		double x = relativePosition.x;
+		double y = relativePosition.y;
+		
+		Mat2 massFactor = Mat2.IDENTITY.mul(1/mass);
+		Mat2 rotFactor = new Mat2(-y*y, x*y, x*y, -x*x).mul(-1/inertia);
+		
+		return massFactor.add(rotFactor);
+	}
+	
 	public Vec2 getConcentratedForceInPoint(Vec2 point){
 		return totalForce.add(point.subtract(getCenterOfMass()).cross(-totalMoment));
 	}
