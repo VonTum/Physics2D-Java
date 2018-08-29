@@ -79,7 +79,7 @@ public abstract class Shape implements Locatable, Iterable<Vec2> {
 		return properties.density * getArea();
 	}
 	public abstract double getArea();
-	public abstract double getInertia();
+	public abstract double getInertialArea();
 	public abstract Vec2 getCenterOfMass();
 	public abstract BoundingBox getBoundingBox();
 	public Iterator<Vec2> iterator(){

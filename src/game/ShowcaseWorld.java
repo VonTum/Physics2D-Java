@@ -11,7 +11,6 @@ import physics.Constraint;
 import physics.Physical;
 import physics.PhysicalProperties;
 import physics.PinConstraint;
-import physics.SpringPinConstraint;
 import physics.World;
 import util.Color;
 

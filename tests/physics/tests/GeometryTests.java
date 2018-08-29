@@ -57,7 +57,7 @@ public class GeometryTests {
 		}
 		
 		@Override public double getArea() {return 0;}
-		@Override public double getInertia() {return 0;}
+		@Override public double getInertialArea() {return 0;}
 		@Override public Vec2 getCenterOfMass() {return null;}
 	}
 }

@@ -293,7 +293,7 @@ public class Physical implements Locatable, Describable {
 		for(Shape shape:shapes){
 			Vec2 delta = shape.getCenterOfMass().subtract(objCenter);
 			
-			totalInertia += shape.getInertia() + delta.lengthSquared() * shape.getMass();
+			totalInertia += shape.getInertialArea()*shape.properties.density + delta.lengthSquared() * shape.getMass();
 		}
 		
 		this.inertia = totalInertia;
@@ -383,5 +383,70 @@ public class Physical implements Locatable, Describable {
 		return String.format("%s{\n  cframe: %s\n  mass: %.9f\n  inertia: %.9f\n  velocity: %s\n  angularVel: %s\n  anchored: %s\n  F: %s\n  M: %.9f\n}", 
 				name, cframe.describe().replace("\n", "\n  "), mass, inertia, velocity, angularVelocity, anchored, totalForce, totalMoment);
 		
+	}
+	
+	/**
+	 * Gets the desired speed towards a point, whereby slowing the object down at <code>acceleration</code>
+	 * it will come to a complete stop at relativePoint
+	 * 
+	 * @param relativePoint the point towards which to be accelerated
+	 * @param acceleration
+	 * @return
+	 */
+	public static Vec2 getDesiredSpeedTowardsPoint(Vec2 relativePoint, double acceleration){
+		return relativePoint.mul(acceleration);
+	}
+	
+	/**
+	 * Returns the force by which to pull the object towards a point with a max acceleration
+	 * 
+	 * @param attachPoint position in local frame, where the force must attach
+	 * @param pullPoint global point towards to be pulled
+	 * @param pullPointVelocity velocity of pullPoint
+	 * @param acceleration maximum acceleration
+	 * @return
+	 */
+	public Vec2 getPullForceTowardsPointDampened(Vec2 attachPoint, Vec2 pullPoint, Vec2 pullPointVelocity, double acceleration){
+		/*Vec2 desiredSpeed = getDesiredSpeedTowardsPoint(relativePos, acceleration).add(pullPointVelocity);
+		
+		Vec2 thisPointVelocity = getSpeedOfPoint(relativePos.add(getCenterOfMass()));
+		
+		Vec2 delta = thisPointVelocity.subtract(desiredSpeed).maxLength(acceleration);
+		
+		double inertia = getPointInertia(relativePos, delta.normalize());
+		
+		Vec2 force = delta.mul(inertia);
+		
+		return force;*/
+		
+		Vec2 globalAttach = cframe.localToGlobal(attachPoint);
+		Vec2 vecToDest = pullPoint.subtract(globalAttach);
+		
+		Vec2 desiredSpeed = getDesiredSpeedTowardsPoint(vecToDest, acceleration*0.03).add(pullPointVelocity);
+		
+		Vec2 currentSpeed = getSpeedOfPoint(globalAttach);
+		
+		Vec2 deltaSpeed = desiredSpeed.subtract(currentSpeed);
+		
+		Vec2 accelerationVec = deltaSpeed.maxLength(acceleration).subtract(getAccelerationOfPoint(globalAttach));
+		
+		Mat2 inertiaMat = getPointInertialMatrix(globalAttach);
+		
+		Vec2 force = inertiaMat.inv().mul(accelerationVec);
+		
+		Debug.logVector(globalAttach, desiredSpeed, Color.ORANGE);
+		Debug.logVector(globalAttach, currentSpeed, Color.GREEN);
+		Debug.logVector(globalAttach, force, Color.RED);
+		Debug.logVector(globalAttach.add(currentSpeed), deltaSpeed, Color.BLUE);
+		
+		
+		return force;
+		
+		// return pullPoint.subtract(cframe.localToGlobal(attachPoint)).mul(acceleration*mass);
+	}
+
+	public void actionRotaction(Physical other, double torque) {
+		this.applyTorque(torque/2);
+		other.applyTorque(-torque/2);
 	}
 }

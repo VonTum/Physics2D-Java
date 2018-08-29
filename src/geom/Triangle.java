@@ -24,8 +24,8 @@ public class Triangle extends ConvexPolygon {
 	}
 	
 	@Override
-	public double getInertia() {
-		return properties.density * baseWidth*top.y*(baseWidth*baseWidth/48 + top.lengthSquared()/36);
+	public double getInertialArea() {
+		return baseWidth*top.y*(baseWidth*baseWidth/48 + top.lengthSquared()/36);
 	}
 	
 	@Override

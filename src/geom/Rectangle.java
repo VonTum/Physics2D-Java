@@ -26,8 +26,8 @@ public class Rectangle extends ConvexPolygon {
 	}
 	
 	@Override
-	public double getInertia() {
-		return getMass()*(width*width+height*height)/12;
+	public double getInertialArea() {
+		return width*height*(width*width+height*height)/12;
 	}
 	
 	@Override
