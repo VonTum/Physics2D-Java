@@ -3,13 +3,17 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
-import geom.Polygon;
+import game.Debug;
+import game.gui.Screen;
+import geom.*;
 import math.CFrame;
+import math.RotMat2;
 import math.Vec2;
 import math.Vertex2;
 
 import org.junit.Test;
 
+import static physics.tests.util.TestUtil.*;
 
 public class GeometryTests {
 
@@ -45,6 +49,28 @@ public class GeometryTests {
 		
 		for(Vec2 point:outsidePoints)
 			assertFalse("Point " + point + " was shown to be inside while it was actually outside", p.containsPoint(point));
+	}
+	
+	
+	@Test
+	public void testRegularPolygon(){
+		RegularPolygon square = new RegularPolygon(4, new Vec2(1.0, 1.0));
+		
+		Rectangle rect = new Rectangle(2.0, 2.0);
+		
+		assertEquals(rect.getArea(), square.getArea(), DELTA);
+		assertEquals(rect.getInertialArea(), square.getInertialArea(), DELTA);
+		
+		
+		RegularPolygon triangle = new RegularPolygon(3, new Vec2(1.0, 1.0));
+		
+		Vec2 d = triangle.vertexes[1].position.subtract(triangle.vertexes[0].position);
+		Vec2 center = triangle.vertexes[1].position.add(triangle.vertexes[0].position).div(2);
+		
+		Triangle tri = new Triangle(d.length(), Vec2.UNITY.mul(triangle.vertexes[2].position.subtract(center).length()));
+		
+		assertEquals(tri.getArea(), triangle.getArea(), DELTA);
+		assertEquals(tri.getInertialArea(), triangle.getInertialArea(), DELTA);
 	}
 	
 	private final class DummyPolygon extends Polygon {
