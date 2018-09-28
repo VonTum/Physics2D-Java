@@ -30,7 +30,7 @@ public final class CFrame implements Describable {
 	}
 	
 	public Vertex2 globalToLocal(Vertex2 vertex){
-		return new Vertex2(rotation.inv().mul(vertex.position.subtract(position)), rotation.inv().mul(vertex.orientation), rotation.inv().mul(vertex.normalVec));
+		return new Vertex2(rotation.inv().mul(vertex.position.subtract(position)), rotation.inv().mul(vertex.orientation), rotation.inv().mul(vertex.normalVec), vertex.edgeLength, vertex.concave);
 	}
 	
 	public Vec2 localToGlobal(Vec2 vec){
@@ -42,7 +42,7 @@ public final class CFrame implements Describable {
 	}
 	
 	public Vertex2 localToGlobal(Vertex2 vertex){
-		return new Vertex2(rotation.mul(vertex.position).add(position), rotation.mul(vertex.orientation), rotation.mul(vertex.normalVec));
+		return new Vertex2(rotation.mul(vertex.position).add(position), rotation.mul(vertex.orientation), rotation.mul(vertex.normalVec), vertex.edgeLength, vertex.concave);
 	}
 	
 	public CFrame localToGlobal(CFrame cframe){

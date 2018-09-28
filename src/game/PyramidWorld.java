@@ -1,7 +1,7 @@
 package game;
 
-import geom.Box;
 import math.CFrame;
+import physics.Box;
 import physics.PhysicalProperties;
 import physics.World;
 import util.Color;

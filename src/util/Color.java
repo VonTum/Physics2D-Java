@@ -8,7 +8,7 @@ public class Color {
 	public static final Color BLUE = new Color(0.0, 0.0, 1.0, 1.0);
 	public static final Color YELLOW = new Color(1.0, 1.0, 0.0, 1.0);
 	public static final Color ORANGE = new Color(1.0, 0.7, 0.0, 1.0);
-	public static final Color PURPLE = new Color(1.0, 0.0, 1.0, 1.0);
+	public static final Color PURPLE = new Color(0.7, 0.0, 1.0, 1.0);
 	public static final Color CYAN = new Color(0.0, 1.0, 1.0, 1.0);
 	public static final Color WHITE = new Color(1.0, 1.0, 1.0, 1.0);
 	public static final Color BLACK = new Color(0.0, 0.0, 0.0, 1.0);
@@ -27,12 +27,24 @@ public class Color {
 		this.a = a;
 	}
 	
-	public Color darker(){
-		return darker(0.7);
-	}
-	
+	public Color darker(){return darker(0.7);}
 	public Color darker(double factor){
 		return new Color(r*factor, g*factor, b*factor, a);
+	}
+	
+	public Color lighter(){return lighter(0.7);}
+	public Color lighter(double factor){
+		return new Color(1-(1-r)*factor, 1-(1-g)*factor, 1-(1-b)*factor, a);
+	}
+	
+	public Color fuzzier(){return fuzzier(0.7);}
+	public Color fuzzier(double factor){
+		return new Color(r, g, b, a*factor);
+	}
+	
+	public Color sharper(){return sharper(0.7);}
+	public Color sharper(double factor){
+		return new Color(r, g, b, 1-(1-a)*factor);
 	}
 	
 	public Color red(double r){

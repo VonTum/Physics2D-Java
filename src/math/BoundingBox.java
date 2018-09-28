@@ -33,6 +33,7 @@ public class BoundingBox {
 	
 
 	public static BoundingBox mergeBoxes(BoundingBox[] boxes) {
+		if(boxes.length == 0) return new BoundingBox(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 		BoundingBox total = boxes[0];
 		for(int i = 1; i < boxes.length; i++)
 			total = total.merge(boxes[i]);

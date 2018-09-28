@@ -1,7 +1,6 @@
-package geom;
+package physics;
 
-import physics.Physical;
-import physics.PhysicalProperties;
+import geom.Rectangle;
 import math.CFrame;
 import math.RotMat2;
 import math.Vec2;
@@ -13,7 +12,7 @@ public class Box extends Physical {
 	}
 	
 	public Box(CFrame cframe, double width, double height, PhysicalProperties properties){
-		super(new Rectangle(properties, cframe, width, height));
+		super(cframe);
+		addPart(new Rectangle(width, height), CFrame.IDENTITY, properties);
 	}
-	
 }

@@ -171,6 +171,11 @@ public class Vec2 {
 		return a.mul(b.length()).add(b.mul(a.length()));
 	}
 	
+	public static Vec2 getIntersection(Vec2 origin1, Vec2 vec1, Vec2 origin2, Vec2 vec2){
+		double a = origin1.subtract(origin2).cross(vec1) / vec2.cross(vec1);
+		return origin2.add(vec2.mul(a));
+	}
+	
 	@Override
 	public String toString(){
 		return String.format("{x: %.9f, y: %.9f}", x, y);

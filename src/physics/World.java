@@ -2,7 +2,6 @@ package physics;
 
 import game.Constants;
 import game.Debug;
-import geom.Shape;
 
 import java.util.ArrayList;
 
@@ -28,12 +27,14 @@ public class World {
 		this.gravity = gravity;
 	}
 	
-	public void addObject(Physical p){
-		physicals.add(p);
+	public void addObject(Physical... objects){
+		for(Physical p:objects)
+			physicals.add(p);
 	}
 	
-	public void addConstraint(Constraint c){
-		constraints.add(c);
+	public void addConstraint(Constraint... consts){
+		for(Constraint c:consts)
+			constraints.add(c);
 	}
 	
 	public void updatePhysicals(double deltaT) {
@@ -69,9 +70,6 @@ public class World {
 	}
 	
 	private void executeConstraints(double deltaT){
-		for(Constraint c:constraints){
-			c.enact();
-		}
 		synchronized (magnetLock) {
 			if(magnetSubject != null){
 				Vec2 attachPoint = magnetSubject.cframe.localToGlobal(magnetAttachPoint);
@@ -105,6 +103,10 @@ public class World {
 				magnetSubject.applyForce(force, magnetSubject.cframe.localToGlobal(magnetAttachPoint));*/
 			}
 		}
+		
+		for(Constraint c:constraints){
+			c.enact();
+		}
 	}
 	
 	/**
@@ -116,8 +118,8 @@ public class World {
 	 */
 	public Physical getObjectAt(Vec2 worldPos){
 		for(Physical p:physicals)
-			for(Shape subShape:p.shapes)
-				if(subShape.containsPoint(worldPos))
+			for(Part subPart:p.parts)
+				if(subPart.containsPoint(worldPos))
 					return p;
 		
 		return null;
@@ -127,8 +129,8 @@ public class World {
 		synchronized (magnetLock) {
 			System.out.println("Block tried to grab at " + mousePos);
 			for(Physical b:physicals){
-				for(Shape subShape:b.shapes)
-					if(subShape.containsPoint(mousePos)){
+				for(Part subPart:b.parts)
+					if(subPart.containsPoint(mousePos)){
 						System.out.println("Block " + b + " grabbed!");
 						magnetSubject = b;
 						magnetAttachPoint = b.cframe.globalToLocal(mousePos);

@@ -1,34 +1,53 @@
 package physics.tests;
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import game.Debug;
-import game.gui.Screen;
 import geom.*;
 import math.CFrame;
+import math.NormalizedVec2;
 import math.RotMat2;
 import math.Vec2;
 import math.Vertex2;
 
 import org.junit.Test;
 
+import util.Color;
 import static physics.tests.util.TestUtil.*;
 
 public class GeometryTests {
-
+	
+	static final Vec2[] polygon = {
+			new Vec2(1.0, 1.0),
+			new Vec2(-3.0, 1.5),
+			new Vec2(-2.0, -0.3),
+			new Vec2(2.0, 0.3),
+			new Vec2(2.5, 0.7),
+			new Vec2(3.0, -1.0),
+			new Vec2(3.5, -1.0),
+			new Vec2(3.0, 1.0)
+	};
+	
+	static final Vec2[] convexPolygon = {
+		new Vec2(1.0, 1.0),
+		new Vec2(0.5, 1.1),
+		new Vec2(-0.3, 0.5),
+		new Vec2(-0.1, -0.5),
+		new Vec2(0.4, -0.6),
+		new Vec2(0.7, 0.0)
+	};
+	
+	static final Vec2[] spheroid = new Vec2[11];
+	
+	static {
+		for(int i = 0; i < 11; i++)
+			spheroid[i] = new RotMat2(i * 2 * Math.PI / 11).mul(Vec2.UNITX);
+	}
+	
 	@Test
 	public void testPolygonContainsPoint() {
-		Vec2[] polygon = {
-				new Vec2(1.0, 1.0),
-				new Vec2(-3.0, 1.5),
-				new Vec2(-2.0, -0.3),
-				new Vec2(2.0, 0.3),
-				new Vec2(2.5, 0.7),
-				new Vec2(3.0, -1.0),
-				new Vec2(3.5, -1.0),
-				new Vec2(3.0, 1.0)
-		};
 		Vertex2[] vertexes = Vertex2.convertToVertexes(polygon);
 		
 		Polygon p = new DummyPolygon(vertexes);
@@ -51,6 +70,28 @@ public class GeometryTests {
 			assertFalse("Point " + point + " was shown to be inside while it was actually outside", p.containsPoint(point));
 	}
 	
+	@Test
+	public void testGetCollisionOutline(){
+		Polygon p1 = new Rectangle(0.3, 0.1).transformToCFrame(new CFrame(-0.2, 0.3, 0.0));
+		
+		
+		Polygon p2 = new RegularPolygon(3, new Vec2(0.2, 0.0)).transformToCFrame(new CFrame(0.0, 0.1, 0.0));
+		
+		Debug.setupDebugScreen();
+		
+		// Debug.logShape(p1, util.Color.DEFAULT_BRICK_COLOR);
+		// Debug.logShape(p2, util.Color.BLUE.alpha(util.Color.DEFAULT_BRICK_COLOR.a));
+		
+		CollisionOutline outline = p1.getCollisionOutline(p2);
+		//CollisionOutline outline2 = p2.getCollisionOutline(p1);
+		
+		Debug.logPoint(outline.getCollisionPoint(p2.getCenterOfMass()), Color.PURPLE);
+		//Debug.logPoint(outline2.getCollisionPoint(p1.getCenterOfMass()), Color.BLUE);
+		
+		Debug.endTick();
+		
+		Debug.halt();
+	}
 	
 	@Test
 	public void testRegularPolygon(){
@@ -73,17 +114,81 @@ public class GeometryTests {
 		assertEquals(tri.getInertialArea(), triangle.getInertialArea(), DELTA);
 	}
 	
-	private final class DummyPolygon extends Polygon {
+	@Test
+	public void testIntersection(){
+		Rectangle r1 = new Rectangle(0.3, 0.1);
+		Rectangle r2 = new Rectangle(0.2, 0.2);
+		ConvexPolygon b2 = new Triangle(0.3, new Vec2(0.2, 0.1));
+		
+		Debug.setupDebugScreen();
+		
+		Debug.logShape(r1, Color.BLUE);
+		
+		ConvexPolygon[] collidingPolygons = {r2, r2.transformToCFrame(new CFrame(0.25, 0.0)), b2, b2.transformToCFrame(new CFrame(0.2, 0.07)), b2.transformToCFrame(new CFrame(-0.1, 0.25, 1.5))};
+		ConvexPolygon[] disjunctPolygons = {r2.transformToCFrame(new CFrame(0.28, 0.1)), r2.transformToCFrame(new CFrame(-0.28, 0.1)), b2.transformToCFrame(new CFrame(0.03, 0.3, 1.5))};
+		
+		for(ConvexPolygon p:collidingPolygons){
+			Debug.logShape(p, r1.intersects(p) ? Color.GREEN.fuzzier() : Color.YELLOW.fuzzier());
+		}
+		
+		for(ConvexPolygon p:disjunctPolygons){
+			Debug.logShape(p, r1.intersects(p) ? Color.RED.fuzzier() : Color.ORANGE.fuzzier());
+		}
+		
+		
+		
+		Debug.endTick();
+		Debug.halt();
+	}
+	
+	@Test
+	public void testGetIntersectionPoint(){
+		Rectangle r1 = new Rectangle(0.3, 0.1);
+		Rectangle r2 = new Rectangle(0.2, 0.2);
+		ConvexPolygon b2 = new Triangle(0.3, new Vec2(0.2, 0.1)).transformToCFrame(new CFrame(0.2, 0.2, 0.7));
+		
+		Debug.setupDebugScreen();
+		
+		Debug.logShape(r1, Color.BLUE);
+		Debug.logShape(b2, Color.YELLOW);
+		
+		r1.getIntersectionPoint(b2);
+		
+		Debug.endTick();
+		Debug.halt();
+	}
+	
+	@Test
+	public void testSlicing(){
+		ConvexPolygon testRect = new Rectangle(0.3, 0.2).transformToCFrame(new CFrame(0.0, 0.0, 0.2));
+		
+		Vec2 sliceOrigin = new Vec2(0.1, 0.07);
+		NormalizedVec2 sliceDirection = new NormalizedVec2(2.3);
+		
+		Debug.setupDebugScreen();
+		
+		Debug.logShape(testRect, Color.BLUE);
+		
+		Debug.logVector(sliceOrigin.subtract(sliceDirection), sliceDirection.mul(2), Color.BLACK);
+		
+		Debug.logShape(testRect.leftSlice(sliceOrigin, sliceDirection.mul(2.87546)), Color.GREEN.fuzzier());
+		
+		Debug.endTick();
+		Debug.halt();
+	}
+	
+	private static final class DummyPolygon extends Polygon {
 		public DummyPolygon(Vec2... polygon) {
-			super(null, new CFrame(0.0, 0.0), polygon);
+			super(polygon);
 		}
 		
 		public DummyPolygon(Vertex2... vertexes) {
-			super(null, new CFrame(0.0, 0.0), vertexes);
+			super(vertexes);
 		}
 		
 		@Override public double getArea() {return 0;}
 		@Override public double getInertialArea() {return 0;}
-		@Override public Vec2 getCenterOfMass() {return null;}
+		@Override public Vec2 getCenterOfMass() {return Vec2.ZERO;}
+		@Override public Shape leftSlice(Vec2 origin, Vec2 direction) {return null;}
 	}
 }

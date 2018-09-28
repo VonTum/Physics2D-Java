@@ -1,12 +1,16 @@
 package physics.tests;
 import static org.junit.Assert.*;
-import geom.Box;
+import geom.Rectangle;
+
 import math.CFrame;
 import math.Mat2;
+import math.NormalizedVec2;
 import math.Vec2;
 
 import org.junit.Test;
 
+import physics.Box;
+import physics.Physical;
 import physics.PhysicalProperties;
 import util.Color;
 import static physics.tests.util.TestUtil.*;
@@ -130,5 +134,69 @@ public class PhysicsTest {
 		testBox.applyForce(force, relativePos);
 		
 		assertVecEquals(testBox.getAccelerationOfPoint(relativePos), inertialMat.mul(force));
+	}
+	
+	@Test
+	public void testReferencePointInvariance(){
+		double D = 1E-12;
+		
+		Rectangle r1 = new Rectangle(0.3, 0.1);
+		Rectangle r2 = new Rectangle(0.1, 0.1);
+		
+		CFrame c1 = new CFrame(0.0, 0.0);
+		CFrame c2 = new CFrame(0.3, 0.0);
+		
+		for(double x = -1.0; x < 1.0; x += 0.05){
+			for(double y = -1.0; y < 1.0; y += 0.05){
+				for(double r = 0.0; r < Math.PI*2; r += 0.1){
+					CFrame curFrame = new CFrame(x, y, r);
+					
+					Physical p1 = new Physical(new CFrame(0.0, 0.0));
+					p1.addPart(r1, c1, properties);
+					p1.addPart(r2, c2, properties);
+					
+					Physical p2 = new Physical(curFrame);
+					p2.addPart(r1, curFrame.globalToLocal(c1), properties);
+					p2.addPart(r2, curFrame.globalToLocal(c2), properties);
+					
+					for(int i = 0; i < p1.parts.size(); i++)
+						assertCFrameEquals(p1.parts.get(i).getGlobalCFrame(), p2.parts.get(i).getGlobalCFrame());
+					
+					Vec2 force = new Vec2(0.3, 0.7);
+					Vec2 attachF = new Vec2(-0.15, 0.05);
+					Vec2 impulse = new Vec2(-0.7, 0.5);
+					Vec2 attachI = new Vec2(0.15, -0.00);
+					
+					Vec2 point = new Vec2(0.2, 0.1);
+					
+					Vec2 gravity = new Vec2(0.0, -2.0);
+					
+					NormalizedVec2 direction = new NormalizedVec2(0.3);
+					
+					for(int i = 0; i < 10; i++){
+						p1.update(deltaT);
+						p2.update(deltaT);
+						
+						p1.applyForce(force, attachF);
+						p1.applyImpulse(impulse, attachI);
+						
+						p2.applyForce(force, attachF);
+						p2.applyImpulse(impulse, attachI);
+					}
+					
+					assertVecEquals(p1.getCenterOfMass(), p2.getCenterOfMass(), D);
+					assertBoundingBoxEquals(p1.getBoundingBox(), p2.getBoundingBox(), D);
+					assertVecEquals(p1.getSpeedOfPoint(point), p2.getSpeedOfPoint(point), D);
+					assertVecEquals(p1.getAccelerationOfPoint(point), p1.getAccelerationOfPoint(point), D);
+					assertVecEquals(p1.getConcentratedForceInPoint(point), p2.getConcentratedForceInPoint(point), D);
+					assertEquals(p1.getEnergy(gravity), p2.getEnergy(gravity), D);
+					assertEquals(p1.getPotentialEnergy(gravity), p2.getPotentialEnergy(gravity), D);
+					assertEquals(p1.getKineticEnergy(), p2.getKineticEnergy(), D);
+					assertEquals(p1.getRotAccelertation(), p2.getRotAccelertation(), D);
+					assertEquals(p1.getPointInertia(point, direction), p2.getPointInertia(point, direction), D);
+					assertMatEquals(p1.getPointInertialMatrix(point), p2.getPointInertialMatrix(point), D);
+				}
+			}
+		}
 	}
 }

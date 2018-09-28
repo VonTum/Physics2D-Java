@@ -1,6 +1,5 @@
 package physics.tests;
 import static org.junit.Assert.*;
-import geom.Box;
 import math.CFrame;
 import math.Mat2;
 import math.NormalizedVec2;
@@ -9,9 +8,6 @@ import math.Vec2;
 import math.WorldVec2;
 
 import org.junit.Test;
-
-import physics.PhysicalProperties;
-import util.Color;
 
 import static physics.tests.util.TestUtil.*;
 
@@ -29,8 +25,6 @@ public class MathTests {
 	CFrame justPosition = new CFrame(new Vec2(0.7, -0.3), Mat2.IDENTITY);
 	CFrame justRotation = new CFrame(Vec2.ZERO, new RotMat2(0.3));
 	CFrame fullCFrame = new CFrame(new Vec2(-0.3, 0.4), new RotMat2(-0.4));
-	
-	Box box = new Box(fullCFrame, 0.3, 0.9, new PhysicalProperties(5/0.3/0.9, 0.05, 0.0, Color.BLUE));
 	
 	
 	

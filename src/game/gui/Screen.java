@@ -34,6 +34,7 @@ import com.sun.org.apache.xpath.internal.operations.Or;
 
 import physics.Constraint;
 import physics.DepthWithDirection;
+import physics.Part;
 import physics.Physical;
 import physics.World;
 import util.Color;
@@ -169,13 +170,13 @@ public class Screen {
 		Physical selectedObject = w.getObjectAt(worldMousePos);
 		
 		for(Physical obj: w.physicals){
-			for(Shape shape:obj.shapes){
+			for(Part p:obj.parts){
 				if(obj == selectedObject)
-					drawShape(shape, shape.properties.color.darker(0.8));
+					drawShape(p.getGlobalShape(), p.properties.color.darker(0.8));
 				else
-					drawShape(shape, shape.properties.color);
+					drawShape(p.getGlobalShape(), p.properties.color);
 				
-				if(DRAW_BLOCK_NORMALVECS) drawShapeNormalVecs(shape);
+				// if(DRAW_BLOCK_NORMALVECS) drawShapeNormalVecs(p.getTransformedShape());
 				
 			}
 			
@@ -184,10 +185,10 @@ public class Screen {
 				drawVector(obj.cframe.position, obj.cframe.rotation.mul(Vec2.UNITX));
 			}
 			color(0.2, 0.2, 0.2, 1.0);
-			for(Shape shape:obj.shapes)
-				drawLine(obj.cframe.position, shape.getCFrame().position);
+			for(Part shape:obj.parts)
+				drawLine(obj.cframe.position, shape.getGlobalCFrame().position);
 			
-			if(DRAW_BLOCK_SPEEDS) drawBlockSpeeds(obj);
+			// if(DRAW_BLOCK_SPEEDS) drawBlockSpeeds(obj);
 			if(DRAW_CENTER_OF_MASS) drawCenterOfMass(obj);
 		}
 		
@@ -230,17 +231,21 @@ public class Screen {
 		glfwSwapBuffers(window);
 	}
 	
-	private static void drawShape(Shape shape, Color c){
-		drawPolygon(shape.getDrawingVertexes(), c);
+	private static void drawShape(Shape shape, Color fillColor){
+		drawPolygon(shape.getDrawingVertexes(), fillColor, Color.BLACK);
 	}
 	
-	private static void drawPolygon(Vec2[] vertexes, Color c){
-		color(c);
+	private static void drawShape(Shape shape, Color fillColor, Color edgeColor){
+		drawPolygon(shape.getDrawingVertexes(), fillColor, edgeColor);
+	}
+	
+	private static void drawPolygon(Vec2[] vertexes, Color fillColor, Color edgeColor){
+		color(fillColor);
 		glBegin(GL11.GL_POLYGON);
 		for(Vec2 vertex:vertexes)
 			vertex(vertex);
 		glEnd();
-		color(0.0, 0.0, 0.0, 1.0);
+		color(edgeColor);
 		glBegin(GL11.GL_LINE_LOOP);
 		for(Vec2 vertex:vertexes)
 			vertex(vertex);
@@ -280,7 +285,7 @@ public class Screen {
 		drawCirclePart(centerOfMass, Vec2.UNITNEGY.mul(pointRadius), Math.PI/2, Math.PI/4+0.000000001);
 	}
 	
-	private static void drawShapeNormalVecs(Shape shape){
+	/*private static void drawShapeNormalVecs(Shape shape){
 		color(0.3, 0.3, 0.3, 0.3);
 		
 		for(Vec2 origin:shape){
@@ -298,13 +303,13 @@ public class Screen {
 	}
 	
 	private static void drawBlockSpeeds(Physical physical){
-		for(Shape s:physical.shapes){
+		for(Part p:physical.parts){
 			color(0.3, 0.7, 0.3, 0.8);
-			for(Vec2 origin:s){
+			for(Vec2 origin:p.getTransformedShape()){
 				drawVector(origin, physical.getSpeedOfPoint(origin));
 			}
 		}
-	}
+	}*/
 	
 	private static void drawLine(Vec2 start, Vec2 end){
 		glBegin(GL11.GL_LINES);
@@ -338,8 +343,8 @@ public class Screen {
 		vertex(end);
 		
 		Mat2 rotMat = Mat2.rotTransform(vector.getTheta());
-		Vec2 leftPart = new Vec2(-0.2, 0.1).mul(vector.length()).maxLength(.02);
-		Vec2 rightPart = new Vec2(-0.2, -0.1).mul(vector.length()).maxLength(.02);
+		Vec2 leftPart = new Vec2(-0.2, 0.1).mul(vector.length()).maxLength(.05/camera.zoomFactor);
+		Vec2 rightPart = new Vec2(-0.2, -0.1).mul(vector.length()).maxLength(.05/camera.zoomFactor);
 		
 		Vec2 leftVec = end.add(rotMat.mul(leftPart));
 		Vec2 rightVec = end.add(rotMat.mul(rightPart));
@@ -427,7 +432,11 @@ public class Screen {
 	}
 	
 	public static void markPolygon(Vec2[] polygon, Color color){
-		markingsBuf.add(new MarkedPolygon(polygon, color));
+		markPolygon(polygon, color, Color.BLACK);
+	}
+	
+	public static void markPolygon(Vec2[] polygon, Color fillColor, Color edgeColor){
+		markingsBuf.add(new MarkedPolygon(polygon, fillColor, edgeColor));
 	}
 	
 	/**
@@ -498,15 +507,17 @@ public class Screen {
 	
 	private static final class MarkedPolygon extends Drawable {
 		public final Vec2[] polygon;
+		public final Color edgeColor;
 		
-		public MarkedPolygon(Vec2[] polygon, Color fillColor) {
+		public MarkedPolygon(Vec2[] polygon, Color fillColor, Color edgeColor) {
 			super(fillColor);
+			this.edgeColor = edgeColor;
 			this.polygon = polygon;
 		}
 		
 		@Override
 		public void draw(){
-			drawPolygon(polygon, color);
+			drawPolygon(polygon, color, edgeColor);
 		}
 	}
 }

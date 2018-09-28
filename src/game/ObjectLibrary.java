@@ -15,16 +15,19 @@ public class ObjectLibrary {
 	public static final PhysicalProperties BASIC = new PhysicalProperties(10.0, 0.05, 0.0, Color.DEFAULT_BRICK_COLOR);
 	
 	public static Physical createFloor(CFrame cframe, PhysicalProperties properties){
-		Shape floorShape = new Rectangle(properties, cframe, 20.0, 0.2);
-		Physical floor = new Physical(floorShape);
+		Shape floorShape = new Rectangle(20.0, 0.2);
+		Physical floor = new Physical(cframe);
+		floor.addPart(floorShape, CFrame.IDENTITY, properties);
 		floor.anchor();
 		return floor;
 	}
 	
 	public static Physical createHammer(CFrame cframe, PhysicalProperties headProperties, PhysicalProperties armProperties){
-		Shape heavyCube = new Rectangle(headProperties, cframe.localToGlobal(new CFrame(0.0, 0.5, RotMat2.rotTransform(Math.PI/4))), 0.1, 0.1);
-		Shape veryLightArm = new Rectangle(armProperties, cframe.localToGlobal(new CFrame(-0.3, 0.5, Mat2.IDENTITY)), 0.2, 0.03);
-		Physical hammer = new Physical(heavyCube, veryLightArm);
+		Shape heavyCube = new Rectangle(0.1, 0.1);
+		Shape veryLightArm = new Rectangle(0.2, 0.03);
+		Physical hammer = new Physical(cframe);
+		hammer.addPart(heavyCube, new CFrame(0.0, 0.0, Math.PI/4), headProperties);
+		hammer.addPart(veryLightArm, new CFrame(-0.3, 0.0, 0.0), armProperties);
 		return hammer;
 	}
 	
@@ -34,12 +37,17 @@ public class ObjectLibrary {
 	
 	public static Physical createBowl(CFrame cframe, PhysicalProperties properties){
 		RotMat2 rotMat = new RotMat2(0.7);
-		Shape bowlLeft = new Rectangle(properties, new CFrame(rotMat.inv().mul(new Vec2(0, -0.4)), -0.7), 0.2, 0.05);
-		Shape bowlBottom = new Rectangle(properties, new CFrame(new Vec2(0, -0.4), 0.0), 0.2, 0.05);
-		Shape bowlRight = new Rectangle(properties, new CFrame(rotMat.mul(new Vec2(0, -0.4)), 0.7), 0.2, 0.05);
+		Shape bowlLeft = new Rectangle(0.2, 0.05);
+		Shape bowlBottom = new Rectangle(0.2, 0.05);
+		Shape bowlRight = new Rectangle(0.2, 0.05);
 		
-		Physical bowl = new Physical(bowlBottom, bowlLeft, bowlRight);
-		bowl.cframe = cframe.localToGlobal(bowl.cframe);
+		Physical bowl = new Physical(cframe);
+		
+		bowl.addPart(bowlLeft, new CFrame(rotMat.inv().mul(new Vec2(0, -0.4)), -0.7), properties);
+		bowl.addPart(bowlBottom, new CFrame(new Vec2(0, -0.4), 0.0), properties);
+		bowl.addPart(bowlRight, new CFrame(rotMat.mul(new Vec2(0, -0.4)), 0.7), properties);
+		
+		// bowl.cframe = cframe.localToGlobal(bowl.cframe);
 		return bowl;
 	}
 }

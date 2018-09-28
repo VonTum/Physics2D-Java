@@ -7,10 +7,14 @@ public class Vertex2 extends OrientedPoint {
 	 * normal vector of the side between this and the next vertex
 	 */
 	public final NormalizedVec2 normalVec;
+	public final double edgeLength;
+	public final boolean concave;
 	
-	public Vertex2(Vec2 position, NormalizedVec2 orientation, NormalizedVec2 normalVec){
+	public Vertex2(Vec2 position, NormalizedVec2 orientation, NormalizedVec2 normalVec, double edgeLength, boolean concave){
 		super(position, orientation);
 		this.normalVec = normalVec;
+		this.edgeLength = edgeLength;
+		this.concave = concave;
 	}
 	
 	/**
@@ -28,10 +32,13 @@ public class Vertex2 extends OrientedPoint {
 		
 		Vec2 bisector = Vec2.bisect(deltaForward, deltaBackward);
 		
+		boolean isConcave = false;
 		if(deltaForward.cross(deltaBackward) > 0){
 			bisector = bisector.neg();
+			isConcave = true;
 		}
-		return new Vertex2(position, bisector.normalize(), deltaForward.rotate90Clockwise().normalize());
+		
+		return new Vertex2(position, bisector.normalize(), deltaForward.rotate90Clockwise().normalize(), deltaForward.length(), isConcave);
 	}
 	
 	public static Vertex2[] convertToVertexes(Vec2... polygon){

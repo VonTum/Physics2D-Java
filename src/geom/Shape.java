@@ -1,67 +1,16 @@
 package geom;
 
-import java.util.Iterator;
 import java.util.stream.Stream;
 
 import physics.DepthWithDirection;
-import physics.Locatable;
-import physics.Physical;
-import physics.PhysicalProperties;
 import math.BoundingBox;
 import math.CFrame;
 import math.NormalizedVec2;
 import math.OrientedPoint;
+import math.Range;
 import math.Vec2;
 
-public abstract class Shape implements Locatable, Iterable<Vec2> {
-	private static final double SPACING = 0.1;
-	
-	/**
-	 * this Shape's parent physical, if null then cframe is in world coordinates, 
-	 * else it's in relative coordinates to it's parent. 
-	 */
-	public Physical parent = null;
-	private CFrame cframe;
-	
-	public final PhysicalProperties properties;
-	
-	
-	public Shape(PhysicalProperties properties, CFrame cframe){
-		this.properties = properties;
-		this.cframe = cframe;
-	}
-	
-	public void attach(Physical parent, CFrame relativeCFrame){
-		this.parent = parent;
-		this.cframe = relativeCFrame;
-	}
-	
-	public void detach(){
-		if(isAttached()){
-			parent.detachShape(this);
-			cframe = getCFrame();
-			parent = null;
-		}
-	}
-	
-	@Override
-	public CFrame getCFrame(){
-		if(isAttached())
-			return parent.cframe.localToGlobal(cframe);
-		else
-			return cframe;
-	}
-	
-	public Vec2 getSpeedOfPoint(Vec2 point){
-		if(isAttached())
-			return Vec2.ZERO;
-		else
-			return parent.getSpeedOfPoint(point);
-	}
-	
-	public boolean isAttached(){
-		return parent != null;
-	}
+public abstract class Shape {
 	
 	/**
 	 * returns a list of points of this object that intersect other
@@ -75,36 +24,32 @@ public abstract class Shape implements Locatable, Iterable<Vec2> {
 	public abstract boolean intersects(Shape other);
 	public abstract boolean containsPoint(Vec2 point);
 	public abstract Vec2[] getDrawingVertexes();
-	public double getMass(){
-		return properties.density * getArea();
-	}
 	public abstract double getArea();
 	public abstract double getInertialArea();
 	public abstract Vec2 getCenterOfMass();
 	public abstract BoundingBox getBoundingBox();
-	public Iterator<Vec2> iterator(){
-		return new Iterator<Vec2>() {
-			final BoundingBox bounds = getBoundingBox();
-			double curX = bounds.xmin;
-			double curY = bounds.ymin;
-			@Override
-			public boolean hasNext() {
-				return curX < bounds.xmax && curY < bounds.ymax;
-			}
-			
-			@Override
-			public Vec2 next() {
-				Vec2 v;
-				do{
-					v = new Vec2(curX, curY);
-					curX += bounds.getWidth() * SPACING;
-					if(curX >= bounds.xmax){
-						curX = bounds.xmin;
-						curY += bounds.getHeight() * SPACING;
-					}
-				}while(!containsPoint(v) && hasNext());
-				return v;
-			}
-		};
-	}
+	
+	public abstract Shape transformToCFrame(CFrame frame);
+	public abstract Shape scale(double factor);
+	
+	public abstract CollisionOutline getCollisionOutline(Shape other);
+	public abstract Range getBoundsAlongDirection(NormalizedVec2 direction);
+	/**
+	 * returns the possible Separating Axis Theorem projection directions applicable to this shape. For polygons for example, this will be normalized vectors along it's edges
+	 * @return an array of the found directions
+	 */
+	public abstract NormalizedVec2[] getSATDirections();
+	public abstract Shape union(Shape other);
+	/**
+	 * Slices this shape along the given direction, and returns the slice to the left of the cut.
+	 * 
+	 * A leftSlice of a Shape which is entirely to the left of the slicing axis is the shape itself.
+	 * 
+	 * A leftSlice of a Shape which is entirely to the right should return a NullShape
+	 * 
+	 * @param origin
+	 * @param direction
+	 * @return the left slice of the shape
+	 */
+	public abstract Shape leftSlice(Vec2 origin, Vec2 direction);
 }

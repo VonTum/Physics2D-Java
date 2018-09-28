@@ -1,9 +1,9 @@
 package game;
 
-import geom.Box;
 import math.Mat2;
 import math.RotMat2;
 import math.Vec2;
+import physics.Box;
 import physics.PhysicalProperties;
 import physics.World;
 import util.Color;

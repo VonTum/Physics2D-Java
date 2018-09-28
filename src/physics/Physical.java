@@ -8,7 +8,6 @@ import geom.Shape;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
 
 import util.Color;
 import math.BoundingBox;
@@ -22,27 +21,30 @@ import math.Vec2;
 public class Physical implements Locatable, Describable {
 	public CFrame cframe;
 	
-	public final List<Shape> shapes;
+	private Vec2 centerOfMassRelative = Vec2.ZERO;
 	
+	/** velocity of center of mass */
 	public Vec2 velocity = Vec2.ZERO;
+	/** angular velocity of center of mass */
 	public double angularVelocity = 0;
 	
-	private Vec2 totalForce = Vec2.ZERO;
-	private double totalMoment = 0;	// counterclockwise is positive
+	public Vec2 totalForce = Vec2.ZERO;
+	public double totalMoment = 0;	// counterclockwise is positive
 	
 	public double mass;
 	public double inertia;
 	
 	private boolean anchored = false;
 	
+	public final List<Part> parts = new ArrayList<>();
+	
 	public String name = super.toString();
 	
 	BoundingBox boundsCache;
 	
-	public Physical(Shape... shapes){
-		this.shapes = new ArrayList<>();
+	/*public Physical(Shape... shapes){
 		for(Shape s:shapes)
-			this.shapes.add(s);
+			this.parts.add(new Part(this, s, s.cframe, ObjectLibrary.BASIC));
 		
 		recalculate();
 		
@@ -52,27 +54,38 @@ public class Physical implements Locatable, Describable {
 		}
 		
 		boundsCache = calculateBoundingBox();
+	}*/
+	
+	public Physical(CFrame location){
+		mass = 0;
+		inertia = 0;
+		cframe = location;
+		boundsCache = new BoundingBox(0.0, 0.0, 0.0, 0.0);
+	}
+	
+	public void addPart(Shape s, CFrame relativePos, PhysicalProperties properties){
+		parts.add(new Part(this, s, relativePos, properties));
+		recalculate();
 	}
 	
 	public void interactWith(Physical otherObj){
-		for(Shape shape:shapes){
-			for(Shape otherShape:otherObj.shapes){
-				shape.getIntersectionPoints(otherShape).forEach((point) -> {
+		for(Part p1:parts){
+			for(Part other:otherObj.parts){
+				p1.getIntersectionPoints(other).forEach((point) -> {
 					double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
-					handleIntersectionPoint(otherShape, smallestInertia, point);
+					handleIntersectionPoint(other, smallestInertia, point);
 				});
-				Stream<? extends OrientedPoint> pointStream = otherShape.getIntersectionPoints(shape);
-				pointStream.forEach((point) -> {
+				other.getIntersectionPoints(p1).forEach((point) -> {
 					double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
-					otherObj.handleIntersectionPoint(shape, smallestInertia, point);
+					otherObj.handleIntersectionPoint(p1, smallestInertia, point);
 				});
 			}
 		}
 	}
 	
-	private void handleIntersectionPoint(Shape otherShape, double smallestInertia, OrientedPoint point) {
+	private void handleIntersectionPoint(Part otherPart, double smallestInertia, OrientedPoint point) {
 		Vec2 position = point.position;
-		DepthWithDirection d = otherShape.getNormalVecAndDepthToSurface(point);
+		DepthWithDirection d = otherPart.getGlobalShape().getNormalVecAndDepthToSurface(point);
 		
 		NormalizedVec2 normalVec = d.direction;
 		
@@ -80,7 +93,7 @@ public class Physical implements Locatable, Describable {
 		
 		Vec2 repulsionForce = d.getVecToSurface().mul(Constants.REPULSION_FACTOR*smallestInertia);
 		
-		Vec2 relativeVelocity = this.getSpeedOfPoint(position).subtract(otherShape.getSpeedOfPoint(position));
+		Vec2 relativeVelocity = this.getSpeedOfPoint(position).subtract(otherPart.getSpeedOfPoint(position));
 		
 		double normalComponent = normalVec.dot(relativeVelocity);
 		double sidewaysComponent = normalVec.cross(relativeVelocity);
@@ -89,16 +102,16 @@ public class Physical implements Locatable, Describable {
 		Debug.logVector(position, Vec2.UNITY.mul(normalComponent), Color.RED);
 		
 		if(normalComponent > 0)
-			normalComponent = normalComponent*otherShape.properties.stickyness;
+			normalComponent = normalComponent * otherPart.properties.stickyness;
 		
-		sidewaysComponent = sidewaysComponent * otherShape.properties.friction;
+		sidewaysComponent = sidewaysComponent * otherPart.properties.friction;
 		
 		Vec2 normalForce = normalVec.mul(-normalComponent * Constants.VELOCITY_STOP_FACTOR * smallestInertia);
 		Vec2 frictionForce = normalVec.rotate90CounterClockwise().mul(-sidewaysComponent * Constants.VELOCITY_STOP_FACTOR * smallestInertia);
 		
-		this.actionReaction(otherShape.parent, position, repulsionForce);
-		this.actionReaction(otherShape.parent, position, normalForce);
-		this.actionReaction(otherShape.parent, position, frictionForce);
+		this.actionReaction(otherPart.parent, position, repulsionForce);
+		this.actionReaction(otherPart.parent, position, normalForce);
+		this.actionReaction(otherPart.parent, position, frictionForce);
 	}
 	
 	public void actionReaction(Physical other, Vec2 globalPos, Vec2 force){
@@ -127,6 +140,10 @@ public class Physical implements Locatable, Describable {
 		double movementFactor = 1/getMass();
 		double rotationFactor = Math.abs(relativePosition.cross(relativePosition.cross(direction)).dot(direction) / getInertia());
 		return 1/(movementFactor + rotationFactor);
+	}
+	
+	public double getAngularImpulse(){
+		return angularVelocity * inertia;
 	}
 	
 	/**
@@ -200,7 +217,7 @@ public class Physical implements Locatable, Describable {
 	 * <code>impulse/mass</code>
 	 * @param impulse
 	 */
-	public void applyImpulse(Vec2 impulse){
+	public void applyImpulseAtCenterOfMass(Vec2 impulse){
 		if(anchored) return;
 		velocity = velocity.add(impulse.div(mass));
 	}
@@ -213,6 +230,14 @@ public class Physical implements Locatable, Describable {
 	public void applyTorque(double torque){
 		if(anchored) return;
 		totalMoment += torque;
+	}
+	
+	/**
+	 * Applies a given torque impulse to this object, changing it's angular momentum by torqueImpulse/inertia
+	 * @param torqueImpulse torque impulse
+	 */
+	public void applyTorqueImpulse(double torqueImpulse){
+		totalMoment += torqueImpulse / inertia;
 	}
 	
 	/**
@@ -245,8 +270,12 @@ public class Physical implements Locatable, Describable {
 		// Vec2 movement = velocity.mul(deltaT);
 		// double rotation = angularVelocity * deltaT;
 		
-		move(movement);
-		rotate(rotation);
+		Vec2 relCOM = cframe.localToGlobalRotation(centerOfMassRelative);
+		
+		RotMat2 rot = new RotMat2(rotation);
+		
+		move(movement.add(relCOM.subtract(rot.mul(relCOM))));
+		rotate(rot);
 		
 		totalForce = Vec2.ZERO;
 		totalMoment = 0.0;
@@ -255,34 +284,50 @@ public class Physical implements Locatable, Describable {
 	}
 	
 	private BoundingBox calculateBoundingBox(){
-		BoundingBox[] boxes = new BoundingBox[shapes.size()];
-		for(int i = 0; i < shapes.size(); i++)
-			boxes[i] = shapes.get(i).getBoundingBox();
+		BoundingBox[] boxes = new BoundingBox[parts.size()];
+		for(int i = 0; i < parts.size(); i++)
+			boxes[i] = parts.get(i).getBoundingBox();
 		
 		return BoundingBox.mergeBoxes(boxes);
 	}
 	
 	public BoundingBox getBoundingBox(){return boundsCache;}
 	
-	private void recalculate(){
+	public void recalculate(){
 		recalculateCenterOfMass();
 		recalculateInertia();
+		boundsCache = calculateBoundingBox();
 	}
 	
 	private void recalculateCenterOfMass(){
 		Vec2 weighedAverage = Vec2.ZERO;
 		double totalMass = 0;
 		
-		for(Shape shape:shapes){
-			double shapeMass = shape.getMass();
-			totalMass += shapeMass;
-			weighedAverage = weighedAverage.add(shape.getCenterOfMass().mul(shapeMass));
+		for(Part p:parts){
+			double partMass = p.getMass();
+			totalMass += partMass;
+			weighedAverage = weighedAverage.add(p.getCenterOfMass().mul(partMass));
 		}
 		
 		Vec2 centerOfMass = weighedAverage.div(totalMass);
-		RotMat2 rotationMat = shapes.get(0).getCFrame().rotation;
 		
-		this.cframe = new CFrame(centerOfMass, rotationMat);
+		Vec2 COMRelative = this.cframe.globalToLocal(centerOfMass);
+		
+		this.centerOfMassRelative = COMRelative;
+		
+		/*RotMat2 rotationMat = parts.get(0).relativeCFrame.rotation;
+		
+		CFrame newCFrame = new CFrame(centerOfMass, rotationMat);
+		
+		for(Part p:parts)
+			p.relativeCFrame = newCFrame.globalToLocal(this.cframe.localToGlobal(p.relativeCFrame));
+		
+		this.cframe = newCFrame;*/
+		
+		//for(Part p:parts)
+		// 	p.relativeCFrame = p.relativeCFrame.add(COMRelative.neg());
+		
+		
 		this.mass = totalMass;
 	}
 	
@@ -290,10 +335,10 @@ public class Physical implements Locatable, Describable {
 		Vec2 objCenter = getCenterOfMass();
 		double totalInertia = 0;
 		
-		for(Shape shape:shapes){
-			Vec2 delta = shape.getCenterOfMass().subtract(objCenter);
+		for(Part p:parts){
+			Vec2 delta = p.getCenterOfMass().subtract(objCenter);
 			
-			totalInertia += shape.getInertialArea()*shape.properties.density + delta.lengthSquared() * shape.getMass();
+			totalInertia += p.getInertia() + delta.lengthSquared() * p.getMass();
 		}
 		
 		this.inertia = totalInertia;
@@ -302,17 +347,17 @@ public class Physical implements Locatable, Describable {
 	
 	
 	/**
-	 * Detaches the given shape from this polygon, removing it from this, and calling s.detach();
+	 * Detaches the given part from this polygon, removing it from this;
 	 * 
-	 * @param s the shape to detach
+	 * @param p the part to detach
 	 * @return true if the shape was detached succesfully
 	 */
-	public boolean detachShape(Shape s){
-		for(Iterator<Shape> shapeIter = this.shapes.iterator(); shapeIter.hasNext(); ){
-			Shape shape = shapeIter.next();
-			if(shape == s){
-				shapeIter.remove();
-				s.detach();
+	public boolean detachShape(Part p){
+		for(Iterator<Part> partIter = this.parts.iterator(); partIter.hasNext(); ){
+			Part part = partIter.next();
+			if(part == p){
+				partIter.remove();
+				recalculate();
 				return true;
 			}
 		}
@@ -336,7 +381,7 @@ public class Physical implements Locatable, Describable {
 	public CFrame getCFrame(){return cframe;}
 	
 	public Vec2 getCenterOfMass(){
-		return cframe.position;
+		return cframe.localToGlobal(centerOfMassRelative);
 	}
 	
 	public void move(Vec2 delta){
@@ -345,6 +390,10 @@ public class Physical implements Locatable, Describable {
 	
 	public void rotate(double angle){
 		cframe = cframe.rotated(angle);
+	}
+	
+	public void rotate(RotMat2 rotation){
+		cframe = cframe.rotated(rotation);
 	}
 	
 	public Vec2 getAccelerationOfPoint(Vec2 point){

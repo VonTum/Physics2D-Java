@@ -4,6 +4,7 @@ package game;
 import game.gui.Screen;
 import game.input.InputHandler;
 import game.input.StandardInputHandler;
+import geom.RegularPolygon;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -12,9 +13,10 @@ import java.util.concurrent.TimeUnit;
 
 import math.CFrame;
 import math.Vec2;
+import physics.Box;
 import physics.Physical;
+import physics.SlideConstraint;
 import physics.World;
-import util.Color;
 
 public class Physics2D {
 	
@@ -30,28 +32,55 @@ public class Physics2D {
 		Debug.setWorld(w);
 		Screen.init(handler);
 		
-		new ConstrainedWorld().build(w);
+		// new ConstrainedWorld().build(w);
 		
 		/*for(Physical p:w.physicals){
 			boolean anchored = p.isAnchored();
 			p.unAnchor();
 			p.move(new Vec2(4.0, 0.0));
 			if(anchored) p.anchor();
-		}
+		}*/
 		
-		new FluidWorld(15).build(w);*/
+		//new FluidWorld(20).build(w);
+		
+		/*Physical hammer = ObjectLibrary.createHammer(new CFrame(0.0, 0.5, 0.3));
 		
 		
+		
+		hammer.angularVelocity = 0.2;
+		
+		w.addObject(hammer);*/
 		
 		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), ObjectLibrary.BASIC));
 		
+		w.addObject(ObjectLibrary.createHammer(new CFrame(0.0, 1.5, Math.PI*3/8)));
+		
+		/*Physical test = new Physical(new CFrame(0.0, 0.5));
+		
+		test.addPart(new Rectangle(0.2, 0.1), new CFrame(0.2, 0.0), ObjectLibrary.BASIC);
+		
+		test.angularVelocity = 0.1;
+		
+		w.addObject(test);*/
+		
+		// new FluidWorld(30).build(w);
 		
 		
-		/*Box b = new Box(CFrame.IDENTITY, 0.3, 0.15, ObjectLibrary.BASIC);
+		/*Box a = new Box(new CFrame(-0.4, 0.5, 0.3), 0.1, 0.15, ObjectLibrary.BASIC);
+		Box b = new Box(new CFrame(0.0, 0.5, 0.0), 0.3, 0.15, ObjectLibrary.BASIC);
 		
-		w.addObject(b);
+		SlideConstraint s = new SlideConstraint(a, b, new CFrame(0.3, 0.0, 0.0), new CFrame(-0.2, 0.0, 0.0));
 		
-		b.applyImpulse(new Vec2(0.0, 0.1), new Vec2(0.15, 0.0));*/
+		w.addObject(a, b);
+		w.addConstraint(s);*/
+		
+		/*RegularPolygon pol = new RegularPolygon(50, new Vec2(0.0, 0.2));
+		Physical p = new Physical(new CFrame(1.0, 0.5));
+		p.addPart(pol, CFrame.IDENTITY, ObjectLibrary.BASIC);
+		
+		w.addObject(p);*/
+		
+		/*b.applyImpulse(new Vec2(0.0, 0.1), new Vec2(0.15, 0.0));*/
 		
 		// w.addObject(ObjectLibrary.createHammer(new CFrame(3.0, 0.0), new PhysicalProperties(1000, 0.1, 0.0, Color.DARK_GREY.alpha(0.6)), new PhysicalProperties(10.0, 0.05, 0.0, Color.DEFAULT_BRICK_COLOR)));
 		// w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), new PhysicalProperties(10.0)));
@@ -83,5 +112,9 @@ public class Physics2D {
 		Debug.startTick();
 		w.tick(deltaT);
 		Debug.endTick();
+		if(Debug.stop){
+			System.out.println("Stopped");
+			Debug.stop = false;
+		}
 	}
 }
