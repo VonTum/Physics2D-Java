@@ -1,6 +1,6 @@
 package game;
 
-import physics.World;
+import physics2D.physics.World;
 
 public interface WorldBuilder {
 	public void build(World w);

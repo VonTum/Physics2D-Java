@@ -5,8 +5,8 @@ import game.gui.Screen;
 
 import org.lwjgl.glfw.GLFW;
 
-import math.Vec2;
-import physics.World;
+import physics2D.math.Vec2;
+import physics2D.physics.World;
 
 public class StandardInputHandler implements InputHandler {
 	

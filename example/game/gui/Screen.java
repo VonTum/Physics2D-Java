@@ -9,21 +9,12 @@ import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.*;
-import game.Debug;
 import game.input.InputHandler;
-import geom.Polygon;
-import geom.Shape;
+import game.util.Color;
+import game.util.Dimentions;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
-import math.BoundingBox;
-import math.CFrame;
-import math.Mat2;
-import math.NormalizedVec2;
-import math.Vec2;
-import math.Vertex2;
-import math.WorldVec2;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -32,13 +23,21 @@ import org.lwjgl.opengl.GLCapabilities;
 
 import com.sun.org.apache.xpath.internal.operations.Or;
 
-import physics.Constraint;
-import physics.DepthWithDirection;
-import physics.Part;
-import physics.Physical;
-import physics.World;
-import util.Color;
-import util.Dimentions;
+import physics2D.Debug;
+import physics2D.geom.Polygon;
+import physics2D.geom.Shape;
+import physics2D.math.BoundingBox;
+import physics2D.math.CFrame;
+import physics2D.math.Mat2;
+import physics2D.math.NormalizedVec2;
+import physics2D.math.Vec2;
+import physics2D.math.Vertex2;
+import physics2D.math.WorldVec2;
+import physics2D.physics.Constraint;
+import physics2D.physics.DepthWithDirection;
+import physics2D.physics.Part;
+import physics2D.physics.Physical;
+import physics2D.physics.World;
 import static java.lang.Math.PI;
 
 
@@ -215,7 +214,7 @@ public class Screen {
 		
 		color(Color.BLACK);
 		if(selectedObject != null){
-			font.drawString(selectedObject.describe(), 36f, 1f, 0.999f * (float) getLeftBorderX(), 0.999f);
+			font.drawString(selectedObject.toString(), 36f, 1f, 0.999f * (float) getLeftBorderX(), 0.999f);
 		}
 		
 		Font.Text text = font.createText(Debug.getDebugInfo(), 36f, 1f);

@@ -1,12 +1,12 @@
 package game;
 
-import math.Mat2;
-import math.RotMat2;
-import math.Vec2;
-import physics.Box;
-import physics.PhysicalProperties;
-import physics.World;
-import util.Color;
+import game.util.Color;
+import physics2D.math.Mat2;
+import physics2D.math.RotMat2;
+import physics2D.math.Vec2;
+import physics2D.physics.Box;
+import physics2D.physics.PhysicalProperties;
+import physics2D.physics.World;
 
 public class BasicWorld implements WorldBuilder {
 

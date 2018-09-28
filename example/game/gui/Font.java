@@ -20,16 +20,17 @@ import static org.lwjgl.opengl.GL11.glTexCoord2f;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.opengl.GL11.glTexParameteri;
 import static org.lwjgl.opengl.GL11.glVertex2f;
+import game.util.Dimentions;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
-import math.Vec2;
-
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import util.Dimentions;
+
+import physics2D.math.Vec2;
 import de.matthiasmann.twl.utils.PNGDecoder;
 
 public class Font {

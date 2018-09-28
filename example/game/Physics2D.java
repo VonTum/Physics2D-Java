@@ -4,19 +4,16 @@ package game;
 import game.gui.Screen;
 import game.input.InputHandler;
 import game.input.StandardInputHandler;
-import geom.RegularPolygon;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import math.CFrame;
-import math.Vec2;
-import physics.Box;
-import physics.Physical;
-import physics.SlideConstraint;
-import physics.World;
+import physics2D.Debug;
+import physics2D.math.CFrame;
+import physics2D.math.Vec2;
+import physics2D.physics.World;
 
 public class Physics2D {
 	

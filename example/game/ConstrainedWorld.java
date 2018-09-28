@@ -1,14 +1,14 @@
 package game;
 
-import math.CFrame;
-import physics.Box;
-import physics.CoilPinConstraint;
-import physics.Constraint;
-import physics.PhysicalProperties;
-import physics.PinConstraint;
-import physics.SpringPinConstraint;
-import physics.World;
-import util.Color;
+import game.util.Color;
+import physics2D.math.CFrame;
+import physics2D.physics.Box;
+import physics2D.physics.CoilPinConstraint;
+import physics2D.physics.Constraint;
+import physics2D.physics.PhysicalProperties;
+import physics2D.physics.PinConstraint;
+import physics2D.physics.SpringPinConstraint;
+import physics2D.physics.World;
 
 public class ConstrainedWorld implements WorldBuilder {
 

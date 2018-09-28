@@ -1,6 +1,6 @@
 package game.gui;
 
-import util.Color;
+import game.util.Color;
 
 abstract class Drawable {
 	protected final Color color;

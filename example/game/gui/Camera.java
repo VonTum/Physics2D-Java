@@ -1,7 +1,7 @@
 package game.gui;
 
-import math.CFrame;
-import math.Vec2;
+import physics2D.math.CFrame;
+import physics2D.math.Vec2;
 
 public class Camera{
 	public CFrame cframe;

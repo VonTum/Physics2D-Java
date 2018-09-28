@@ -1,9 +1,9 @@
 package game;
 
-import math.CFrame;
-import physics.PhysicalProperties;
-import physics.World;
-import util.Color;
+import game.util.Color;
+import physics2D.math.CFrame;
+import physics2D.physics.PhysicalProperties;
+import physics2D.physics.World;
 
 public class MultiMassWorld implements WorldBuilder {
 	

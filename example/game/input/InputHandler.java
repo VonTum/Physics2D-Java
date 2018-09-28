@@ -1,6 +1,6 @@
 package game.input;
 
-import math.Vec2;
+import physics2D.math.Vec2;
 
 public interface InputHandler {
 	public void mouseDown(Vec2 screenPos, int button, int modifiers);

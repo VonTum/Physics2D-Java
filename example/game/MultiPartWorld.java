@@ -1,16 +1,16 @@
 package game;
 
-import math.CFrame;
-import math.RotMat2;
-import math.Vec2;
-import geom.Shape;
-import geom.Rectangle;
-import geom.Triangle;
-import physics.Box;
-import physics.Physical;
-import physics.PhysicalProperties;
-import physics.World;
-import util.Color;
+import game.util.Color;
+import physics2D.geom.Rectangle;
+import physics2D.geom.Shape;
+import physics2D.geom.Triangle;
+import physics2D.math.CFrame;
+import physics2D.math.RotMat2;
+import physics2D.math.Vec2;
+import physics2D.physics.Box;
+import physics2D.physics.Physical;
+import physics2D.physics.PhysicalProperties;
+import physics2D.physics.World;
 
 public class MultiPartWorld implements WorldBuilder {
 

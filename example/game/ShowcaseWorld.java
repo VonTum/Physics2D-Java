@@ -1,18 +1,18 @@
 package game;
 
-import geom.Rectangle;
-import geom.Shape;
-import geom.Triangle;
-import math.CFrame;
-import math.RotMat2;
-import math.Vec2;
-import physics.Box;
-import physics.Constraint;
-import physics.Physical;
-import physics.PhysicalProperties;
-import physics.PinConstraint;
-import physics.World;
-import util.Color;
+import game.util.Color;
+import physics2D.geom.Rectangle;
+import physics2D.geom.Shape;
+import physics2D.geom.Triangle;
+import physics2D.math.CFrame;
+import physics2D.math.RotMat2;
+import physics2D.math.Vec2;
+import physics2D.physics.Box;
+import physics2D.physics.Constraint;
+import physics2D.physics.Physical;
+import physics2D.physics.PhysicalProperties;
+import physics2D.physics.PinConstraint;
+import physics2D.physics.World;
 
 public class ShowcaseWorld implements WorldBuilder {
 	
