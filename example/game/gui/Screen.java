@@ -142,6 +142,10 @@ public class Screen {
 		glLineWidth(2.0f);
 	}
 	
+	public static void close(){
+		GLFW.glfwDestroyWindow(window);
+	}
+	
 	public static Dimentions getWindowSize(){
 		int[] x = new int[1], y = new int[1];
 		GLFW.glfwGetWindowSize(window, x, y);

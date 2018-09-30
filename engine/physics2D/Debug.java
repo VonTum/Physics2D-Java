@@ -176,6 +176,7 @@ public class Debug {
 	public static void halt() {
 		while(!Screen.shouldClose())
 			Screen.refresh();
+		Screen.close();
 	}
 	
 	/**

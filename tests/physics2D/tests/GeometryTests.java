@@ -4,6 +4,8 @@ import game.util.Color;
 
 import java.util.Arrays;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import physics2D.Debug;
@@ -44,6 +46,17 @@ public class GeometryTests {
 			spheroid[i] = new RotMat2(i * 2 * Math.PI / 11).mul(Vec2.UNITX);
 	}
 	
+	@Before
+	public void setupDebugScreen(){
+		Debug.setupDebugScreen();
+	}
+	
+	@After
+	public void destroyDebugScreen(){
+		Debug.endTick();
+		Debug.halt();
+	}
+	
 	@Test
 	public void testPolygonContainsPoint() {
 		Vertex2[] vertexes = Vertex2.convertToVertexes(polygon);
@@ -75,8 +88,6 @@ public class GeometryTests {
 		
 		Polygon p2 = new RegularPolygon(3, new Vec2(0.2, 0.0)).transformToCFrame(new CFrame(0.0, 0.1, 0.0));
 		
-		Debug.setupDebugScreen();
-		
 		// Debug.logShape(p1, util.Color.DEFAULT_BRICK_COLOR);
 		// Debug.logShape(p2, util.Color.BLUE.alpha(util.Color.DEFAULT_BRICK_COLOR.a));
 		
@@ -85,10 +96,6 @@ public class GeometryTests {
 		
 		Debug.logPoint(outline.getCollisionPoint(p2.getCenterOfMass()), Color.PURPLE);
 		//Debug.logPoint(outline2.getCollisionPoint(p1.getCenterOfMass()), Color.BLUE);
-		
-		Debug.endTick();
-		
-		Debug.halt();
 	}
 	
 	@Test
@@ -118,8 +125,6 @@ public class GeometryTests {
 		Rectangle r2 = new Rectangle(0.2, 0.2);
 		ConvexPolygon b2 = new Triangle(0.3, new Vec2(0.2, 0.1));
 		
-		Debug.setupDebugScreen();
-		
 		Debug.logShape(r1, Color.BLUE);
 		
 		ConvexPolygon[] collidingPolygons = {r2, r2.transformToCFrame(new CFrame(0.25, 0.0)), b2, b2.transformToCFrame(new CFrame(0.2, 0.07)), b2.transformToCFrame(new CFrame(-0.1, 0.25, 1.5))};
@@ -132,11 +137,22 @@ public class GeometryTests {
 		for(ConvexPolygon p:disjunctPolygons){
 			Debug.logShape(p, r1.intersects(p) ? Color.RED.fuzzier() : Color.ORANGE.fuzzier());
 		}
+	}
+	
+	@Test
+	public void testIntersect(){
+		Vec2[] poly1 = new Triangle(0.8, new Vec2(0.2, 0.4)).getCorners();
+		Vec2[] poly2 = new RegularPolygon(12, new Vec2(0.2, 0)).transformToCFrame(new CFrame(-0.2, 0.0)).getCorners();
+		Vec2[] poly3 = new DummyPolygon(convexPolygon).scale(0.2).transformToCFrame(new CFrame(-0.17, -0.03)).getCorners();
 		
+		Debug.logPolygon(Color.GREEN.fuzzier(), poly1);
+		Debug.logPolygon(Color.BLUE.fuzzier(), poly2);
+		Vec2[] intersect1 = ConvexPolygon.intersection(poly1, poly2);
+		Debug.logPolygon(Color.CYAN.fuzzier(), intersect1);
+		Debug.logPolygon(Color.ORANGE.fuzzier(0.5), poly3);
+		Vec2[] intersect2 = ConvexPolygon.intersection(intersect1, poly3);
+		Debug.logPolygon(Color.RED, intersect2);
 		
-		
-		Debug.endTick();
-		Debug.halt();
 	}
 	
 	@Test
@@ -144,34 +160,35 @@ public class GeometryTests {
 		Rectangle r1 = new Rectangle(0.3, 0.1);
 		ConvexPolygon b2 = new Triangle(0.3, new Vec2(0.2, 0.1)).transformToCFrame(new CFrame(0.2, 0.2, 0.7));
 		
-		Debug.setupDebugScreen();
-		
 		Debug.logShape(r1, Color.BLUE);
 		Debug.logShape(b2, Color.YELLOW);
 		
 		r1.getIntersectionPoint(b2);
-		
-		Debug.endTick();
-		Debug.halt();
 	}
 	
 	@Test
 	public void testSlicing(){
-		ConvexPolygon testRect = new Rectangle(0.3, 0.2).transformToCFrame(new CFrame(0.0, 0.0, 0.2));
+		Vec2[] startPoly = new Rectangle(0.3, 0.2).transformToCFrame(new CFrame(0.0, 0.0, 0.2)).getCorners();
 		
-		Vec2 sliceOrigin = new Vec2(0.1, 0.07);
-		NormalizedVec2 sliceDirection = new NormalizedVec2(2.3);
+		Vec2[] slices = new Vec2[]{
+				new Vec2(0.1, 0.07), new Vec2(-0.3, 0.4),
+				new Vec2(0.02, -0.3), new Vec2(0.3, 1.2),
+				new Vec2(0.3, -0.3), new Vec2(1.0, 1.0),
+				new Vec2(0.3, 0.3), new Vec2(1.0, 1.0),
+				new Vec2(-0.2, -0.3), new Vec2(-1.0, -2.0)
+		};
 		
-		Debug.setupDebugScreen();
+		Debug.logPolygon(Color.BLUE, startPoly);
 		
-		Debug.logShape(testRect, Color.BLUE);
+		Vec2[] curPoly = startPoly;
 		
-		Debug.logVector(sliceOrigin.subtract(sliceDirection), sliceDirection.mul(2), Color.BLACK);
+		for(int i = 0; i < slices.length; i+=2){
+			Debug.logVector(slices[i], slices[i+1], Color.BLACK);
+			curPoly = ConvexPolygon.leftSlice(curPoly, slices[i], slices[i+1]);
+			Debug.logPolygon(new Color(0, 1.0/(i+1), 0, 0.6), curPoly);
+		}
 		
-		Debug.logShape(testRect.leftSlice(sliceOrigin, sliceDirection.mul(2.87546)), Color.GREEN.fuzzier());
-		
-		Debug.endTick();
-		Debug.halt();
+		Debug.logPolygon(Color.YELLOW.fuzzier(), curPoly);
 	}
 	
 	private static final class DummyPolygon extends Polygon {

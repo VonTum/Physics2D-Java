@@ -46,6 +46,13 @@ public abstract class Polygon extends Shape {
 		return vertexes;
 	}
 	
+	public Vec2[] getCorners(){
+		Vec2[] poly = new Vec2[vertexes.length];
+		for(int i = 0; i < vertexes.length; i++)
+			poly[i] = vertexes[i].position;
+		return poly;
+	}
+	
 	@Override
 	public boolean intersects(Shape other) {
 		//return intersectsUsingVertexContains(other);

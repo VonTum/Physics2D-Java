@@ -38,17 +38,23 @@ public abstract class ConvexPolygon extends Polygon {
 	
 	@Override
 	public Shape leftSlice(Vec2 origin, Vec2 direction){
-		final int DEFAULT = -1;
-		int edgeEnterIndex = DEFAULT;
+		return new TransformedConvexPolygon(Vertex2.convertToVertexes(leftSlice(getCorners(), origin, direction)), 0, 0, null);
+	}
+	
+	public static Vec2[] leftSlice(Vec2[] poly, Vec2 origin, Vec2 direction){
+		if(poly.length == 0) return poly;
+		
+		int edgeEnterIndex = -1;
 		Vec2 enterPos = null;
-		int edgeLeaveIndex = DEFAULT;
+		int edgeLeaveIndex = -1;
 		Vec2 leavePos = null;
 		
-		for(int i = 0; i < vertexes.length; i++){
-			Vec2 firstPos = vertexes[i].position;
-			Vec2 secondPos = vertexes[(i+1)%vertexes.length].position;
+		Vec2 firstPos = poly[poly.length-1];
+		double firstRightSided = firstPos.subtract(origin).cross(direction);
+		
+		for(int i = 0; i < poly.length; i++){
+			Vec2 secondPos = poly[i];
 			
-			double firstRightSided = firstPos.subtract(origin).cross(direction);
 			double secondRightSided = secondPos.subtract(origin).cross(direction);
 			
 			if(firstRightSided > 0 && secondRightSided <= 0){
@@ -60,23 +66,47 @@ public abstract class ConvexPolygon extends Polygon {
 				edgeEnterIndex = i;
 				enterPos = Vec2.getIntersection(firstPos, secondPos.subtract(firstPos), origin, direction);
 			}
+			
+			firstPos = secondPos;
+			firstRightSided = secondRightSided;
 		}
 		
-		if(edgeEnterIndex == DEFAULT || edgeLeaveIndex == DEFAULT)
-			return new NullShape();
+		if(edgeEnterIndex == -1 || edgeLeaveIndex == -1)
+			return (firstRightSided <= 0)? poly:new Vec2[0];// no intersection and a vertex on one side means entire polygon on that side
 		
-		int edgeCount = (edgeEnterIndex-edgeLeaveIndex + vertexes.length) % vertexes.length +2;
+		int edgeCount = (edgeEnterIndex-edgeLeaveIndex + poly.length) % poly.length +2;
 		
-		Vec2[] newShape = new Vec2[edgeCount];
+		Vec2[] newPoly = new Vec2[edgeCount];
 		
-		newShape[0] = leavePos;
+		newPoly[0] = leavePos;
 		for(int i = 1; i < edgeCount-1; i++)
-			newShape[i] = vertexes[(edgeLeaveIndex+i)%vertexes.length].position;
-		newShape[edgeCount-1] = enterPos;
+			newPoly[i] = poly[(edgeLeaveIndex+i-1)%poly.length];
+		newPoly[edgeCount-1] = enterPos;
 		
 		Debug.logPoint(enterPos, game.util.Color.ORANGE);
 		Debug.logPoint(leavePos, game.util.Color.RED);
-		return new TransformedConvexPolygon(Vertex2.convertToVertexes(newShape), 0, 0, null);
+		return newPoly;
+	}
+	
+	public static Vec2[] intersection(Vec2[] poly1, Vec2[] poly2){
+		Vec2[] curPoly = poly1;
+		for(int i = 0; i < poly2.length; i++)
+			curPoly = leftSlice(curPoly, poly2[i], poly2[(i+1)%poly2.length].subtract(poly2[i]));
+		
+		return curPoly;
+	}
+	
+	public static Vec2[][] divideIntoTriangles(Vec2[] polygon){
+		Vec2[][] triangles = new Vec2[polygon.length-2][];
+		Vec2 mainCorner = polygon[polygon.length-1];
+		for(int i = 0; i < polygon.length-2; i++){
+			triangles[i] = new Vec2[]{
+					mainCorner,
+					polygon[i],
+					polygon[i+1]
+			};
+		}
+		return triangles;
 	}
 	
 	private static class TransformedConvexPolygon extends ConvexPolygon {
