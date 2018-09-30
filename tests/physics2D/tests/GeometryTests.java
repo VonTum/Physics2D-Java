@@ -48,13 +48,19 @@ public class GeometryTests {
 	
 	@Before
 	public void setupDebugScreen(){
-		Debug.setupDebugScreen();
+		if(Boolean.getBoolean("debugEnabled"))
+			Debug.setupDebugScreen();
 	}
 	
 	@After
 	public void destroyDebugScreen(){
-		Debug.endTick();
-		Debug.halt();
+		if(Boolean.getBoolean("debugEnabled")){
+			Debug.endTick();
+			if(Debug.getDrawCount() > 0)
+				Debug.halt();
+			else
+				Debug.destroyDebugScreen();
+		}
 	}
 	
 	@Test

@@ -108,6 +108,9 @@ public class Debug {
 	public static void logShape(Shape s, Color fillColor, Color edgeColor){
 		logPolygon(fillColor, edgeColor, s.getDrawingVertexes());
 	}
+	public static int getDrawCount(){
+		return Screen.getMarkingsCount();
+	}
 	
 	public static synchronized void startTick(){
 		age++;
@@ -176,6 +179,13 @@ public class Debug {
 	public static void halt() {
 		while(!Screen.shouldClose())
 			Screen.refresh();
+		destroyDebugScreen();
+	}
+	
+	/**
+	 * Closes the current debug screen
+	 */
+	public static void destroyDebugScreen(){
 		Screen.close();
 	}
 	

@@ -454,6 +454,15 @@ public class Screen {
 		}
 	}
 	
+	/**
+	 * @return the number of markings that have been applied
+	 */
+	public static int getMarkingsCount(){
+		synchronized (markings) {
+			return markings.size();
+		}
+	}
+	
 	public static Vec2 mouseToScreenCoords(Vec2 mouseCoords){
 		
 		Dimentions screenSize = getWindowSize();
