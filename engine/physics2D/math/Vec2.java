@@ -49,6 +49,15 @@ public class Vec2 {
 		return new Vec2(x, y);
 	}
 	
+	public static Vec2 avg(Vec2... vecs){
+		double x=0, y=0;
+		for(Vec2 v: vecs){
+			x+=v.x;
+			y+=v.y;
+		}
+		return new Vec2(x/vecs.length, y/vecs.length);
+	}
+	
 	public Vec2 mul(double d){
 		return new Vec2(x*d, y*d);
 	}

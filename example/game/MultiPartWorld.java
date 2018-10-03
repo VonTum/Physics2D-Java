@@ -3,7 +3,7 @@ package game;
 import game.util.Color;
 import physics2D.geom.Rectangle;
 import physics2D.geom.Shape;
-import physics2D.geom.Triangle;
+import physics2D.geom.PolygonTriangle;
 import physics2D.math.CFrame;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
@@ -32,7 +32,7 @@ public class MultiPartWorld implements WorldBuilder {
 		
 		w.addObject(ObjectLibrary.createBowl(new CFrame(-0.2, 1.0, 0.0), basicProperties));
 		
-		Triangle t = new Triangle(basicProperties, new CFrame(new Vec2(0.9, 1.2), 0), 0.3, new Vec2(0.2, 0.2));
+		PolygonTriangle t = new PolygonTriangle(basicProperties, new CFrame(new Vec2(0.9, 1.2), 0), 0.3, new Vec2(0.2, 0.2));
 		Physical trianglePhysical = new Physical(t);
 		w.addObject(trianglePhysical);
 		

@@ -96,17 +96,29 @@ public abstract class ConvexPolygon extends Polygon {
 		return curPoly;
 	}
 	
-	public static Vec2[][] divideIntoTriangles(Vec2[] polygon){
-		Vec2[][] triangles = new Vec2[polygon.length-2][];
+	public static Triangle[] divideIntoTriangles(Vec2[] polygon){
+		Triangle[] triangles = new Triangle[polygon.length-2];
 		Vec2 mainCorner = polygon[polygon.length-1];
 		for(int i = 0; i < polygon.length-2; i++){
-			triangles[i] = new Vec2[]{
+			triangles[i] = new Triangle(
 					mainCorner,
 					polygon[i],
 					polygon[i+1]
-			};
+			);
 		}
 		return triangles;
+	}
+	
+	@Override
+	public double getArea(){
+		double A = 0;
+		Vec2[] corners = getCorners();
+		int c = corners.length;
+		for(int i = 0; i < corners.length-1; i++)
+			A += corners[i].x*corners[i+1].y-corners[i+1].x*corners[i].y;
+		A += corners[c-1].x*corners[0].y-corners[0].x*corners[c-1].y;
+		
+		return A/2;
 	}
 	
 	private static class TransformedConvexPolygon extends ConvexPolygon {
