@@ -5,7 +5,7 @@ import physics2D.math.CFrame;
 import physics2D.math.Vec2;
 import physics2D.math.Vertex2;
 
-public abstract class ConvexPolygon extends Polygon {
+public class ConvexPolygon extends Polygon {
 	
 	public ConvexPolygon(Vec2[] polygon) {
 		super(polygon);
@@ -113,12 +113,44 @@ public abstract class ConvexPolygon extends Polygon {
 	public double getArea(){
 		double A = 0;
 		Vec2[] corners = getCorners();
-		int c = corners.length;
 		for(int i = 0; i < corners.length-1; i++)
-			A += corners[i].x*corners[i+1].y-corners[i+1].x*corners[i].y;
-		A += corners[c-1].x*corners[0].y-corners[0].x*corners[c-1].y;
+			A += corners[i].cross(corners[i+1]);
+		A += corners[corners.length-1].cross(corners[0]);
 		
 		return A/2;
+	}
+	
+	/*@Override
+	public Vec2 getCenterOfMass(){
+		Vec2 total = Vec2.ZERO;
+		
+		for(Triangle t:divideIntoTriangles(getCorners()))
+			total = total.add(t.getCenterOfMass().mul(t.getArea()));
+		
+		return total.div(getArea());
+	}*/
+	
+	public Vec2 getCenterOfMass(){
+		Vec2 total = Vec2.ZERO;
+		
+		Vec2[] corners = getCorners();
+		
+		for(int i=0; i < corners.length; i++)
+			total = total.add(corners[i].add(corners[(i+1)%corners.length]).mul(corners[i].cross(corners[(i+1)%corners.length])));
+		
+		return total.div(6*getArea());
+	}
+	
+	@Override
+	public double getInertialArea(){
+		Vec2 com = getCenterOfMass();
+		
+		double total = 0;
+		
+		for(Triangle t:divideIntoTriangles(getCorners()))
+			total+=t.getInertialArea()+t.getCenterOfMass().subtract(com).lengthSquared() * t.getArea();
+		
+		return total;
 	}
 	
 	private static class TransformedConvexPolygon extends ConvexPolygon {
