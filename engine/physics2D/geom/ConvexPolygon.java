@@ -33,12 +33,12 @@ public class ConvexPolygon extends Polygon {
 		for(int i = 0; i < vertexes.length; i++)
 			newVertexes[i] = frame.localToGlobal(vertexes[i]);
 		
-		return new TransformedConvexPolygon(newVertexes, getArea(), getInertialArea(), frame.localToGlobal(getCenterOfMass()));
+		return new ConvexPolygon(newVertexes);
 	}
 	
 	@Override
-	public Shape leftSlice(Vec2 origin, Vec2 direction){
-		return new TransformedConvexPolygon(Vertex2.convertToVertexes(leftSlice(getCorners(), origin, direction)), 0, 0, null);
+	public ConvexPolygon leftSlice(Vec2 origin, Vec2 direction){
+		return new ConvexPolygon(Vertex2.convertToVertexes(leftSlice(getCorners(), origin, direction)));
 	}
 	
 	public static Vec2[] leftSlice(Vec2[] poly, Vec2 origin, Vec2 direction){
@@ -151,34 +151,5 @@ public class ConvexPolygon extends Polygon {
 			total+=t.getInertialArea()+t.getCenterOfMass().subtract(com).lengthSquared() * t.getArea();
 		
 		return total;
-	}
-	
-	private static class TransformedConvexPolygon extends ConvexPolygon {
-		
-		private final double area;
-		private final double inertialArea;
-		private final Vec2 centerOfMass;
-		
-		public TransformedConvexPolygon(Vertex2[] polygon, double area, double inertialArea, Vec2 centerOfMass) {
-			super(polygon);
-			this.area = area;
-			this.inertialArea = inertialArea;
-			this.centerOfMass = centerOfMass;
-		}
-
-		@Override
-		public double getArea() {
-			return area;
-		}
-
-		@Override
-		public double getInertialArea() {
-			return inertialArea;
-		}
-
-		@Override
-		public Vec2 getCenterOfMass() {
-			return centerOfMass;
-		}
 	}
 }

@@ -11,7 +11,6 @@ import org.junit.Test;
 import physics2D.Debug;
 import physics2D.geom.*;
 import physics2D.math.CFrame;
-import physics2D.math.NormalizedVec2;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 import physics2D.math.Vertex2;
