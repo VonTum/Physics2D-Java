@@ -73,6 +73,29 @@ public class Font {
 			//flip the buffer into "read mode" for OpenGL
 			buf.flip();
 			
+			boolean[] solid = new boolean[textureWidth*textureHeight];
+			
+			for(int i = 0; i < textureWidth*textureHeight; i++){
+				byte r = buf.get();
+				buf.get();
+				buf.get();
+				buf.get();
+				
+				solid[i] = r!=0;
+			}
+			
+			buf.flip();
+			
+			for(int i = 0; i < textureWidth*textureHeight; i++){
+				if(solid[i]){
+					buf.put((byte) -1);buf.put((byte) -1);buf.put((byte) -1);buf.put((byte) -1);
+				}else{
+					buf.put((byte) 0);buf.put((byte) 0);buf.put((byte) 0);buf.put((byte) 0);
+				}
+			}
+			
+			buf.flip();
+			
 			// initialize char widths
 			int char_width = getCharWidthInPixels();
 			int char_height = getCharHeightInPixels();
