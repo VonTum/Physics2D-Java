@@ -39,7 +39,7 @@ public class Physical implements Locatable {
 	
 	public String name = super.toString();
 	
-	BoundingBox boundsCache;
+	private BoundingBox boundsCache;
 	
 	/*public Physical(Shape... shapes){
 		for(Shape s:shapes)
@@ -68,16 +68,18 @@ public class Physical implements Locatable {
 	}
 	
 	public void interactWith(Physical otherObj){
-		for(Part p1:parts){
-			for(Part other:otherObj.parts){
-				p1.getIntersectionPoints(other).forEach((point) -> {
-					double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
-					handleIntersectionPoint(other, smallestInertia, point);
-				});
-				other.getIntersectionPoints(p1).forEach((point) -> {
-					double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
-					otherObj.handleIntersectionPoint(p1, smallestInertia, point);
-				});
+		if(this.boundsCache.intersects(otherObj.boundsCache)){
+			for(Part p1:parts){
+				for(Part other:otherObj.parts){
+					p1.getIntersectionPoints(other).forEach((point) -> {
+						double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
+						handleIntersectionPoint(other, smallestInertia, point);
+					});
+					other.getIntersectionPoints(p1).forEach((point) -> {
+						double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
+						otherObj.handleIntersectionPoint(p1, smallestInertia, point);
+					});
+				}
 			}
 		}
 	}

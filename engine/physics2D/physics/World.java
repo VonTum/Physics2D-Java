@@ -52,12 +52,9 @@ public class World {
 	
 	public void computeInteractions(double deltaT) {
 		for(int i = 0; i < physicals.size(); i++){
-			BoundingBox curBox = physicals.get(i).getBoundingBox();
 			for(int j = i+1; j < physicals.size(); j++){
-				if(curBox.intersects(physicals.get(j).getBoundingBox())){
-					physicals.get(i).interactWith(physicals.get(j));
-					Debug.logInteraction(physicals.get(i), physicals.get(j));
-				}
+				physicals.get(i).interactWith(physicals.get(j));
+				Debug.logInteraction(physicals.get(i), physicals.get(j));
 			}
 		}
 	}
