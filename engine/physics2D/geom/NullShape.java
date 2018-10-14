@@ -10,7 +10,7 @@ import physics2D.math.Range;
 import physics2D.math.Vec2;
 import physics2D.physics.DepthWithDirection;
 
-public class NullShape extends Shape {
+public class NullShape implements Shape {
 	
 	@Override
 	public Stream<? extends OrientedPoint> getIntersectionPoints(Shape other) {

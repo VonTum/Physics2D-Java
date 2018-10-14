@@ -20,7 +20,7 @@ import static java.lang.Math.min;
 import static java.lang.Math.max;
 
 
-public abstract class Polygon extends Shape {
+public abstract class Polygon implements Shape {
 	
 	public final Vertex2[] vertexes;
 	
