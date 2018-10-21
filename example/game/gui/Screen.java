@@ -24,7 +24,7 @@ import org.lwjgl.opengl.GLCapabilities;
 import com.sun.org.apache.xpath.internal.operations.Or;
 
 import physics2D.Debug;
-import physics2D.geom.Polygon;
+import physics2D.geom.AbstractPolygon;
 import physics2D.geom.Shape;
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
@@ -170,12 +170,14 @@ public class Screen {
 		Vec2 mousePos = getMousePos();
 		Vec2 worldMousePos = mouseToWorldCoords(mousePos);
 		
-		Physical selectedObject = w.getObjectAt(worldMousePos);
+		Part selectedPart = w.getPartAt(worldMousePos);
 		
 		for(Physical obj: w.physicals){
 			for(Part p:obj.parts){
-				if(obj == selectedObject)
+				if(p == selectedPart)
 					drawShape(p.getGlobalShape(), p.properties.color.darker(0.8));
+				else if(selectedPart != null && obj == selectedPart.parent)
+					drawShape(p.getGlobalShape(), p.properties.color.darker(0.9));
 				else
 					drawShape(p.getGlobalShape(), p.properties.color);
 				
@@ -217,8 +219,8 @@ public class Screen {
 		}*/
 		
 		color(Color.BLACK);
-		if(selectedObject != null){
-			font.drawString(selectedObject.toString(), 36f, 1f, 0.999f * (float) getLeftBorderX(), 0.999f);
+		if(selectedPart != null){
+			font.drawString(selectedPart.toString(), 36f, 1f, 0.999f * (float) getLeftBorderX(), 0.999f);
 		}
 		
 		Font.Text text = font.createText(Debug.getDebugInfo(), 36f, 1f);

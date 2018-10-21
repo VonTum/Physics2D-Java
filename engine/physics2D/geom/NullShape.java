@@ -1,6 +1,7 @@
 package physics2D.geom;
 
-import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.List;
 
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
@@ -13,8 +14,8 @@ import physics2D.physics.DepthWithDirection;
 public class NullShape implements Shape {
 	
 	@Override
-	public Stream<? extends OrientedPoint> getIntersectionPoints(Shape other) {
-		return Stream.empty();
+	public List<OrientedPoint> getIntersectionPoints(Shape other) {
+		return Collections.emptyList();
 	}
 
 	@Override

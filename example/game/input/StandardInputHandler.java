@@ -6,6 +6,7 @@ import game.gui.Screen;
 import org.lwjgl.glfw.GLFW;
 
 import physics2D.math.Vec2;
+import physics2D.physics.Part;
 import physics2D.physics.World;
 
 public class StandardInputHandler implements InputHandler {
@@ -25,9 +26,20 @@ public class StandardInputHandler implements InputHandler {
 		mouseDown[button] = true;
 		if(button == GLFW.GLFW_MOUSE_BUTTON_1){
 			Vec2 worldPos = Screen.mouseToWorldCoords(screenPos);
+			Part selectedPart = world.getPartAt(worldPos);
+			if(selectedPart != null){
+				onClickPart(worldPos, selectedPart);
+			}
 			world.grabBlock(worldPos);
-			System.out.println(world.getObjectAt(worldPos));
 		}
+	}
+	
+	public void onClickPart(Vec2 worldPos, Part clickedPart){
+		//ConvexPolygon p = (ConvexPolygon) clickedPart.shape;
+		//ConvexPolygon cp = p.transformToCFrame(new CFrame(p.getCenterOfMass().neg()));
+		//System.out.println(String.format("%.20f", cp.getNewI()));
+		
+		//System.out.println(p.getCenterOfMass() + "<=>" + p.getNewCOM());
 	}
 
 	@Override

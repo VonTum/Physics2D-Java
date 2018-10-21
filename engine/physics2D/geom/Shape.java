@@ -1,6 +1,6 @@
 package physics2D.geom;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
@@ -18,7 +18,7 @@ public interface Shape {
 	 * @param other shape to be intersected
 	 * @return All points for which other.containsPoint(p)
 	 */
-	public Stream<? extends OrientedPoint> getIntersectionPoints(Shape other);
+	public List<OrientedPoint> getIntersectionPoints(Shape other);
 	public default DepthWithDirection getNormalVecAndDepthToSurface(OrientedPoint point){return getNormalVecAndDepthToSurface(point.position, point.orientation);};
 	public DepthWithDirection getNormalVecAndDepthToSurface(Vec2 position, NormalizedVec2 orientation);
 	public boolean intersects(Shape other);

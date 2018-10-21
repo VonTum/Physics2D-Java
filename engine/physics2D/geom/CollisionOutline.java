@@ -10,7 +10,7 @@ public class CollisionOutline {
 		this.refPoints = refPoints;
 	}
 	
-	public Polygon asPolygon(){
+	public AbstractPolygon asPolygon(){
 		return new DummyPolygon(outline);
 	}
 	
@@ -22,7 +22,7 @@ public class CollisionOutline {
 	public Vec2 getCollisionPoint(Vec2 otherShapeLocation){
 		Vec2 r = otherShapeLocation;
 		
-		Polygon colShape = new DummyPolygon(outline);
+		AbstractPolygon colShape = new DummyPolygon(outline);
 		
 		if(!colShape.containsPoint(r))
 			return null;
@@ -42,7 +42,7 @@ public class CollisionOutline {
 		return weightedAverage.div(totalWeight);
 	}
 	
-	private static final class DummyPolygon extends Polygon {
+	private static final class DummyPolygon extends AbstractPolygon {
 		public DummyPolygon(Vec2... polygon) {
 			super(polygon);
 		}

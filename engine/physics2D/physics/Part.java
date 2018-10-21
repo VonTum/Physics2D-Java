@@ -1,6 +1,6 @@
 package physics2D.physics;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 import physics2D.geom.Shape;
 import physics2D.math.BoundingBox;
@@ -10,11 +10,10 @@ import physics2D.math.Vec2;
 
 public class Part {
 	
-	private final Shape shape;
+	public final Shape shape;
 	public CFrame relativeCFrame;
 	public PhysicalProperties properties;
 	public final Physical parent;
-	
 	
 	public Part(Physical parent, Shape shape, CFrame relativeCFrame, PhysicalProperties properties) {
 		this.shape = shape;
@@ -55,7 +54,12 @@ public class Part {
 		return parent.getSpeedOfPoint(point);
 	}
 	
-	public Stream<? extends OrientedPoint> getIntersectionPoints(Part other){
+	public List<OrientedPoint> getIntersectionPoints(Part other){
 		return getGlobalShape().getIntersectionPoints(other.getGlobalShape());
+	}
+	
+	@Override
+	public String toString(){
+		return String.format("Part{shape: %s, rCF: %s, properties: %s, parent: %s}", shape, relativeCFrame, properties, parent);
 	}
 }

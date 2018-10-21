@@ -5,7 +5,7 @@ import physics2D.math.CFrame;
 import physics2D.math.Vec2;
 import physics2D.math.Vertex2;
 
-public class ConvexPolygon extends Polygon {
+public class ConvexPolygon extends AbstractPolygon {
 	
 	public ConvexPolygon(Vec2[] polygon) {
 		super(polygon);
@@ -109,6 +109,11 @@ public class ConvexPolygon extends Polygon {
 		return triangles;
 	}
 	
+	//TODO ADD @Override
+	public ConvexPolygon[] convexDecomposition() {
+		return new ConvexPolygon[]{this};
+	};
+	
 	@Override
 	public double getArea(){
 		double A = 0;
@@ -119,16 +124,6 @@ public class ConvexPolygon extends Polygon {
 		
 		return A/2;
 	}
-	
-	/*@Override
-	public Vec2 getCenterOfMass(){
-		Vec2 total = Vec2.ZERO;
-		
-		for(Triangle t:divideIntoTriangles(getCorners()))
-			total = total.add(t.getCenterOfMass().mul(t.getArea()));
-		
-		return total.div(getArea());
-	}*/
 	
 	public Vec2 getCenterOfMass(){
 		Vec2 total = Vec2.ZERO;

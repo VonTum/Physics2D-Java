@@ -1,5 +1,6 @@
 package game.util;
 
+import java.util.Random;
 
 public class Color {
 	
@@ -61,5 +62,15 @@ public class Color {
 	
 	public Color alpha(double a){
 		return new Color(r, g, b, a);
+	}
+
+	public static Color random() {
+		Random rand = new Random();
+		return new Color(rand.nextDouble(), rand.nextDouble(), rand.nextDouble(), 1.0);
+	}
+	
+	@Override
+	public String toString(){
+		return String.format("Color(%f.3,%f.3,%f.3,%f.3)", r, g, b, a);
 	}
 }

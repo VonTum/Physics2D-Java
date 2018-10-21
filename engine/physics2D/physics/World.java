@@ -5,7 +5,6 @@ import game.util.Color;
 import java.util.ArrayList;
 
 import physics2D.Debug;
-import physics2D.math.BoundingBox;
 import physics2D.math.Constants;
 import physics2D.math.Vec2;
 
@@ -107,28 +106,26 @@ public class World {
 	}
 	
 	/**
-	 * Returns the first physical found containing the given coordinate
+	 * Returns the first part found containing the given coordinate
 	 * If none found then <code>null</code>
 	 * 
 	 * @param worldPos
-	 * @return
+	 * @return the selected part
 	 */
-	public Physical getObjectAt(Vec2 worldPos){
+	public Part getPartAt(Vec2 worldPos){
 		for(Physical p:physicals)
 			for(Part subPart:p.parts)
 				if(subPart.containsPoint(worldPos))
-					return p;
+					return subPart;
 		
 		return null;
 	}
 	
 	public void grabBlock(Vec2 mousePos){
 		synchronized (magnetLock) {
-			System.out.println("Block tried to grab at " + mousePos);
 			for(Physical b:physicals){
 				for(Part subPart:b.parts)
 					if(subPart.containsPoint(mousePos)){
-						System.out.println("Block " + b + " grabbed!");
 						magnetSubject = b;
 						magnetAttachPoint = b.cframe.globalToLocal(mousePos);
 						magnetTarget = mousePos;

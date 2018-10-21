@@ -4,8 +4,6 @@ import game.util.Color;
 
 import java.util.Arrays;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import physics2D.Debug;
@@ -16,17 +14,17 @@ import physics2D.math.Vec2;
 import physics2D.math.Vertex2;
 import static physics2D.tests.util.TestUtil.*;
 
-public class GeometryTests {
+public class GeometryTests extends GUITestSuite {
 	
 	static final Vec2[] polygon = {
-			new Vec2(1.0, 1.0),
-			new Vec2(-3.0, 1.5),
-			new Vec2(-2.0, -0.3),
-			new Vec2(2.0, 0.3),
-			new Vec2(2.5, 0.7),
-			new Vec2(3.0, -1.0),
-			new Vec2(3.5, -1.0),
-			new Vec2(3.0, 1.0)
+		new Vec2(1.0, 1.0),
+		new Vec2(-3.0, 1.5),
+		new Vec2(-2.0, -0.3),
+		new Vec2(2.0, 0.3),
+		new Vec2(2.5, 0.7),
+		new Vec2(3.0, -1.0),
+		new Vec2(3.5, -1.0),
+		new Vec2(3.0, 1.0)
 	};
 	
 	static final Vec2[] convexPolygon = {
@@ -45,28 +43,11 @@ public class GeometryTests {
 			spheroid[i] = new RotMat2(i * 2 * Math.PI / 11).mul(Vec2.UNITX);
 	}
 	
-	@Before
-	public void setupDebugScreen(){
-		if(Boolean.getBoolean("debugEnabled"))
-			Debug.setupDebugScreen();
-	}
-	
-	@After
-	public void destroyDebugScreen(){
-		if(Boolean.getBoolean("debugEnabled")){
-			Debug.endTick();
-			if(Debug.getDrawCount() > 0)
-				Debug.halt();
-			else
-				Debug.destroyDebugScreen();
-		}
-	}
-	
 	@Test
 	public void testPolygonContainsPoint() {
 		Vertex2[] vertexes = Vertex2.convertToVertexes(polygon);
 		
-		Polygon p = new DummyPolygon(vertexes);
+		AbstractPolygon p = new DummyPolygon(vertexes);
 		
 		Vec2[] givenInsidePoints = {new Vec2(0.0, 0.0), new Vec2(-1.0, 0.7), new Vec2(-2.0, 1.0)};
 		Vec2[] givenOutsidePoints = {new Vec2(-5.0, 1.0), new Vec2(-5.0, 0.7), new Vec2(-5.0, 1.5)};
@@ -88,10 +69,10 @@ public class GeometryTests {
 	
 	@Test
 	public void testGetCollisionOutline(){
-		Polygon p1 = new Rectangle(0.3, 0.1).transformToCFrame(new CFrame(-0.2, 0.3, 0.0));
+		AbstractPolygon p1 = new Rectangle(0.3, 0.1).transformToCFrame(new CFrame(-0.2, 0.3, 0.0));
 		
 		
-		Polygon p2 = new RegularPolygon(3, new Vec2(0.2, 0.0)).transformToCFrame(new CFrame(0.0, 0.1, 0.0));
+		AbstractPolygon p2 = new RegularPolygon(3, new Vec2(0.2, 0.0)).transformToCFrame(new CFrame(0.0, 0.1, 0.0));
 		
 		// Debug.logShape(p1, util.Color.DEFAULT_BRICK_COLOR);
 		// Debug.logShape(p2, util.Color.BLUE.alpha(util.Color.DEFAULT_BRICK_COLOR.a));
@@ -196,7 +177,7 @@ public class GeometryTests {
 		Debug.logPolygon(Color.YELLOW.fuzzier(), curPoly);
 	}
 	
-	private static final class DummyPolygon extends Polygon {
+	private static final class DummyPolygon extends AbstractPolygon {
 		public DummyPolygon(Vec2... polygon) {
 			super(polygon);
 		}

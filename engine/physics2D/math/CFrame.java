@@ -16,6 +16,7 @@ public final class CFrame implements Describable {
 		this.position = position;
 		this.rotation = new RotMat2(angle);
 	}
+	public CFrame(Vec2 position){this(position, Mat2.IDENTITY);}
 	public CFrame(double x, double y, RotMat2 rotation){this(new Vec2(x, y), rotation);}
 	public CFrame(double x, double y, double angle){this(new Vec2(x, y), angle);}
 	public CFrame(double x, double y){this(new Vec2(x, y), Mat2.IDENTITY);}

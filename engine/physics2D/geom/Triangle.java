@@ -2,7 +2,7 @@ package physics2D.geom;
 
 import physics2D.math.Vec2;
 
-public class Triangle {
+public class Triangle{
 	public final Vec2 v1, v2, v3;
 	
 	public Triangle(Vec2 v1, Vec2 v2, Vec2 v3){
@@ -24,5 +24,14 @@ public class Triangle {
 	
 	public Vec2 getCenterOfMass() {
 		return Vec2.avg(v1, v2, v3);
+	}
+	
+	public Vec2[] getCorners() {
+		return new Vec2[]{v1, v2, v3};
+	}
+	
+	@Override
+	public String toString(){
+		return String.format("Triangle(%s, %s, %s)", v1, v2, v3);
 	}
 }
