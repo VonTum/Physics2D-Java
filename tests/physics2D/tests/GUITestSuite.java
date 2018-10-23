@@ -6,15 +6,16 @@ import org.junit.Before;
 import physics2D.Debug;
 
 public abstract class GUITestSuite {
+	private static final boolean SCREEN_ENABLED = "true".equalsIgnoreCase(System.getProperty("debugEnabled"));
 	@Before
 	public void setupDebugScreen(){
-		if(Boolean.getBoolean("debugEnabled"))
+		if(SCREEN_ENABLED)
 			Debug.setupDebugScreen();
 	}
 	
 	@After
 	public void destroyDebugScreen(){
-		if(Boolean.getBoolean("debugEnabled")){
+		if(SCREEN_ENABLED){
 			Debug.endTick();
 			if(Debug.getDrawCount() > 0)
 				Debug.halt();

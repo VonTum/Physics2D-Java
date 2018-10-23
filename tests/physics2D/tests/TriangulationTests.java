@@ -25,7 +25,7 @@ public class TriangulationTests extends GUITestSuite{
 		new Vec2(2.0, 2.5),
 	};
 	
-	static final Vec2[] halfcircleThing = new Vec2[40];
+	static final Vec2[] halfcircleThing = new Vec2[16];
 	static{
 		int L = halfcircleThing.length;
 		RotMat2 r = new RotMat2(2*Math.PI/(L-2));

@@ -18,6 +18,8 @@ import game.util.Color;
 
 public class Debug {
 	
+	private static final boolean PAUSE_ENABLED = "true".equalsIgnoreCase(System.getProperty("pauseEnabled"));
+	
 	private static final boolean MARK_FORCES = true;
 	private static final boolean MARK_POINTS = true;
 	private static final boolean MARK_VECTORS = true;
@@ -188,6 +190,7 @@ public class Debug {
 		p();
 	}
 	private static void p(){
+		if(!PAUSE_ENABLED) return;
 		PAUSED = true;
 		while(!Screen.shouldClose() && PAUSED){
 			Screen.refresh();
