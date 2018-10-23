@@ -5,15 +5,12 @@ import static java.lang.Math.min;
 import game.util.Color;
 
 import java.util.ArrayList;
-import java.util.Queue;
+import java.util.List;
 import java.util.Stack;
-
-import com.sun.jmx.remote.internal.ArrayQueue;
 
 import physics2D.Debug;
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
-import physics2D.math.NormalizedVec2;
 import physics2D.math.Range;
 import physics2D.math.Vec2;
 
@@ -24,20 +21,35 @@ public interface Polygon extends Shape {
 	
 	public Vec2[] getCorners();
 	
-	public ConvexPolygon[] convexDecomposition();
+	@Override
+	public Polygon transformToCFrame(CFrame frame);
 	
-	public static ConvexPolygon[] convexDecomposition(Vec2[] polygon){
-		 ArrayList<Vec2[]> polyList = convexDecompose(polygon);
+	@Override
+	public Polygon scale(double factor);
+	
+	
+	
+	public default Triangle[] divideIntoTriangles(){
+		Triangle[] triangles = new Triangle[getCorners().length-2];
+		int i = 0;
+		for(ConvexPolygon subPoly:convexDecomposition())
+			for(Triangle t:subPoly.divideIntoTriangles())
+				triangles[i++] = t;
 		
-		ConvexPolygon[] decomp = new ConvexPolygon[polyList.size()];
-		for(int i = 0; i < decomp.length; i++)
-			decomp[i] = new ConvexPolygon(polyList.get(i));
-		
-		return decomp;
+		return triangles;
 	}
 	
+	@Override
+	public default List<? extends ConvexPolygon> convexDecomposition(){
+		ArrayList<Vec2[]> d = convexDecomposition(getCorners());
+		ArrayList<ConvexPolygon> convexDecomp = new ArrayList<ConvexPolygon>(d.size());
+		for(int i = 0; i < d.size(); i++)
+			convexDecomp.set(i, new ConvexPolygon(d.get(i)));
+		
+		return convexDecomp;
+	}
 	
-	public static ArrayList<Vec2[]> convexDecompose(Vec2[] polygon){
+	public static ArrayList<Vec2[]> convexDecomposition(Vec2[] polygon){
 		ArrayList<Vec2[]> decomposition = new ArrayList<Vec2[]>();
 		Stack<Vec2[]> polyParts = new Stack<Vec2[]>();
 		polyParts.push(polygon);
@@ -255,7 +267,7 @@ public interface Polygon extends Shape {
 	public default Vec2[] getDrawingVertexes() {
 		return getCorners();
 	}
-
+	
 	@Override
 	public default double getArea() {
 		double total = 0;
@@ -324,13 +336,7 @@ public interface Polygon extends Shape {
 	}
 
 	@Override
-	public Polygon transformToCFrame(CFrame frame);
-	
-	@Override
-	public Polygon scale(double factor);
-
-	@Override
-	public default Range getBoundsAlongDirection(NormalizedVec2 direction){
+	public default Range getBoundsAlongDirection(Vec2 direction){
 		Vec2[] vertexes = getCorners();
 		double value = direction.cross(vertexes[0]);
 		double min = value;
@@ -429,5 +435,18 @@ public interface Polygon extends Shape {
 		for(int i = 0; i < polygon.length; i++)
 			n[(i+shift)%polygon.length] = polygon[i];
 		return n;
+	}
+	
+	/**
+	 * returns a scaled version of this polygon, scaled by <code>factor</code>
+	 * @param poly the polygon to be scaled
+	 * @param factor the factor to scale by
+	 * @return a new polygon, scaled by the given amount
+	 */
+	public static Vec2[] scaled(Vec2[] poly, double factor){
+		Vec2[] newPoly = new Vec2[poly.length];
+		for(int i = 0; i < poly.length; i++)
+			newPoly[i] = poly[i].mul(factor);
+		return newPoly;
 	}
 }

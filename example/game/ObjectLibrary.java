@@ -4,7 +4,6 @@ import game.util.Color;
 import physics2D.geom.Rectangle;
 import physics2D.geom.Shape;
 import physics2D.math.CFrame;
-import physics2D.math.Mat2;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 import physics2D.physics.Physical;

@@ -1,16 +1,13 @@
 package physics2D.geom;
 
-import game.util.Color;
-
 import java.util.ArrayList;
 import java.util.List;
-import physics2D.Debug;
+
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
 import physics2D.math.NormalizedVec2;
 import physics2D.math.OrientedPoint;
 import physics2D.math.Range;
-import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 import physics2D.math.Vertex2;
 import physics2D.physics.DepthWithDirection;
@@ -54,8 +51,8 @@ public abstract class AbstractPolygon implements Shape {
 	
 	@Override
 	public boolean intersects(Shape other) {
-		//return intersectsUsingVertexContains(other);
-		return intersectsUsingSAT(other);
+		return intersectsUsingVertexContains(other);
+		//return intersectsUsingSAT(other);
 	}
 	
 	private boolean intersectsUsingVertexContains(Shape other){
@@ -63,21 +60,6 @@ public abstract class AbstractPolygon implements Shape {
 			if(other.containsPoint(vertex.position))
 				return true;
 		return false;
-	}
-	
-	private boolean intersectsUsingSweptShapes(Shape other){
-		CollisionOutline outline = getCollisionOutline(other);
-		return outline.asPolygon().containsPoint(Vec2.ZERO);
-	}
-	
-	private boolean intersectsUsingSAT(Shape other){
-		for(NormalizedVec2 direction:getSATDirections())
-			if(getBoundsAlongDirection(direction).isDisjunct(other.getBoundsAlongDirection(direction)))
-				return false;
-		for(NormalizedVec2 direction:other.getSATDirections())
-			if(getBoundsAlongDirection(direction).isDisjunct(other.getBoundsAlongDirection(direction)))
-				return false;
-		return true;
 	}
 	
 	/**
@@ -139,37 +121,46 @@ public abstract class AbstractPolygon implements Shape {
 		return points;
 	}
 	
-	public Vec2 getIntersectionPoint(Shape other){
-		NormalizedVec2[][] allDirs = {getSATDirections(), other.getSATDirections()};
-		
-		NormalizedVec2 bestVec = null;
-		double bestWidth = Double.POSITIVE_INFINITY;
-		
-		for(NormalizedVec2[] directions:allDirs){
-			for(NormalizedVec2 direction:directions){
-				Range b1 = getBoundsAlongDirection(direction);
-				Range b2 = other.getBoundsAlongDirection(direction);
+	/*public Vec2 getIntersectionPoint(Shape other){
+		List<? extends ConvexPolygon> thisDecomp = convexDecomposition();
+		List<? extends Convex> otherDecomp = other.convexDecomposition();
+		for(ConvexPolygon p:thisDecomp){
+			for(Convex o:otherDecomp){
+				if(!p.getBoundingBox().intersects(o.getBoundingBox())) continue;
 				
-				NormalizedVec2 axis = direction.rotate90CounterClockwise();
+				Vec2[][] allDirs = {p.getSATDirections(), o.getSATDirections()};
 				
-				Debug.logVector(axis.mul(b1.min).add(direction.mul(0.003)), axis.mul(b1.getWidth()), Color.GREEN);
-				Debug.logVector(axis.mul(b2.min).add(direction.mul(-0.003)), axis.mul(b2.getWidth()), Color.ORANGE);
+				Vec2 bestVec = null;
+				double bestWidth = Double.POSITIVE_INFINITY;
 				
-				if(b1.isDisjunct(b2))
-					return null;
+				for(Vec2[] directions:allDirs){
+					for(Vec2 direction:directions){
+						Range b1 = getBoundsAlongDirection(direction);
+						Range b2 = other.getBoundsAlongDirection(direction);
+						
+						Vec2 axis = direction.rotate90CounterClockwise();
+						
+						Debug.logVector(axis.mul(b1.min).add(direction.mul(0.003)), axis.mul(b1.getWidth()), Color.GREEN);
+						Debug.logVector(axis.mul(b2.min).add(direction.mul(-0.003)), axis.mul(b2.getWidth()), Color.ORANGE);
+						
+						if(b1.isDisjunct(b2))
+							return null;
+						
+						Range intersect = b1.intersect(b2);
+						
+						
+						
+						Debug.logVector(axis.mul(intersect.min), axis.mul(intersect.getWidth()), Color.RED);
+						
+						//throw new NotImplementedException();
+					}
+				}
 				
-				Range intersect = b1.intersect(b2);
-				
-				
-				
-				Debug.logVector(axis.mul(intersect.min), axis.mul(intersect.getWidth()), Color.RED);
-				
-				//throw new NotImplementedException();
 			}
 		}
 		
 		return null;
-	}
+	}*/
 	
 	@Override
 	public boolean containsPoint(Vec2 point){
@@ -243,112 +234,6 @@ public abstract class AbstractPolygon implements Shape {
 	}
 	
 	@Override
-	public CollisionOutline getCollisionOutline(Shape other) {
-		if(!(other instanceof AbstractPolygon))
-			throw new NotImplementedException();
-		
-		Debug.logShape(other, Color.GREEN.alpha(0.4));
-		Debug.logShape(this, Color.BLUE.alpha(0.4));
-		
-		
-		AbstractPolygon o = (AbstractPolygon) other;
-		
-		Vertex2 ref = vertexes[0];
-		
-		NormalizedVec2 edgeRightNormal = vertexes[vertexes.length-1].normalVec;
-		NormalizedVec2 edgeLeftNormal = ref.normalVec;
-		
-		// Debug.logVector(ref.position, edgeRightNormal);
-		// Debug.logVector(ref.position, edgeLeftNormal);
-		
-		Debug.logPoint(o.getCenterOfMass());
-		
-		Vertex2 best = null;
-		int bestI = -1;
-		
-		Vertex2 previous = o.vertexes[o.vertexes.length - 1];
-		
-		for(int i = 0; i < o.vertexes.length; i++){
-			Vertex2 current = o.vertexes[i];
-			
-			NormalizedVec2 rightNormal = previous.normalVec;
-			NormalizedVec2 leftNormal = current.normalVec;
-			
-			//Debug.logVector(current.position, rightNormal, Color.GREEN);
-			//Debug.logVector(current.position, leftNormal, Color.GREEN);
-			
-			if(edgeLeftNormal.cross(rightNormal) > 0 && edgeRightNormal.cross(leftNormal) < 0){
-				// Debug.logPoint(current.position, Color.RED);
-				best = current;
-				bestI = i;
-			}
-			
-			previous = current;
-		}
-		
-		// Debug.logPoint(best.position, Color.YELLOW);
-		
-		Vec2 delta = other.getCenterOfMass().add(ref.position.subtract(best.position));
-		
-		Debug.logShape(other.transformToCFrame(new CFrame(delta.subtract(o.getCenterOfMass()), RotMat2.IDENTITY)), Color.YELLOW.alpha(0.1), Color.YELLOW.alpha(0.6));
-		
-		Vec2[] outline = new Vec2[vertexes.length+o.vertexes.length];
-		Vec2[] referencePoints = new Vec2[vertexes.length+o.vertexes.length];
-		
-		outline[0] = delta;
-		referencePoints[0] = ref.position;
-		
-		
-		//Debug.logVector(ref.position, best.normalVec, Color.RED);
-		//Debug.logVector(ref.position, ref.normalVec, Color.BLUE);
-		
-		int thisI = 0;
-		int otherI = bestI;
-		
-		Vertex2 thisCur = ref;
-		Vertex2 otherCur = best;
-		
-		
-		
-		for(int i = 1; i < vertexes.length+o.vertexes.length; i++){
-			Vec2 d;
-			if(otherCur.normalVec.cross(thisCur.normalVec) > 0){
-				// slide over thisCur
-				thisI = (thisI+1) % vertexes.length;
-				Vertex2 next = vertexes[thisI];
-				d = next.position.subtract(thisCur.position);
-				thisCur = next;
-			}else{
-				// slide over otherCur
-				otherI = (otherI+1) % o.vertexes.length;
-				Vertex2 next = o.vertexes[otherI];
-				d = otherCur.position.subtract(next.position);
-				otherCur = next;
-			}
-			delta = delta.add(d);
-			outline[i] = delta;
-			referencePoints[i] = thisCur.position;
-			
-			
-			
-			//Debug.logVector(thisCur.position, otherCur.normalVec, Color.RED);
-			//Debug.logVector(thisCur.position, thisCur.normalVec, Color.BLUE);
-			
-			//Debug.logShape(other.transformToCFrame(new CFrame(delta.subtract(o.getCenterOfMass()).subtract(d.mul(1.0/4)), RotMat2.IDENTITY)), Color.YELLOW.alpha(0.1), Color.YELLOW.alpha(0.6));
-			//Debug.logShape(other.transformToCFrame(new CFrame(delta.subtract(o.getCenterOfMass()).subtract(d.mul(2.0/4)), RotMat2.IDENTITY)), Color.YELLOW.alpha(0.1), Color.YELLOW.alpha(0.6));
-			//Debug.logShape(other.transformToCFrame(new CFrame(delta.subtract(o.getCenterOfMass()).subtract(d.mul(3.0/4)), RotMat2.IDENTITY)), Color.YELLOW.alpha(0.1), Color.YELLOW.alpha(0.6));
-			Debug.logShape(other.transformToCFrame(new CFrame(delta.subtract(o.getCenterOfMass()), RotMat2.IDENTITY)), Color.YELLOW.alpha(0.1), Color.YELLOW.alpha(0.6));
-		}
-		
-		Debug.logPolygon(Color.TRANSPARENT, outline);
-		
-		for(int i = 0; i < referencePoints.length; i++)
-			Debug.logPoint(referencePoints[i], Color.GREEN);
-		
-		return new CollisionOutline(outline, referencePoints);
-	}
-	
-	@Override
 	public Shape union(Shape other){
 		if(other instanceof AbstractPolygon){
 			return union((AbstractPolygon) other);
@@ -362,7 +247,7 @@ public abstract class AbstractPolygon implements Shape {
 	}
 	
 	@Override
-	public Range getBoundsAlongDirection(NormalizedVec2 direction){
+	public Range getBoundsAlongDirection(Vec2 direction){
 		double value = direction.cross(vertexes[0].position);
 		double min = value;
 		double max = value;
@@ -376,13 +261,16 @@ public abstract class AbstractPolygon implements Shape {
 		return new Range(min, max);
 	}
 	
+	
+	
 	@Override
-	public NormalizedVec2[] getSATDirections(){
-		NormalizedVec2[] directions = new NormalizedVec2[vertexes.length];
-		for(int i = 0; i < vertexes.length; i++)
-			directions[i] = vertexes[i].normalVec.rotate90CounterClockwise();
+	public List<? extends ConvexPolygon> convexDecomposition(){
+		ArrayList<Vec2[]> d = Polygon.convexDecomposition(getCorners());
+		ArrayList<ConvexPolygon> convexDecomp = new ArrayList<ConvexPolygon>(d.size());
+		for(int i = 0; i < d.size(); i++)
+			convexDecomp.set(i, new ConvexPolygon(d.get(i)));
 		
-		return directions;
+		return convexDecomp;
 	}
 	
 	private static class TransformedPolygon extends AbstractPolygon {
@@ -411,11 +299,6 @@ public abstract class AbstractPolygon implements Shape {
 		@Override
 		public Vec2 getCenterOfMass() {
 			return centerOfMass;
-		}
-
-		@Override
-		public Shape leftSlice(Vec2 origin, Vec2 direction) {
-			throw new NotImplementedException();
 		}
 	}
 }

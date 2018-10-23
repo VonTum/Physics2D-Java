@@ -1,11 +1,14 @@
 package physics2D.geom;
 
+import java.util.Arrays;
+import java.util.List;
+
 import physics2D.Debug;
 import physics2D.math.CFrame;
 import physics2D.math.Vec2;
 import physics2D.math.Vertex2;
 
-public class ConvexPolygon extends AbstractPolygon {
+public class ConvexPolygon extends AbstractPolygon implements Convex, Polygon{
 	
 	public ConvexPolygon(Vec2[] polygon) {
 		super(polygon);
@@ -109,10 +112,16 @@ public class ConvexPolygon extends AbstractPolygon {
 		return triangles;
 	}
 	
-	//TODO ADD @Override
-	public ConvexPolygon[] convexDecomposition() {
-		return new ConvexPolygon[]{this};
-	};
+	@Override
+	public Vec2[] getSATDirections(){
+		Vec2[] corners = getCorners();
+		Vec2[] directions = new Vec2[corners.length];
+		for(int i = 0; i < corners.length-1; i++)
+			directions[i] = corners[i+1].subtract(corners[i]);
+		directions[corners.length-1] = corners[0].subtract(corners[corners.length-1]);
+		
+		return directions;
+	}
 	
 	@Override
 	public double getArea(){
@@ -146,5 +155,50 @@ public class ConvexPolygon extends AbstractPolygon {
 			total+=t.getInertialArea()+t.getCenterOfMass().subtract(com).lengthSquared() * t.getArea();
 		
 		return total;
+	}
+	
+	@Override
+	public ConvexPolygon scale(double factor){
+		return new ConvexPolygon(Polygon.scaled(getCorners(), factor));
+	}
+
+	/*@Override
+	public List<OrientedPoint> getIntersectionPoints(Shape other) {
+		// TODO Auto-generated method stub
+		return null;
+	}*/
+
+	@Override
+	public List<? extends ConvexPolygon> convexDecomposition() {
+		return Arrays.asList(new ConvexPolygon[]{this});
+	}
+
+	@Override
+	public Convex intersection(Convex other) {
+		Vec2[] corners = getCorners();
+		Vec2 curCorner = corners[corners.length-1];
+		Convex currentConv = other;
+		for(int i = 0; i < corners.length; i++){
+			Vec2 next = corners[i];
+			Vec2 sliceOrigin = curCorner;
+			Vec2 sliceDirection = next.subtract(curCorner);
+			currentConv = currentConv.leftSlice(sliceOrigin, sliceDirection);
+			curCorner = next;
+		}
+		return currentConv;
+	}
+	
+	public ConvexPolygon intersection(ConvexPolygon other){
+		Vec2[] corners = getCorners();
+		Vec2 curCorner = corners[corners.length-1];
+		ConvexPolygon currentConv = other;
+		for(int i = 0; i < corners.length; i++){
+			Vec2 next = corners[i];
+			Vec2 sliceOrigin = curCorner;
+			Vec2 sliceDirection = next.subtract(curCorner);
+			currentConv = currentConv.leftSlice(sliceOrigin, sliceDirection);
+			curCorner = next;
+		}
+		return currentConv;
 	}
 }

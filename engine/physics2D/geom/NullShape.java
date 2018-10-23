@@ -11,7 +11,7 @@ import physics2D.math.Range;
 import physics2D.math.Vec2;
 import physics2D.physics.DepthWithDirection;
 
-public class NullShape implements Shape {
+public final class NullShape implements Shape, Convex {
 	
 	@Override
 	public List<OrientedPoint> getIntersectionPoints(Shape other) {
@@ -69,18 +69,13 @@ public class NullShape implements Shape {
 	}
 
 	@Override
-	public CollisionOutline getCollisionOutline(Shape other) {
-		return new CollisionOutline(new Vec2[0], new Vec2[0]);
-	}
-
-	@Override
-	public Range getBoundsAlongDirection(NormalizedVec2 direction) {
+	public Range getBoundsAlongDirection(Vec2 direction) {
 		return null;
 	}
 
 	@Override
-	public NormalizedVec2[] getSATDirections() {
-		return new NormalizedVec2[0];
+	public Vec2[] getSATDirections() {
+		return new Vec2[0];
 	}
 
 	@Override
@@ -89,8 +84,17 @@ public class NullShape implements Shape {
 	}
 
 	@Override
-	public Shape leftSlice(Vec2 origin, Vec2 direction) {
+	public NullShape leftSlice(Vec2 origin, Vec2 direction) {
 		return this;
 	}
-
+	
+	@Override
+	public List<NullShape> convexDecomposition(){
+		return Collections.emptyList();
+	}
+	
+	@Override
+	public Convex intersection(Convex other){
+		return this;
+	}
 }

@@ -15,7 +15,6 @@ import physics2D.geom.ConvexPolygon;
 import physics2D.math.CFrame;
 import physics2D.math.Vec2;
 import physics2D.physics.Physical;
-import physics2D.physics.PhysicalProperties;
 import physics2D.physics.World;
 
 public class Physics2D {

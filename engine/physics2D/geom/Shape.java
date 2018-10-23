@@ -9,6 +9,7 @@ import physics2D.math.OrientedPoint;
 import physics2D.math.Range;
 import physics2D.math.Vec2;
 import physics2D.physics.DepthWithDirection;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public interface Shape {
 	
@@ -21,7 +22,28 @@ public interface Shape {
 	public List<OrientedPoint> getIntersectionPoints(Shape other);
 	public default DepthWithDirection getNormalVecAndDepthToSurface(OrientedPoint point){return getNormalVecAndDepthToSurface(point.position, point.orientation);};
 	public DepthWithDirection getNormalVecAndDepthToSurface(Vec2 position, NormalizedVec2 orientation);
-	public boolean intersects(Shape other);
+	public default boolean intersects(Shape other){
+		//quickfail on disjunct bounding boxes
+		if(!getBoundingBox().intersects(other.getBoundingBox())) return false;
+		
+		List<? extends Convex> decomp = this.convexDecomposition();
+		List<? extends Convex> otherDecomp = other.convexDecomposition();
+		
+		BoundingBox[] bounds = new BoundingBox[decomp.size()];
+		for(int i = 0; i < decomp.size(); i++)
+			bounds[i] = decomp.get(i).getBoundingBox();
+		BoundingBox[] otherBounds = new BoundingBox[otherDecomp.size()];
+		for(int i = 0; i < otherDecomp.size(); i++)
+			otherBounds[i] = otherDecomp.get(i).getBoundingBox();
+		
+		for(int i = 0; i < decomp.size(); i++)
+			for(int j = 0; j < otherDecomp.size(); j++)
+				if(bounds[i].intersects(otherBounds[j]))
+					if(decomp.get(i).intersects(otherDecomp.get(j)))
+						return true;
+			
+		return false;
+	}
 	public boolean containsPoint(Vec2 point);
 	public Vec2[] getDrawingVertexes();
 	public double getArea();
@@ -32,14 +54,9 @@ public interface Shape {
 	public Shape transformToCFrame(CFrame frame);
 	public Shape scale(double factor);
 	
-	public CollisionOutline getCollisionOutline(Shape other);
-	public Range getBoundsAlongDirection(NormalizedVec2 direction);
-	/**
-	 * returns the possible Separating Axis Theorem projection directions applicable to this shape. For polygons for example, this will be normalized vectors along it's edges
-	 * @return an array of the found directions
-	 */
-	public NormalizedVec2[] getSATDirections();
-	public Shape union(Shape other);
+	public Range getBoundsAlongDirection(Vec2 direction);
+	
+	public default Shape union(Shape other){throw new NotImplementedException();};
 	/**
 	 * Slices this shape along the given direction, and returns the slice to the left of the cut.
 	 * 
@@ -51,5 +68,9 @@ public interface Shape {
 	 * @param direction
 	 * @return the left slice of the shape
 	 */
-	public Shape leftSlice(Vec2 origin, Vec2 direction);
+	//public Shape leftSlice(Vec2 origin, Vec2 direction);
+	/**
+	 * returns a convex decomposition of this object, may be an approximation
+	 */
+	public List<? extends Convex> convexDecomposition();
 }

@@ -1,7 +1,5 @@
 package game.input;
 
-import game.Physics2D;
-
 import org.lwjgl.glfw.GLFW;
 
 import physics2D.Debug;

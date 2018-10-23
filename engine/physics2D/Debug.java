@@ -13,7 +13,6 @@ import physics2D.physics.World;
 import game.Physics2D;
 import game.gui.Screen;
 import game.input.DebugInputHandler;
-import game.input.StandardInputHandler;
 import game.util.Color;
 
 public class Debug {

@@ -67,7 +67,7 @@ public class GeometryTests extends GUITestSuite {
 			assertFalse("Point " + point + " was shown to be inside while it was actually outside", p.containsPoint(point));
 	}
 	
-	@Test
+	/*@Test
 	public void testGetCollisionOutline(){
 		AbstractPolygon p1 = new Rectangle(0.3, 0.1).transformToCFrame(new CFrame(-0.2, 0.3, 0.0));
 		
@@ -82,7 +82,7 @@ public class GeometryTests extends GUITestSuite {
 		
 		Debug.logPoint(outline.getCollisionPoint(p2.getCenterOfMass()), Color.PURPLE);
 		//Debug.logPoint(outline2.getCollisionPoint(p1.getCenterOfMass()), Color.BLUE);
-	}
+	}*/
 	
 	@Test
 	public void testRegularPolygon(){
@@ -141,7 +141,7 @@ public class GeometryTests extends GUITestSuite {
 		
 	}
 	
-	@Test
+	/*@Test
 	public void testGetIntersectionPoint(){
 		Rectangle r1 = new Rectangle(0.3, 0.1);
 		ConvexPolygon b2 = new PolygonTriangle(0.3, new Vec2(0.2, 0.1)).transformToCFrame(new CFrame(0.2, 0.2, 0.7));
@@ -150,7 +150,7 @@ public class GeometryTests extends GUITestSuite {
 		Debug.logShape(b2, Color.YELLOW);
 		
 		r1.getIntersectionPoint(b2);
-	}
+	}*/
 	
 	@Test
 	public void testSlicing(){
