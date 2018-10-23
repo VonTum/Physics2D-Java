@@ -6,7 +6,9 @@ public class Color {
 	
 	public static final Color RED = new Color(1.0, 0.0, 0.0, 1.0);
 	public static final Color GREEN = new Color(0.0, 1.0, 0.0, 1.0);
+	public static final Color DARK_GREEN = new Color(0.0, 0.5, 0.0, 1.0);
 	public static final Color BLUE = new Color(0.0, 0.0, 1.0, 1.0);
+	public static final Color DARK_BLUE = new Color(0.0, 0.0, 0.5, 1.0);
 	public static final Color YELLOW = new Color(1.0, 1.0, 0.0, 1.0);
 	public static final Color ORANGE = new Color(1.0, 0.7, 0.0, 1.0);
 	public static final Color PURPLE = new Color(0.7, 0.0, 1.0, 1.0);
@@ -19,6 +21,7 @@ public class Color {
 	public static final Color DARK_GREY = new Color(0.2, 0.2, 0.2, 1.0);
 	public static final Color DEFAULT_BRICK_COLOR = new Color(0.8, 0.8, 0.6, 0.6);
 	public static final Color TRANSPARENT = new Color(0.0, 0.0, 0.0, 0.0);
+	
 	
 	public final double r, g, b, a;
 	public Color(double r, double g, double b, double a) {

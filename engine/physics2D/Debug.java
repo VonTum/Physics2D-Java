@@ -12,6 +12,7 @@ import physics2D.physics.Physical;
 import physics2D.physics.World;
 import game.Physics2D;
 import game.gui.Screen;
+import game.input.DebugInputHandler;
 import game.input.StandardInputHandler;
 import game.util.Color;
 
@@ -163,12 +164,37 @@ public class Debug {
 	public static void setupDebugScreen(){
 		World emptyWorld = new World(Vec2.ZERO);
 		try{
-			Screen.init(new StandardInputHandler(emptyWorld));
+			Screen.init(new DebugInputHandler(emptyWorld));
 			Screen.setWorld(emptyWorld);
 			world = emptyWorld;
 		}catch(IOException ex){
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	private static boolean PAUSED = false;
+	/**
+	 * Pauses the current execution and adds drawings
+	 */
+	public static void pause(){
+		Screen.addDrawings();
+		p();
+	}
+	/**
+	 * Pauses the current execution and commits drawings
+	 */
+	public static void pauseAndCommit(){
+		Screen.commitDrawings();
+		p();
+	}
+	private static void p(){
+		PAUSED = true;
+		while(!Screen.shouldClose() && PAUSED){
+			Screen.refresh();
+		}
+	}
+	public static void unpause() {
+		PAUSED = false;
 	}
 	
 	/**
@@ -264,4 +290,5 @@ public class Debug {
 			this.data = data;
 		}
 	}
+
 }

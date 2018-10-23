@@ -93,7 +93,7 @@ public class StandardInputHandler implements InputHandler {
 			break;
 		}
 		
-		System.out.println(GLFW.glfwGetKeyName(key, scancode));
+		// System.out.println(GLFW.glfwGetKeyName(key, scancode));
 	}
 	
 	@Override

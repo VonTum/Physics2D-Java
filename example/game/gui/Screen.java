@@ -457,6 +457,20 @@ public class Screen {
 	}
 	
 	/**
+	 * Adds all drawings to the next frame
+	 * 
+	 * draw buffer is cleared
+	 * 
+	 * Similar to {@code #commitDrawings()} but doesn't clear previous drawings
+	 */
+	public static void addDrawings(){
+		synchronized (markings) {
+			markings.addAll(markingsBuf);
+			markingsBuf = new ArrayList<>();
+		}
+	}
+	
+	/**
 	 * @return the number of markings that have been applied
 	 */
 	public static int getMarkingsCount(){
