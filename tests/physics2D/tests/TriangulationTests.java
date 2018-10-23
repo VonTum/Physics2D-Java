@@ -8,6 +8,7 @@ import physics2D.Debug;
 import physics2D.geom.CompositePolygon;
 import physics2D.geom.Polygon;
 import physics2D.geom.Triangle;
+import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 
 public class TriangulationTests extends GUITestSuite{
@@ -16,13 +17,32 @@ public class TriangulationTests extends GUITestSuite{
 		new Vec2(-3.0, 1.5),
 		new Vec2(-2.0, -0.3),
 		new Vec2(2.0, 0.3),
-		new Vec2(2.5, 0.7),
+		new Vec2(2.4, 0.7),
 		new Vec2(3.0, -1.0),
 		new Vec2(3.5, -1.0),
 		new Vec2(2.0, 2.0),
 		new Vec2(3.5, 1.0),
 		new Vec2(2.0, 2.5),
 	};
+	
+	static final Vec2[] halfcircleThing = new Vec2[40];
+	static{
+		int L = halfcircleThing.length;
+		RotMat2 r = new RotMat2(2*Math.PI/(L-2));
+		Vec2 cur = new Vec2(2.0, 0.0);
+		for(int i = 0; i < L/2-1; i++){
+			halfcircleThing[i] = cur;
+			cur = r.mul(cur);
+		}
+		halfcircleThing[L/2-1] = cur;
+		cur = cur.div(1.2);
+		for(int i = L/2; i < L-1; i++){
+			halfcircleThing[i] = cur;
+			cur = r.inv().mul(cur);
+		}
+		halfcircleThing[L-1] = cur;
+	}
+	
 	
 	@Test
 	public void testTriangulate() {
@@ -76,5 +96,6 @@ public class TriangulationTests extends GUITestSuite{
 		Debug.logPolygon(Color.TRANSPARENT, polygon);
 		
 		Polygon.convexDecomposition(polygon);
+		Polygon.convexDecomposition(halfcircleThing);
 	}
 }

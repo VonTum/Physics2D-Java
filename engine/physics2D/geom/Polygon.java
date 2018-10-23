@@ -2,8 +2,13 @@ package physics2D.geom;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import game.util.Color;
 
 import java.util.ArrayList;
+import java.util.Queue;
+import java.util.Stack;
+
+import com.sun.jmx.remote.internal.ArrayQueue;
 
 import physics2D.Debug;
 import physics2D.math.BoundingBox;
@@ -22,8 +27,7 @@ public interface Polygon extends Shape {
 	public ConvexPolygon[] convexDecomposition();
 	
 	public static ConvexPolygon[] convexDecomposition(Vec2[] polygon){
-		ArrayList<Vec2[]> polyList = new ArrayList<Vec2[]>();
-		convexDecompose(polygon, polyList);
+		 ArrayList<Vec2[]> polyList = convexDecompose(polygon);
 		
 		ConvexPolygon[] decomp = new ConvexPolygon[polyList.size()];
 		for(int i = 0; i < decomp.length; i++)
@@ -33,55 +37,76 @@ public interface Polygon extends Shape {
 	}
 	
 	
-	public static void convexDecompose(Vec2[] polygon, ArrayList<Vec2[]> curList){
-		int L = polygon.length;
+	public static ArrayList<Vec2[]> convexDecompose(Vec2[] polygon){
+		ArrayList<Vec2[]> decomposition = new ArrayList<Vec2[]>();
+		Stack<Vec2[]> polyParts = new Stack<Vec2[]>();
+		polyParts.push(polygon);
 		
-		for(int i = 0; i < L; i++){
-			Vec2 prev = polygon[(i-1+L)%L];
-			Vec2 cur = polygon[i];
-			Vec2 next = polygon[(i+1)%L];
-			Vec2 prevToCur = cur.subtract(prev);
-			Vec2 curToNext = next.subtract(cur);
+		while(!polyParts.isEmpty()){
+			Vec2[] curPoly = polyParts.pop();
 			
-			if(isConcave(prevToCur, curToNext)){
-				// handle concave corner
-				
-				int bestCorner = -1;
-				double bestDist = Double.POSITIVE_INFINITY;
-				
-				Debug.logPoint(cur, game.util.Color.RED);
-				
-				// iterates over all corners from i+1, stops at the first concave corner
-				for(int j = (i+2)%L; j != (i-1+L)%L; j=(j+1)%L){
-					// TODO finish
+			polyParts.forEach((poly) -> {Debug.logPolygon(Color.TRANSPARENT, Color.BLACK, poly);});
+			decomposition.forEach((poly) -> {Debug.logPolygon(Color.GREEN.fuzzier(0.1), Color.DARK_GREEN.fuzzier(0.1), poly);});
+			Debug.logPolygon(Color.RED.fuzzier(0.2), Color.RED, curPoly);
+			int L = curPoly.length;
+			nextPoly:{
+				for(int i = 0; i < L; i++){
+					Vec2 prev = curPoly[(i-1+L)%L];
+					Vec2 cur = curPoly[i];
+					Vec2 next = curPoly[(i+1)%L];
+					Vec2 prevToCur = cur.subtract(prev);
+					Vec2 curToNext = next.subtract(cur);
 					
-					Vec2 otherPrev = polygon[(j-1+L)%L];
-					Vec2 otherCur = polygon[j];
-					Vec2 otherNext = polygon[(j+1)%L];
-					Vec2 otherPrevToCur = otherCur.subtract(otherPrev);
-					Vec2 otherCurToNext = otherNext.subtract(otherCur);
-					
-					Vec2 delta = otherCur.subtract(cur);
-					
-					if((curToNext.cross(delta) >= 0 || 
-						prevToCur.cross(delta) >= 0) &&
-						liesBetween(otherPrevToCur, otherCurToNext, delta.neg())){
+					if(isConcave(prevToCur, curToNext)){
+						// handle concave corner
 						
-						Debug.logPoint(polygon[j], game.util.Color.GREEN);
+						int bestCorner = -1;
+						double bestDist = Double.POSITIVE_INFINITY;
 						
-						if(delta.lengthSquared() < bestDist){
-							bestDist = delta.lengthSquared();
-							bestCorner = j;
+						Debug.logPoint(cur, game.util.Color.RED);
+						
+						// iterates over all corners from i+1, stops at the first concave corner
+						for(int j = (i+2)%L; j != (i-1+L)%L; j=(j+1)%L){
+							Vec2 otherPrev = curPoly[(j-1+L)%L];
+							Vec2 otherCur = curPoly[j];
+							Vec2 otherNext = curPoly[(j+1)%L];
+							Vec2 otherPrevToCur = otherCur.subtract(otherPrev);
+							Vec2 otherCurToNext = otherNext.subtract(otherCur);
 							
+							Vec2 delta = otherCur.subtract(cur);
 							
+							if((curToNext.cross(delta) >= 0 || 
+								prevToCur.cross(delta) >= 0) &&
+								liesBetween(otherPrevToCur, otherCurToNext, delta.neg())){
+								
+								if(delta.lengthSquared() < bestDist){
+									bestDist = delta.lengthSquared();
+									bestCorner = j;
+									
+									
+								}
+							}
 						}
+						
+						int chosenCorner = bestCorner;
+						
+						polyParts.push(Polygon.polygonFromTo(curPoly, i, chosenCorner));
+						polyParts.push(Polygon.polygonFromTo(curPoly, chosenCorner, i));
+						
+						Debug.pauseAndCommit();
+						break nextPoly;
 					}
 				}
 				
-				Debug.logPoint(polygon[bestCorner], game.util.Color.YELLOW);
-				break;
+				decomposition.add(curPoly);
+				Debug.pauseAndCommit();
 			}
 		}
+		
+		decomposition.forEach((poly) -> {Debug.logPolygon(Color.GREEN.fuzzier(0.1), Color.DARK_GREEN.fuzzier(0.1), poly);});
+		Debug.pauseAndCommit();
+		
+		return decomposition;
 	}
 	
 	public static boolean liesBetween(Vec2 prevToCur, Vec2 curToNext, Vec2 tested){
