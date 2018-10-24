@@ -137,6 +137,24 @@ public class Vec2 {
 		return new NormalizedVec2(x/length, y/length);
 	}
 	
+	/**
+	 * used to project the result of a dotproduct back onto the original vector
+	 * @param v the result of this.dot(someVec)
+	 * @return this vector times (v/lengthSquared())
+	 */
+	public Vec2 reProject(double v){
+		return this.mul(v/lengthSquared());
+	}
+	
+	/**
+	 * projects other on this
+	 * @param other vector to be projected
+	 * @return a projected version of the given vector
+	 */
+	public Vec2 project(Vec2 other){
+		return mul(dot(other)/lengthSquared());
+	}
+	
 	public double angleBetween(Vec2 other){
 		return Math.acos(this.normalize().dot(other.normalize()));
 	}

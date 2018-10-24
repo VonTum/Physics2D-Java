@@ -61,4 +61,14 @@ public class NormalizedVec2 extends Vec2 {
 	public NormalizedVec2 rotate90CounterClockwise(){
 		return new NormalizedVec2(-y, x);
 	}
+	
+	@Override
+	public Vec2 reProject(double v){
+		return this.mul(v);
+	}
+	
+	@Override
+	public Vec2 project(Vec2 other){
+		return mul(dot(other));
+	}
 }
