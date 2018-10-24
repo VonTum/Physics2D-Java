@@ -8,6 +8,7 @@ import physics2D.math.CFrame;
 import physics2D.math.NormalizedVec2;
 import physics2D.math.OrientedPoint;
 import physics2D.math.Range;
+import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 import physics2D.physics.DepthWithDirection;
 
@@ -97,4 +98,9 @@ public final class NullShape implements Shape, Convex {
 	public Convex intersection(Convex other){
 		return this;
 	}
+	
+	@Override public NullShape translate(Vec2 offset){return this;}
+	@Override public NullShape rotate(double angle){return this;}
+	@Override public NullShape rotate(RotMat2 rotation){return this;}
+	
 }

@@ -7,6 +7,7 @@ import physics2D.math.CFrame;
 import physics2D.math.NormalizedVec2;
 import physics2D.math.OrientedPoint;
 import physics2D.math.Range;
+import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 import physics2D.physics.DepthWithDirection;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -52,6 +53,9 @@ public interface Shape {
 	public BoundingBox getBoundingBox();
 	
 	public Shape transformToCFrame(CFrame frame);
+	public Shape translate(Vec2 offset);
+	public Shape rotate(RotMat2 rotation);
+	public default Shape rotate(double angle){return rotate(RotMat2.rotTransform(angle));};
 	public Shape scale(double factor);
 	
 	public Range getBoundsAlongDirection(Vec2 direction);

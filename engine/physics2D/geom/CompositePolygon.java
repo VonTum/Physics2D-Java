@@ -6,6 +6,7 @@ import java.util.List;
 import physics2D.math.CFrame;
 import physics2D.math.NormalizedVec2;
 import physics2D.math.OrientedPoint;
+import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 import physics2D.physics.DepthWithDirection;
 
@@ -72,20 +73,32 @@ public class CompositePolygon implements Polygon {
 	}
 
 	@Override
-	public Polygon transformToCFrame(CFrame frame) {
+	public CompositePolygon transformToCFrame(CFrame frame) {
 		ConvexPolygon[] newDecomp = new ConvexPolygon[decomposition.length];
 		for(int p = 0; p < decomposition.length; p++)
 			newDecomp[p] = decomposition[p].transformToCFrame(frame);
 		
-		return new CompositePolygon(transformToCFrame(frame, outline), newDecomp);
+		return new CompositePolygon(Polygon.transformToCFrame(outline, frame), newDecomp);
 	}
 	
-	private static Vec2[] transformToCFrame(CFrame frame, Vec2[] poly){
-		Vec2[] newPoly = new Vec2[poly.length];
-		for(int i = 0; i < poly.length; i++)
-			newPoly[i] = frame.localToGlobal(poly[i]);
-		return newPoly;
+	@Override
+	public CompositePolygon translate(Vec2 offset){
+		ConvexPolygon[] d = new ConvexPolygon[decomposition.length];
+		for(int i = 0; i < d.length; i++)
+			d[i] = decomposition[i].translate(offset);
+		return new CompositePolygon(Polygon.translate(outline, offset), d);
 	}
+	
+	@Override
+	public CompositePolygon rotate(RotMat2 rotation){
+		ConvexPolygon[] d = new ConvexPolygon[decomposition.length];
+		for(int i = 0; i < d.length; i++)
+			d[i] = decomposition[i].rotate(rotation);
+		return new CompositePolygon(Polygon.rotate(outline, rotation), d);
+	}
+	
+	@Override
+	public CompositePolygon rotate(double angle){return rotate(RotMat2.rotTransform(angle));}
 
 	@Override
 	public CompositePolygon scale(double factor) {

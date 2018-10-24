@@ -5,6 +5,7 @@ import java.util.List;
 
 import physics2D.Debug;
 import physics2D.math.CFrame;
+import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 import physics2D.math.Vertex2;
 
@@ -201,4 +202,17 @@ public class ConvexPolygon extends AbstractPolygon implements Convex, Polygon{
 		}
 		return currentConv;
 	}
+	
+	@Override
+	public ConvexPolygon translate(Vec2 offset){
+		return new ConvexPolygon(Polygon.translate(getCorners(), offset));
+	}
+	
+	@Override
+	public ConvexPolygon rotate(RotMat2 rotation){
+		return new ConvexPolygon(Polygon.rotate(getCorners(), rotation));
+	}
+	
+	@Override
+	public ConvexPolygon rotate(double angle){return rotate(RotMat2.rotTransform(angle));}
 }

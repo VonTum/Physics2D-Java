@@ -8,6 +8,7 @@ import physics2D.math.CFrame;
 import physics2D.math.NormalizedVec2;
 import physics2D.math.OrientedPoint;
 import physics2D.math.Range;
+import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 import physics2D.math.Vertex2;
 import physics2D.physics.DepthWithDirection;
@@ -299,6 +300,21 @@ public abstract class AbstractPolygon implements Shape {
 		@Override
 		public Vec2 getCenterOfMass() {
 			return centerOfMass;
+		}
+
+		@Override
+		public TransformedPolygon translate(Vec2 offset) {
+			return null;
+		}
+
+		@Override
+		public TransformedPolygon rotate(RotMat2 rotation) {
+			return null;
+		}
+		
+		@Override
+		public TransformedPolygon rotate(double angle){
+			return null;
 		}
 	}
 }

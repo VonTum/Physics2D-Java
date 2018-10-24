@@ -59,7 +59,7 @@ public class Debug {
 					loggedClasses.contains(Class.forName(e.getClassName())) || 
 					loggedMethods.contains(e.getMethodName())
 				) return true;
-			} catch (ClassNotFoundException e1) {/*will never happen*/}
+			} catch (ClassNotFoundException e1) {assert false;/*will never happen*/}
 		}
 		return false;
 	}
@@ -164,13 +164,18 @@ public class Debug {
 	 */
 	public static void setupDebugScreen(){
 		World emptyWorld = new World(Vec2.ZERO);
+		DebugInputHandler debugInputHandler = new DebugInputHandler(emptyWorld);
 		try{
-			Screen.init(new DebugInputHandler(emptyWorld));
+			Screen.init(debugInputHandler);
 			Screen.setWorld(emptyWorld);
 			world = emptyWorld;
 		}catch(IOException ex){
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	public static Vec2 getMouseWorldPos(){
+		return Screen.mouseToWorldCoords(Screen.getMousePos());
 	}
 	
 	private static boolean PAUSED = false;
@@ -226,6 +231,7 @@ public class Debug {
 	public static void haltWithTickAction(Runnable r){
 		while(!Screen.shouldClose()){
 			r.run();
+			Debug.endTick();
 			Screen.refresh();
 		}
 	}

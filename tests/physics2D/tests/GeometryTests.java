@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import physics2D.Debug;
 import physics2D.geom.*;
+import physics2D.geom.Convex.BasisWithDirection;
 import physics2D.math.CFrame;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
@@ -177,6 +178,53 @@ public class GeometryTests extends GUITestSuite {
 		Debug.logPolygon(Color.YELLOW.fuzzier(), curPoly);
 	}
 	
+	@Test
+	public void testGetNearestExit(){
+		
+		Debug.haltWithTickAction(() -> {
+			
+			ConvexPolygon poly1 = new ConvexPolygon(convexPolygon).translate(Debug.getMouseWorldPos());
+			ConvexPolygon poly2 = new ConvexPolygon(spheroid);
+			
+			Debug.logShape(poly1, Color.TRANSPARENT, Color.RED);
+			Debug.logShape(poly2, Color.TRANSPARENT, Color.GREEN);
+			
+			BasisWithDirection bd = poly1.getNearestExit(poly2);
+			
+			if(bd != null){
+				if(bd.callerIsBase){
+					Debug.logVector(poly1.getCenterOfMass(), bd.direction, Color.RED);
+					Debug.logShape(poly2.translate(bd.direction), Color.BLUE.fuzzier(0.2));
+				}else{
+					Debug.logVector(poly2.getCenterOfMass(), bd.direction, Color.GREEN);
+					Debug.logShape(poly1.translate(bd.direction), Color.BLUE.fuzzier(0.2));
+				}
+			}
+		});
+	}
+	
+	@Test
+	public void testGetNearestExit2(){
+		Debug.haltWithTickAction(() -> {
+			ConvexPolygon poly1 = new Rectangle(1.2, 0.3).rotate(0.5).translate(Debug.getMouseWorldPos());
+			ConvexPolygon poly2 = new Rectangle(2.0, 0.4);
+			
+			Debug.logShape(poly1, Color.TRANSPARENT, Color.RED);
+			Debug.logShape(poly2, Color.TRANSPARENT, Color.GREEN);
+			
+			BasisWithDirection bd = poly1.getNearestExit(poly2);
+			if(bd != null){
+				if(bd.callerIsBase){
+					Debug.logVector(poly1.getCenterOfMass(), bd.direction, Color.RED);
+					Debug.logShape(poly2.translate(bd.direction), Color.BLUE.fuzzier(0.2));
+				}else{
+					Debug.logVector(poly2.getCenterOfMass(), bd.direction, Color.GREEN);
+					Debug.logShape(poly1.translate(bd.direction), Color.BLUE.fuzzier(0.2));
+				}
+			}
+		});
+	}
+	
 	private static final class DummyPolygon extends AbstractPolygon {
 		public DummyPolygon(Vec2... polygon) {
 			super(polygon);
@@ -189,6 +237,5 @@ public class GeometryTests extends GUITestSuite {
 		@Override public double getArea() {return 0;}
 		@Override public double getInertialArea() {return 0;}
 		@Override public Vec2 getCenterOfMass() {return Vec2.ZERO;}
-		@Override public Shape leftSlice(Vec2 origin, Vec2 direction) {return null;}
 	}
 }

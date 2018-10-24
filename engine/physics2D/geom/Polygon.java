@@ -12,6 +12,7 @@ import physics2D.Debug;
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
 import physics2D.math.Range;
+import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 
 /**
@@ -448,5 +449,30 @@ public interface Polygon extends Shape {
 		for(int i = 0; i < poly.length; i++)
 			newPoly[i] = poly[i].mul(factor);
 		return newPoly;
+	}
+	
+	public static Vec2[] transformToCFrame(Vec2[] poly, CFrame frame){
+		Vec2[] newPoly = new Vec2[poly.length];
+		for(int i = 0; i < poly.length; i++)
+			newPoly[i] = frame.localToGlobal(poly[i]);
+		return newPoly;
+	}
+	
+	public static Vec2[] translate(Vec2[] poly, Vec2 offset){
+		Vec2[] newPoly = new Vec2[poly.length];
+		for(int i = 0; i < poly.length; i++)
+			newPoly[i] = poly[i].add(offset);
+		return newPoly;
+	}
+	
+	public static Vec2[] rotate(Vec2[] poly, RotMat2 rotation){
+		Vec2[] newCorners = new Vec2[poly.length];
+		for(int i = 0; i < poly.length; i++)
+			newCorners[i] = rotation.mul(poly[i]);
+		return newCorners;
+	}
+	
+	public static Vec2[] rotate(Vec2[] poly, double angle){
+		return rotate(poly, RotMat2.rotTransform(angle));
 	}
 }
