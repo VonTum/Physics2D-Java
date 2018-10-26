@@ -49,7 +49,7 @@ public class TriangulationTests extends GUITestSuite{
 		//Debug.logPolygon(Color.GREEN, new Vec2[]{new Vec2(3.0, 2.0),new Vec2(4.0, 3.0),new Vec2(3.5, 3.0)});
 		Debug.logPolygon(Color.TRANSPARENT, polygon);
 		
-		Triangle[] division = CompositePolygon.divideIntoTriangles(Polygon.shifted(polygon, 1));
+		Triangle[] division = new CompositePolygon(Polygon.shifted(polygon, 1)).divideIntoTriangles();
 		
 		for(Triangle t:division){
 			Debug.logPolygon(Color.random().fuzzier(), Color.TRANSPARENT, t.getCorners());
@@ -62,7 +62,7 @@ public class TriangulationTests extends GUITestSuite{
 		//Debug.logPolygon(Color.GREEN, new Vec2[]{new Vec2(3.0, 2.0),new Vec2(4.0, 3.0),new Vec2(3.5, 3.0)});
 		Debug.logPolygon(Color.TRANSPARENT, polygon);
 		
-		Triangle[] division = CompositePolygon.divideIntoTriangles(Polygon.shifted(polygon, 2));
+		Triangle[] division = new CompositePolygon(Polygon.shifted(polygon, 2)).divideIntoTriangles();
 		
 		for(Triangle t:division){
 			Debug.logPolygon(Color.random().fuzzier(), Color.TRANSPARENT, t.getCorners());
@@ -83,7 +83,7 @@ public class TriangulationTests extends GUITestSuite{
 		
 		Debug.logPolygon(Color.TRANSPARENT, simpleBad);
 		
-		Triangle[] division = CompositePolygon.divideIntoTriangles(simpleBad);
+		Triangle[] division = new CompositePolygon(simpleBad).divideIntoTriangles();
 		
 		for(Triangle t:division){
 			Debug.logPolygon(Color.random().fuzzier(), Color.TRANSPARENT, t.getCorners());

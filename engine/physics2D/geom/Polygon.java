@@ -351,6 +351,8 @@ public interface Polygon extends Shape {
 		
 		return new Range(min, max);
 	}
+	
+	
 
 	/*@Override
 	public Shape union(Shape other) {

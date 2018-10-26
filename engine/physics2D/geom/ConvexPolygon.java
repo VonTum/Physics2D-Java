@@ -173,6 +173,17 @@ public class ConvexPolygon extends AbstractPolygon implements Convex, Polygon{
 	public List<? extends ConvexPolygon> convexDecomposition() {
 		return Arrays.asList(new ConvexPolygon[]{this});
 	}
+	
+	@Override
+	public Triangle[] divideIntoTriangles(){
+		Vec2[] corners = getCorners();
+		Triangle[] triangles = new Triangle[corners.length-2];
+		
+		for(int i = 0; i < corners.length-2; i++)
+			triangles[i] = new Triangle(corners[0], corners[i+1], corners[i+2]);
+		
+		return triangles;
+	}
 
 	@Override
 	public Convex intersection(Convex other) {
