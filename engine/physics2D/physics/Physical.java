@@ -69,15 +69,15 @@ public class Physical implements Locatable {
 	
 	public void interactWith(Physical otherObj){
 		if(this.boundsCache.intersects(otherObj.boundsCache)){
-			for(Part p1:parts){
+			for(Part cur:parts){
 				for(Part other:otherObj.parts){
-					p1.getIntersectionPoints(other).forEach((point) -> {
+					cur.getIntersectionPoints(other).forEach((point) -> {
 						double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
 						handleIntersectionPoint(other, smallestInertia, point);
 					});
-					other.getIntersectionPoints(p1).forEach((point) -> {
+					other.getIntersectionPoints(cur).forEach((point) -> {
 						double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
-						otherObj.handleIntersectionPoint(p1, smallestInertia, point);
+						otherObj.handleIntersectionPoint(cur, smallestInertia, point);
 					});
 				}
 			}

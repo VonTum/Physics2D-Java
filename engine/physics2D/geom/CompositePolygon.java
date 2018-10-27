@@ -1,5 +1,6 @@
 package physics2D.geom;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,16 +36,29 @@ public class CompositePolygon implements Polygon {
 	
 	@Override
 	public List<OrientedPoint> getIntersectionPoints(Shape other) {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<OrientedPoint> oriPoints = new ArrayList<OrientedPoint>();
+		for(ConvexPolygon p1:convexDecomposition())
+			for(Convex p2:other.convexDecomposition())
+				oriPoints.addAll(p1.getIntersectionPoints(p2));
+		
+		return oriPoints;
 	}
 	
 	@Override
 	public DepthWithDirection getNormalVecAndDepthToSurface(Vec2 position, NormalizedVec2 orientation) {
-		// TODO Auto-generated method stub
-		return null;
+		DepthWithDirection best = null;
+		for(ConvexPolygon p1:convexDecomposition())
+			if(p1.containsPoint(position)){
+				DepthWithDirection newDepth = p1.getNormalVecAndDepthToSurface(position, orientation);
+				if(best == null)
+					best = newDepth;
+				else
+					if(best.depth > newDepth.depth)
+						best = newDepth;
+			}
+		return best;
 	}
-
+	
 	@Override
 	public boolean intersects(Shape other) {
 		if(!(other instanceof Polygon))

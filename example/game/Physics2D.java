@@ -55,7 +55,7 @@ public class Physics2D {
 					for(int i = 0; i < (int) (SIMULATION_REPEATS_PER_TICK * SIMULATION_SPEED); i++){
 						runTick(w);
 					}
-				}catch(Exception e){
+				}catch(Throwable e){
 					e.printStackTrace();
 					System.exit(1);
 				}

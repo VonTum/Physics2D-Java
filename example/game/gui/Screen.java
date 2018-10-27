@@ -15,6 +15,8 @@ import game.util.Dimentions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -25,6 +27,7 @@ import com.sun.org.apache.xpath.internal.operations.Or;
 
 import physics2D.Debug;
 import physics2D.geom.AbstractPolygon;
+import physics2D.geom.Convex;
 import physics2D.geom.Shape;
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
@@ -49,6 +52,8 @@ public class Screen {
 	
 	private static ArrayList<Drawable> markingsBuf = new ArrayList<>();
 	private static ArrayList<Drawable> markings = new ArrayList<>();
+	
+	private static final HashSet<Drawable> persistentDrawings = new HashSet<>();
 	
 	public static final boolean DRAW_BLOCK_DIRECTION = false;
 	public static final boolean DRAW_BLOCK_NORMALVECS = false;
@@ -237,11 +242,16 @@ public class Screen {
 	}
 	
 	private static void drawShape(Shape shape, Color fillColor){
-		drawPolygon(shape.getDrawingVertexes(), fillColor, Color.BLACK);
+		drawShape(shape, fillColor, Color.BLACK);
 	}
 	
 	private static void drawShape(Shape shape, Color fillColor, Color edgeColor){
-		drawPolygon(shape.getDrawingVertexes(), fillColor, edgeColor);
+		List<? extends Convex> decomp = shape.convexDecomposition();
+		Vec2[][] convexSubset = new Vec2[decomp.size()][];
+		for(int i = 0; i < decomp.size(); i++)
+			convexSubset[i] = decomp.get(i).getDrawingVertexes();
+		drawCompositePolygon(shape.getDrawingVertexes(), convexSubset, fillColor, edgeColor);
+		// drawPolygon(shape.getDrawingVertexes(), fillColor, edgeColor);
 	}
 	
 	private static void drawPolygon(Vec2[] vertexes, Color fillColor, Color edgeColor){
@@ -253,6 +263,34 @@ public class Screen {
 		color(edgeColor);
 		glBegin(GL11.GL_LINE_LOOP);
 		for(Vec2 vertex:vertexes)
+			vertex(vertex);
+		glEnd();
+	}
+	
+	private static void drawPolygon(List<Vec2> vertexes, Color fillColor, Color edgeColor){
+		color(fillColor);
+		glBegin(GL11.GL_POLYGON);
+		for(Vec2 vertex:vertexes)
+			vertex(vertex);
+		glEnd();
+		color(edgeColor);
+		glBegin(GL11.GL_LINE_LOOP);
+		for(Vec2 vertex:vertexes)
+			vertex(vertex);
+		glEnd();
+	}
+	
+	private static void drawCompositePolygon(Vec2[] drawingVertexes, Vec2[][] convexSubset, Color fillColor, Color edgeColor) {
+		color(fillColor);
+		for(Vec2[] conv:convexSubset){
+			glBegin(GL11.GL_POLYGON);
+			for(Vec2 vertex:conv)
+				vertex(vertex);
+			glEnd();
+		}
+		color(edgeColor);
+		glBegin(GL11.GL_LINE_LOOP);
+		for(Vec2 vertex:drawingVertexes)
 			vertex(vertex);
 		glEnd();
 	}
@@ -270,6 +308,11 @@ public class Screen {
 	
 	private static void applyMarkings(){
 		// mark markings
+		synchronized (persistentDrawings) {
+			for(Drawable d:persistentDrawings){
+				d.drawAndColor();
+			}
+		}
 		synchronized (markings) {
 			for(Drawable d:markings){
 				d.drawAndColor();
@@ -444,6 +487,40 @@ public class Screen {
 		markingsBuf.add(new MarkedPolygon(polygon, fillColor, edgeColor));
 	}
 	
+	public static void markShape(Shape s, Color fillColor){
+		markShape(s, fillColor, Color.BLACK);
+	}
+	
+	public static void markShape(Shape s, Color fillColor, Color edgeColor){
+		markingsBuf.add(new MarkedShape(s, fillColor, edgeColor));
+	}
+	
+	public static MarkedPoint addPoint(Vec2 point, Color color){
+		MarkedPoint p = new MarkedPoint(point, color);
+		persistentDrawings.add(p);
+		return p;
+	}
+	
+	public static MarkedVector addVector(Vec2 origin, Vec2 vector, Color color){
+		MarkedVector v = new MarkedVector(origin, vector, color);
+		persistentDrawings.add(v);
+		return v;
+	}
+	
+	public static InProgressPolygon addPolygon(List<Vec2> polygon, Color color){
+		return addPolygon(polygon, color, Color.BLACK);
+	}
+	
+	public static InProgressPolygon addPolygon(List<Vec2> polygon, Color fillColor, Color edgeColor){
+		InProgressPolygon p = new InProgressPolygon(polygon, fillColor, edgeColor);
+		persistentDrawings.add(p);
+		return p;
+	}
+	
+	public static boolean removeDrawable(Drawable d){
+		return persistentDrawings.remove(d);
+	}
+	
 	/**
 	 * Commits all drawings to the next frame
 	 * 
@@ -546,6 +623,39 @@ public class Screen {
 		@Override
 		public void draw(){
 			drawPolygon(polygon, color, edgeColor);
+		}
+	}
+	
+	private static final class MarkedShape extends Drawable {
+		
+		public final Shape s;
+		public final Color edgeColor;
+		
+		public MarkedShape(Shape s, Color fillColor, Color edgeColor) {
+			super(fillColor);
+			this.edgeColor = edgeColor;
+			this.s = s;
+		}
+		
+		@Override
+		public void draw(){
+			drawShape(s, color, edgeColor);
+			/**/
+		}
+	}
+	
+	public static final class InProgressPolygon extends Drawable {
+		public List<Vec2> poly;
+		public Color fill, edge;
+		public InProgressPolygon(List<Vec2> polygon, Color fillColor, Color edgeColor){
+			super(fillColor);
+			this.poly = polygon;
+			this.edge = edgeColor;
+		}
+		
+		@Override
+		public void draw(){
+			drawPolygon(poly, color, edge);
 		}
 	}
 }

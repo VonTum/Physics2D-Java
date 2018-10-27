@@ -105,10 +105,10 @@ public class Debug {
 		logShape(s, DEFAULT_SHAPE_COLOR);
 	}
 	public static void logShape(Shape s, Color color){
-		logPolygon(color, s.getDrawingVertexes());
+		logShape(s, color, Color.BLACK);
 	}
 	public static void logShape(Shape s, Color fillColor, Color edgeColor){
-		logPolygon(fillColor, edgeColor, s.getDrawingVertexes());
+		Screen.markShape(s, fillColor, edgeColor);
 	}
 	public static int getDrawCount(){
 		return Screen.getMarkingsCount();

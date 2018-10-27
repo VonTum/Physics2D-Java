@@ -1,12 +1,21 @@
 package game.input;
 
+import java.util.ArrayList;
+
+import game.ObjectLibrary;
 import game.Physics2D;
 import game.gui.Screen;
+import game.gui.Screen.InProgressPolygon;
+import game.util.Color;
 
 import org.lwjgl.glfw.GLFW;
 
+import physics2D.geom.CompositePolygon;
+import physics2D.geom.Polygon;
+import physics2D.math.CFrame;
 import physics2D.math.Vec2;
 import physics2D.physics.Part;
+import physics2D.physics.Physical;
 import physics2D.physics.World;
 
 public class StandardInputHandler implements InputHandler {
@@ -25,12 +34,21 @@ public class StandardInputHandler implements InputHandler {
 	public void mouseDown(Vec2 screenPos, int button, int modifiers) {
 		mouseDown[button] = true;
 		if(button == GLFW.GLFW_MOUSE_BUTTON_1){
-			Vec2 worldPos = Screen.mouseToWorldCoords(screenPos);
-			Part selectedPart = world.getPartAt(worldPos);
-			if(selectedPart != null){
-				onClickPart(worldPos, selectedPart);
+			switch(mode){
+			case STANDARD:
+				Vec2 worldPos = Screen.mouseToWorldCoords(screenPos);
+				Part selectedPart = world.getPartAt(worldPos);
+				if(selectedPart != null){
+					onClickPart(worldPos, selectedPart);
+				}
+				world.grabBlock(worldPos);
+				break;
+			case DRAWING:
+				int size = drawingPolygon.poly.size();
+				drawingPolygon.poly.set(size-1, Screen.mouseToWorldCoords(screenPos));
+				drawingPolygon.poly.add(Screen.mouseToWorldCoords(screenPos));
+				break;
 			}
-			world.grabBlock(worldPos);
 		}
 	}
 	
@@ -52,15 +70,30 @@ public class StandardInputHandler implements InputHandler {
 	
 	@Override
 	public void mouseMove(Vec2 newScreenPos) {
-		if(mouseDown[0])
+		
+		if(mode == InputMode.STANDARD && mouseDown[0])
 			world.dragBlock(Screen.mouseToWorldCoords(newScreenPos));
+		
+		if(mode == InputMode.DRAWING){
+			int size = drawingPolygon.poly.size();
+			drawingPolygon.poly.set(size-1, Screen.mouseToWorldCoords(newScreenPos));
+			
+		}
 		
 		if(mouseDown[1])
 			Screen.camera.move(Screen.mouseToWorldCoords(lastMousePos).subtract(Screen.mouseToWorldCoords(newScreenPos)));
 		
 		lastMousePos = newScreenPos;
 	}
-
+	
+	private enum InputMode{
+		STANDARD,
+		DRAWING
+	}
+	
+	public InputMode mode = InputMode.STANDARD;
+	private InProgressPolygon drawingPolygon = null;
+	
 	@Override
 	public void keyDown(int key, int scancode, int modifiers) {
 		keyDownOrRepeat(key, scancode, modifiers);
@@ -69,8 +102,54 @@ public class StandardInputHandler implements InputHandler {
 			Physics2D.SIMULATION_PAUSED = !Physics2D.SIMULATION_PAUSED;
 			System.out.println("Simulation "+((Physics2D.SIMULATION_PAUSED)?"paused":"unpaused"));
 			break;
-		
+		case GLFW.GLFW_KEY_N:
+			switch(mode){
+			case STANDARD:
+				setMode(InputMode.DRAWING);
+				break;
+			case DRAWING:
+				setMode(InputMode.STANDARD);
+				break;
+			}
 		}
+	}
+	
+	public void setMode(InputMode newMode){
+		switch(newMode){
+		case STANDARD:
+			Polygon poly = finishShapeDrawing();
+			if(poly != null){
+				Vec2 com = poly.getCenterOfMass();
+				Physical p = new Physical(new CFrame(com));
+				p.addPart(poly.translate(com.neg()), CFrame.IDENTITY, ObjectLibrary.BASIC);
+				world.addObject(p);
+			}
+			break;
+		case DRAWING:
+			beginShapeDrawing();
+			break;
+		}
+		mode = newMode;
+		System.out.println(newMode);
+	}
+	
+	public void beginShapeDrawing(){
+		if(mode != InputMode.STANDARD) return;
+		mode = InputMode.DRAWING;
+		drawingPolygon = Screen.addPolygon(new ArrayList<Vec2>(), Color.YELLOW.fuzzier());
+		Vec2 mousePos = Screen.mouseToWorldCoords(Screen.getMousePos());
+		drawingPolygon.poly.add(mousePos);
+	}
+	
+	public Polygon finishShapeDrawing(){
+		Screen.removeDrawable(drawingPolygon);
+		drawingPolygon.poly.remove(drawingPolygon.poly.size()-1);
+		Vec2[] polygon = drawingPolygon.poly.toArray(new Vec2[drawingPolygon.poly.size()]);
+		drawingPolygon = null;
+		if(polygon.length >= 3)
+			return new CompositePolygon(polygon);
+		else
+			return null;
 	}
 	
 	private void keyDownOrRepeat(int key, int scancode, int modifiers) {
