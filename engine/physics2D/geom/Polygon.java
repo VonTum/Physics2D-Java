@@ -284,18 +284,17 @@ public interface Polygon extends Shape {
 	@Override
 	public default double getInertialArea() {
 		double total = 0;
-		Vec2[] verts = getCorners();
 		Vec2 com = getCenterOfMass();
-		for(int i = 0; i < verts.length; i++)
-			verts[i] = verts[i].subtract(com);
+		Vec2[] verts = getCorners();
 		
+		Vec2 A = verts[verts.length-1].subtract(com);
 		for(int i = 0; i < verts.length; i++){
-			Vec2 A = verts[i];
-			Vec2 B = verts[(i+1)%verts.length];
+			Vec2 B = verts[i].subtract(com);
 			Vec2 D = B.subtract(A);
 			double Dx = D.x, Dy=D.y, Ax=A.x, Ay=A.y;
 			
 			total += Dx*Dy*(Dx*Dx-Dy*Dy)/4.0+Dx*Dy*(Ax*Dx-Ay*Dy)+Dx*Dy*(Ax*Ax-Ay*Ay)*1.5+Ax*Ax*Ax*Dy-Ay*Ay*Ay*Dx;
+			A=B;
 		}
 		return total/3.0;
 	}
