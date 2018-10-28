@@ -2,7 +2,7 @@ package physics2D.geom;
 
 import physics2D.math.Vec2;
 
-public class Triangle{
+public class Triangle {
 	public final Vec2 v1, v2, v3;
 	
 	public Triangle(Vec2 v1, Vec2 v2, Vec2 v3){

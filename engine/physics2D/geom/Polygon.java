@@ -2,13 +2,10 @@ package physics2D.geom;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import game.util.Color;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import physics2D.Debug;
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
 import physics2D.math.Range;
@@ -58,9 +55,6 @@ public interface Polygon extends Shape {
 		while(!polyParts.isEmpty()){
 			Vec2[] curPoly = polyParts.pop();
 			
-			polyParts.forEach((poly) -> {Debug.logPolygon(Color.TRANSPARENT, Color.BLACK, poly);});
-			decomposition.forEach((poly) -> {Debug.logPolygon(Color.GREEN.fuzzier(0.1), Color.DARK_GREEN.fuzzier(0.1), poly);});
-			Debug.logPolygon(Color.RED.fuzzier(0.2), Color.RED, curPoly);
 			int L = curPoly.length;
 			nextPoly:{
 				for(int i = 0; i < L; i++){
@@ -76,8 +70,6 @@ public interface Polygon extends Shape {
 						int bestCorner = -1;
 						double bestDist = Double.POSITIVE_INFINITY;
 						
-						Debug.logPoint(cur, game.util.Color.RED);
-						
 						// iterates over all corners from i+1, stops at the first concave corner
 						for(int j = (i+2)%L; j != (i-1+L)%L; j=(j+1)%L){
 							Vec2 otherPrev = curPoly[(j-1+L)%L];
@@ -86,17 +78,16 @@ public interface Polygon extends Shape {
 							Vec2 otherPrevToCur = otherCur.subtract(otherPrev);
 							Vec2 otherCurToNext = otherNext.subtract(otherCur);
 							
+							//delta goes from the current concave point to the currently examining point
 							Vec2 delta = otherCur.subtract(cur);
 							
 							if((curToNext.cross(delta) >= 0 || 
 								prevToCur.cross(delta) >= 0) &&
 								liesBetween(otherPrevToCur, otherCurToNext, delta.neg())){
 								
-								if(delta.lengthSquared() < bestDist){
+								if(delta.lengthSquared() < bestDist && !doesDeltaIntersectPolygon(curPoly, i, j)){
 									bestDist = delta.lengthSquared();
 									bestCorner = j;
-									
-									
 								}
 							}
 						}
@@ -105,21 +96,38 @@ public interface Polygon extends Shape {
 						
 						polyParts.push(Polygon.polygonFromTo(curPoly, i, chosenCorner));
 						polyParts.push(Polygon.polygonFromTo(curPoly, chosenCorner, i));
-						
-						Debug.pauseAndCommit();
 						break nextPoly;
 					}
 				}
 				
 				decomposition.add(curPoly);
-				Debug.pauseAndCommit();
 			}
 		}
 		
-		decomposition.forEach((poly) -> {Debug.logPolygon(Color.GREEN.fuzzier(0.1), Color.DARK_GREEN.fuzzier(0.1), poly);});
-		Debug.pauseAndCommit();
-		
 		return decomposition;
+	}
+	
+	/**
+	 * Returns whether a line between two points {@code poly[i]} and {@code poly[j]}
+	 * @param polygon
+	 * @param i index of first corner
+	 * @param j index of second corner
+	 * @return true if the line between i and j intersects the polygon
+	 */
+	public static boolean doesDeltaIntersectPolygon(Vec2[] polygon, int i, int j){
+		int L = polygon.length;
+		Vec2 origin = polygon[i];
+		Vec2 vector = polygon[j].subtract(origin);
+		
+		for(int k = (j+1)%L; k != (j-2+L)%L; k=(k+1)%L){
+			if(k == (i-1+L)%L || k == i) continue;
+			Vec2 cur = polygon[k];
+			Vec2 next = polygon[(k+1)%L];
+			if(Vec2.doLineSegsIntersectInclusive(vector, next.subtract(cur), cur.subtract(origin)))
+				return true;
+		}
+		
+		return false;
 	}
 	
 	public static boolean liesBetween(Vec2 prevToCur, Vec2 curToNext, Vec2 tested){

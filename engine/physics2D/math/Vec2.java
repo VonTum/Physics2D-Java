@@ -203,6 +203,22 @@ public class Vec2 {
 		return origin2.add(vec2.mul(a));
 	}
 	
+	/**
+	 * Returns whether two line segments intersect including the endpoints.<br>
+	 * A vector going through the start or end of the other vector will also yield true.
+	 * @param f the vector of the first line
+	 * @param g the vector of the second line
+	 * @param deltaOrigin the difference between the origins of the lines <code>origin2-origin1</code>
+	 * @return true if the lines intersect, false otherwise
+	 */
+	public static boolean doLineSegsIntersectInclusive(Vec2 f, Vec2 g, Vec2 deltaOrigin){
+		double cr = f.cross(g);
+		double t = deltaOrigin.cross(g)/cr;
+		double s = deltaOrigin.cross(f)/cr;
+		System.out.println("s:"+s+",t:"+t);
+		return s>=0.0&&s<=1.0 && t>=0.0&&t<=1.0;
+	}
+	
 	@Override
 	public String toString(){
 		return String.format("{x: %.9f, y: %.9f}", x, y);

@@ -31,7 +31,7 @@ public class Physics2D {
 		
 		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), ObjectLibrary.BASIC));
 		
-		new FluidWorld(20).build(w);
+		//new FluidWorld(20).build(w);
 		
 		
 		

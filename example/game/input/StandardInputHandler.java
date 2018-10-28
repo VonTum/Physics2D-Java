@@ -147,6 +147,8 @@ public class StandardInputHandler implements InputHandler {
 	}
 	
 	public Polygon finishShapeDrawing(){
+		if(mode != InputMode.DRAWING) return null;
+		mode = InputMode.STANDARD;
 		Screen.removeDrawable(drawingPolygon);
 		drawingPolygon.poly.remove(drawingPolygon.poly.size()-1);
 		Vec2[] polygon = drawingPolygon.poly.toArray(new Vec2[drawingPolygon.poly.size()]);

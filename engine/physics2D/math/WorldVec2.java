@@ -7,6 +7,10 @@ public class WorldVec2 {
 		this.vector = vector;
 	}
 	
+	public WorldVec2(double xo, double yo, double dx, double dy){
+		this(new Vec2(xo, yo), new Vec2(dx, dy));
+	}
+	
 	public Vec2 getEnd(){
 		return origin.add(vector);
 	}

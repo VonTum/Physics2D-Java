@@ -8,6 +8,7 @@ import java.util.List;
 
 import physics2D.geom.Shape;
 import physics2D.math.Vec2;
+import physics2D.math.WorldVec2;
 import physics2D.physics.Physical;
 import physics2D.physics.World;
 import game.Physics2D;
@@ -82,6 +83,12 @@ public class Debug {
 	}
 	public static void logPoint(Vec2 point, Color color){
 		if(MARK_POINTS) Screen.markPoint(point, color);
+	}
+	public static void logVector(WorldVec2 vec){
+		logVector(vec.origin, vec.vector);
+	}
+	public static void logVector(WorldVec2 vec, Color c){
+		logVector(vec.origin, vec.vector, c);
 	}
 	public static void logVector(Vec2 origin, Vec2 vector){
 		logVector(origin, vector, DEFAULT_COLOR);
@@ -185,6 +192,14 @@ public class Debug {
 	public static void pause(){
 		Screen.addDrawings();
 		p();
+	}
+	/**
+	 * Pauses the current execution and adds drawings
+	 * Prints <code>message</code>
+	 */
+	public static void pause(String message){
+		System.out.println(message);
+		pause();
 	}
 	/**
 	 * Pauses the current execution and commits drawings

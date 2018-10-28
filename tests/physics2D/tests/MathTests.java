@@ -162,4 +162,27 @@ public class MathTests {
 		
 		assertVecEquals(new Vec2(1, Math.tan(0.3)), new WorldVec2(Vec2.ZERO, Vec2.fromPolar(1, 0.3)).intersect(new WorldVec2(Vec2.UNITX, Vec2.UNITY)));
 	}
+	
+	@Test
+	public void testLineSegmentIntersect(){
+		WorldVec2[] intersectors = new WorldVec2[]{
+				new WorldVec2(0.0, 0.0,  1.0, 1.0),  new WorldVec2(1.0, 0.0,  -1.0, 1.0),
+				new WorldVec2(0.0, 0.0,  1.0, 1.0),  new WorldVec2(1.0, 0.0,  0.0, 1.0),
+				new WorldVec2(0.0, 0.0,  1.0, 1.0),  new WorldVec2(1.0, 2.0,  -0.5, -2.0),
+		};
+		
+		WorldVec2[] nonTersectors = new WorldVec2[]{
+				new WorldVec2(0.0, 0.0,  1.0, 1.0),  new WorldVec2(0.2, 0.0,  1.0, 1.0),
+				new WorldVec2(0.0, 0.0,  1.0, 1.0),  new WorldVec2(1.0, 0.0,  0.0, -1.0),
+				new WorldVec2(0.0, 0.0,  1.0, 1.0),  new WorldVec2(0.6, 0.5,  -0.5, -2.0),
+		};
+		
+		for(int i = 0; i < intersectors.length; i+=2){
+			assertTrue(Vec2.doLineSegsIntersectInclusive(intersectors[i].vector, intersectors[i+1].vector, intersectors[i+1].origin.subtract(intersectors[i].origin)));
+		}
+		
+		for(int i = 0; i < nonTersectors.length; i+=2){
+			assertFalse(Vec2.doLineSegsIntersectInclusive(nonTersectors[i].vector, nonTersectors[i+1].vector, nonTersectors[i+1].origin.subtract(nonTersectors[i].origin)));
+		}
+	}
 }

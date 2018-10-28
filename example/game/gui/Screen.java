@@ -54,11 +54,11 @@ public class Screen {
 	
 	private static final HashSet<Drawable> persistentDrawings = new HashSet<>();
 	
-	public static final boolean DRAW_BLOCK_DIRECTION = true;
-	public static final boolean DRAW_BLOCK_NORMALVECS = true;
-	public static final boolean DRAW_LOCAL_AXES = true;
-	public static final boolean DRAW_VERTEX_ORIENTATION = true;
-	public static final boolean DRAW_BLOCK_SPEEDS = true;
+	public static final boolean DRAW_BLOCK_DIRECTION = false;
+	public static final boolean DRAW_BLOCK_NORMALVECS = false;
+	public static final boolean DRAW_LOCAL_AXES = false;
+	public static final boolean DRAW_VERTEX_ORIENTATION = false;
+	public static final boolean DRAW_BLOCK_SPEEDS = false;
 	public static final boolean DRAW_CENTER_OF_MASS = true;
 	
 	static final int DEFAULT_SIZE = 920;
