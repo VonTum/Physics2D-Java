@@ -1,5 +1,6 @@
 package physics2D.geom;
 
+import physics2D.math.CFrame;
 import physics2D.math.Vec2;
 
 public class Rectangle extends ConvexPolygon {
@@ -16,6 +17,16 @@ public class Rectangle extends ConvexPolygon {
 		this.height = height;
 	}
 	
+	public Rectangle(CFrame location, double width, double height){
+		super(Polygon.transformToCFrame(new Vec2[]{	new Vec2(width/2, height/2), 
+							new Vec2(-width/2, height/2), 
+							new Vec2(-width/2, -height/2), 
+							new Vec2(width/2, -height/2)}, location));
+		
+		this.width = width;
+		this.height = height;
+	}
+	
 	@Override
 	public double getArea() {
 		return width * height;
@@ -26,7 +37,7 @@ public class Rectangle extends ConvexPolygon {
 		return width*height*(width*width+height*height)/12;
 	}
 	
-	@Override
+	/*@Override
 	public Vec2 getCenterOfMass(){
 		return Vec2.ZERO;
 	}
@@ -35,7 +46,7 @@ public class Rectangle extends ConvexPolygon {
 	public boolean containsPoint(Vec2 point) {
 		// Vec2 localPoint = getCFrame().globalToLocal(point);
 		return Math.abs(point.x) <= width/2 && Math.abs(point.y) <= height/2;
-	}
+	}*/
 	
 	@Override
 	public String toString(){

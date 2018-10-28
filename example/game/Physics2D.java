@@ -11,10 +11,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import physics2D.Debug;
-import physics2D.geom.ConvexPolygon;
 import physics2D.math.CFrame;
 import physics2D.math.Vec2;
-import physics2D.physics.Physical;
 import physics2D.physics.World;
 
 public class Physics2D {
@@ -33,7 +31,11 @@ public class Physics2D {
 		
 		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), ObjectLibrary.BASIC));
 		
-		w.addObject(ObjectLibrary.createHammer(new CFrame(0.0, 1.5, Math.PI*3/8)));
+		new FluidWorld(20).build(w);
+		
+		
+		
+		/*w.addObject(ObjectLibrary.createHammer(new CFrame(0.0, 1.5, Math.PI*3/8)));
 		
 		ConvexPolygon weirdthing = new ConvexPolygon(new Vec2[]{
 			new Vec2(0.1,0.1),
@@ -45,7 +47,7 @@ public class Physics2D {
 		Physical p = new Physical(CFrame.IDENTITY);
 		p.addPart(weirdthing, CFrame.IDENTITY, ObjectLibrary.BASIC.withDensity(1.0));
 		
-		w.addObject(p);
+		w.addObject(p);*/
 		
 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 		

@@ -23,19 +23,19 @@ public class ShowcaseWorld implements WorldBuilder {
 		Shape s = new Rectangle(new CFrame(0.4, 0.8, 0.1), 0.3, 0.2);
 		Shape s2 = new Rectangle(new CFrame(0.2, 0.6, 0.7), 0.1, 0.2);
 		Shape s3 = new Rectangle(new CFrame(0.5, 0.6, 0.3), 0.3, 0.05);
-		Physical physical = new Physical(s, s2, s3);
+		Physical physical = new Physical(ObjectLibrary.BASIC, s, s2, s3);
 		w.addObject(physical);
 		
 		Shape blockShape = new Rectangle(new CFrame(-0.4, 1.2, 0.1), 0.3, 0.2);
-		Physical block = new Physical(blockShape);
+		Physical block = new Physical(ObjectLibrary.BASIC, blockShape);
 		w.addObject(block);
 		
 		
 		
 		w.addObject(ObjectLibrary.createBowl(new CFrame(-0.2, 1.0, 0.0), basicProperties));
 		
-		PolygonTriangle t = new PolygonTriangle(new CFrame(new Vec2(0.9, 1.2), 0), 0.3, new Vec2(0.2, 0.2));
-		Physical trianglePhysical = new Physical(t);
+		PolygonTriangle t = new PolygonTriangle(new Vec2(0.2, 0.2), new Vec2(0.6, 0.2), new Vec2(0.3, 0.5));
+		Physical trianglePhysical = new Physical(ObjectLibrary.BASIC, t);
 		w.addObject(trianglePhysical);
 		
 		Box box = new Box(new Vec2(0.1, 1.0), RotMat2.IDENTITY, 0.3, 0.2, basicProperties);

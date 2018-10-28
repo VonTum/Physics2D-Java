@@ -62,6 +62,32 @@ public class Physical implements Locatable {
 		boundsCache = new BoundingBox(0.0, 0.0, 0.0, 0.0);
 	}
 	
+	/**
+	 * Construct a physical with the given properties for all parts
+	 * @param properties
+	 * @param shapes
+	 */
+	public Physical(PhysicalProperties properties, Shape... shapes){
+		Vec2 com = Vec2.ZERO;
+		double totalArea = 0;
+		for(Shape s:shapes){
+			double area = s.getArea();
+			com = com.add(s.getCenterOfMass().mul(area));
+			totalArea += area;
+		}
+		com = com.div(totalArea);
+		cframe = new CFrame(com);
+		
+		mass = 0;
+		inertia = 0;
+		boundsCache = new BoundingBox(0.0, 0.0, 0.0, 0.0);
+		
+		for(Shape s:shapes){
+			parts.add(new Part(this, s, CFrame.IDENTITY, properties));
+		}
+		recalculate();
+	}
+	
 	public void addPart(Shape s, CFrame relativePos, PhysicalProperties properties){
 		parts.add(new Part(this, s, relativePos, properties));
 		recalculate();
