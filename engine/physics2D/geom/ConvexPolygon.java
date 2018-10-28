@@ -1,48 +1,47 @@
 package physics2D.geom;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import physics2D.Debug;
 import physics2D.math.CFrame;
+import physics2D.math.NormalizedVec2;
+import physics2D.math.OrientedPoint;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 import physics2D.math.Vertex2;
+import physics2D.physics.DepthWithDirection;
 
-public class ConvexPolygon extends AbstractPolygon implements Convex, Polygon{
+public class ConvexPolygon implements Convex, Polygon{
 	
+	public final Vec2[] corners;
 	public ConvexPolygon(Vec2[] polygon) {
-		super(polygon);
+		this.corners = polygon;
 	}
-	
-	public ConvexPolygon(Vertex2[] vertexes) {
-		super(vertexes);
+	@Override
+	public Vec2[] getCorners() {
+		return corners;
 	}
 	
 	@Override
 	public boolean containsPoint(Vec2 point) {
-		for(Vertex2 vertex: getVertexes()){
-			Vec2 relativeVec = vertex.position.subtract(point);
-			if(vertex.normalVec.dot(relativeVec) < 0)
+		Vec2[] corners = getCorners();
+		Vec2 cur = corners[corners.length-1];
+		for(int i = 0; i < corners.length; i++){
+			Vec2 next = corners[i];
+			if(cur.subtract(point).cross(next.subtract(cur)) < 0)
 				return false;
+			
+			cur = next;
 		}
 		
 		return true;
 	}
 	
 	@Override
-	public ConvexPolygon transformToCFrame(CFrame frame){
-		Vertex2[] newVertexes = new Vertex2[vertexes.length];
-		
-		for(int i = 0; i < vertexes.length; i++)
-			newVertexes[i] = frame.localToGlobal(vertexes[i]);
-		
-		return new ConvexPolygon(newVertexes);
-	}
-	
-	@Override
 	public ConvexPolygon leftSlice(Vec2 origin, Vec2 direction){
-		return new ConvexPolygon(Vertex2.convertToVertexes(leftSlice(getCorners(), origin, direction)));
+		return new ConvexPolygon(leftSlice(getCorners(), origin, direction));
 	}
 	
 	public static Vec2[] leftSlice(Vec2[] poly, Vec2 origin, Vec2 direction){
@@ -100,6 +99,7 @@ public class ConvexPolygon extends AbstractPolygon implements Convex, Polygon{
 		return curPoly;
 	}
 	
+	
 	public static Triangle[] divideIntoTriangles(Vec2[] polygon){
 		Triangle[] triangles = new Triangle[polygon.length-2];
 		Vec2 mainCorner = polygon[polygon.length-1];
@@ -125,49 +125,9 @@ public class ConvexPolygon extends AbstractPolygon implements Convex, Polygon{
 	}
 	
 	@Override
-	public double getArea(){
-		double A = 0;
-		Vec2[] corners = getCorners();
-		for(int i = 0; i < corners.length-1; i++)
-			A += corners[i].cross(corners[i+1]);
-		A += corners[corners.length-1].cross(corners[0]);
-		
-		return A/2;
-	}
-	
-	public Vec2 getCenterOfMass(){
-		Vec2 total = Vec2.ZERO;
-		
-		Vec2[] corners = getCorners();
-		
-		for(int i=0; i < corners.length; i++)
-			total = total.add(corners[i].add(corners[(i+1)%corners.length]).mul(corners[i].cross(corners[(i+1)%corners.length])));
-		
-		return total.div(6*getArea());
-	}
-	
-	@Override
-	public double getInertialArea(){
-		Vec2 com = getCenterOfMass();
-		
-		double total = 0;
-		
-		for(Triangle t:divideIntoTriangles(getCorners()))
-			total+=t.getInertialArea()+t.getCenterOfMass().subtract(com).lengthSquared() * t.getArea();
-		
-		return total;
-	}
-	
-	@Override
 	public ConvexPolygon scale(double factor){
 		return new ConvexPolygon(Polygon.scaled(getCorners(), factor));
 	}
-
-	/*@Override
-	public List<OrientedPoint> getIntersectionPoints(Shape other) {
-		// TODO Auto-generated method stub
-		return null;
-	}*/
 
 	@Override
 	public List<? extends ConvexPolygon> convexDecomposition() {
@@ -215,6 +175,11 @@ public class ConvexPolygon extends AbstractPolygon implements Convex, Polygon{
 	}
 	
 	@Override
+	public ConvexPolygon transformToCFrame(CFrame frame){
+		return new ConvexPolygon(Polygon.transformToCFrame(getCorners(), frame));
+	}
+	
+	@Override
 	public ConvexPolygon translate(Vec2 offset){
 		return new ConvexPolygon(Polygon.translate(getCorners(), offset));
 	}
@@ -226,4 +191,46 @@ public class ConvexPolygon extends AbstractPolygon implements Convex, Polygon{
 	
 	@Override
 	public ConvexPolygon rotate(double angle){return rotate(RotMat2.rotTransform(angle));}
+
+	@Override
+	public List<OrientedPoint> getIntersectionPoints(Shape other) {
+		List<OrientedPoint> points = new ArrayList<OrientedPoint>();
+		for(Vertex2 vert:Vertex2.convertToVertexes(getCorners())){
+			if(other.containsPoint(vert.position))
+				points.add(new OrientedPoint(vert.position, vert.orientation));
+		}
+		return points;
+	}
+
+	/**
+	 * Gets all normal vectors of all sides, and ranks them based on their 'score'
+	 * 
+	 * This score is calculated as follows: 
+	 * 		score = -normalVec . point.orientation / depth
+	 * 
+	 * @param point
+	 * @return the vector to the nearest surface
+	 */
+	@Override
+	public DepthWithDirection getNormalVecAndDepthToSurface(Vec2 position, NormalizedVec2 orientation){
+		Vertex2[] vertexes = Vertex2.convertToVertexes(getCorners());
+		
+		double bestDepth = Double.NaN;
+		NormalizedVec2 bestNormalVec = null;
+		double bestScore = 0;
+		
+		for(int i = 0; i < vertexes.length; i++){
+			// Vec2 normalizedSide = vertexes[(i+1) % vertexes.length].position.subtract(vertexes[i].position).normalize();
+			NormalizedVec2 normalVec = vertexes[i].normalVec;
+			double depth = normalVec.rotate90CounterClockwise().pointToLineDistance(position.subtract(vertexes[i].position));
+			double score = -normalVec.dot(orientation) / depth;
+			if(score > bestScore){
+				bestScore = score;
+				bestDepth = depth;
+				bestNormalVec = normalVec;
+			}
+		}
+		
+		return new DepthWithDirection(bestNormalVec, bestDepth);
+	}
 }

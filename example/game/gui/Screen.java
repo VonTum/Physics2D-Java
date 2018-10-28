@@ -26,7 +26,6 @@ import org.lwjgl.opengl.GLCapabilities;
 import com.sun.org.apache.xpath.internal.operations.Or;
 
 import physics2D.Debug;
-import physics2D.geom.AbstractPolygon;
 import physics2D.geom.Convex;
 import physics2D.geom.Shape;
 import physics2D.math.BoundingBox;
@@ -55,11 +54,11 @@ public class Screen {
 	
 	private static final HashSet<Drawable> persistentDrawings = new HashSet<>();
 	
-	public static final boolean DRAW_BLOCK_DIRECTION = false;
-	public static final boolean DRAW_BLOCK_NORMALVECS = false;
-	public static final boolean DRAW_LOCAL_AXES = false;
-	public static final boolean DRAW_VERTEX_ORIENTATION = false;
-	public static final boolean DRAW_BLOCK_SPEEDS = false;
+	public static final boolean DRAW_BLOCK_DIRECTION = true;
+	public static final boolean DRAW_BLOCK_NORMALVECS = true;
+	public static final boolean DRAW_LOCAL_AXES = true;
+	public static final boolean DRAW_VERTEX_ORIENTATION = true;
+	public static final boolean DRAW_BLOCK_SPEEDS = true;
 	public static final boolean DRAW_CENTER_OF_MASS = true;
 	
 	static final int DEFAULT_SIZE = 920;
@@ -161,6 +160,10 @@ public class Screen {
 		double[] x = new double[1], y = new double[1];
 		GLFW.glfwGetCursorPos(window, x, y);
 		return new Vec2(x[0], y[0]);
+	}
+	
+	public static Vec2 getMouseWorldPos(){
+		return mouseToWorldCoords(getMousePos());
 	}
 	
 	private static World w;

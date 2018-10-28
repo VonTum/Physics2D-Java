@@ -1,6 +1,7 @@
 package game.input;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import game.ObjectLibrary;
 import game.Physics2D;
@@ -10,8 +11,12 @@ import game.util.Color;
 
 import org.lwjgl.glfw.GLFW;
 
+import physics2D.Debug;
 import physics2D.geom.CompositePolygon;
+import physics2D.geom.Convex;
+import physics2D.geom.ConvexPolygon;
 import physics2D.geom.Polygon;
+import physics2D.geom.Triangle;
 import physics2D.math.CFrame;
 import physics2D.math.Vec2;
 import physics2D.physics.Part;
@@ -169,6 +174,26 @@ public class StandardInputHandler implements InputHandler {
 		case GLFW.GLFW_KEY_G:
 			System.out.println("Garbagecollecting!");
 			System.gc();
+			break;
+		case GLFW.GLFW_KEY_C:
+			System.out.println("Convex decomposition");
+			Part p = world.getPartAt(Screen.getMouseWorldPos());
+			if(p == null) break;
+			List<? extends Convex> convexes = p.getGlobalShape().convexDecomposition();
+			
+			for(Convex c:convexes)
+				Debug.logShape(c, Color.GREEN.fuzzier(), Color.DARK_GREEN);
+			Screen.addDrawings();
+			break;
+		case GLFW.GLFW_KEY_T:
+			System.out.println("Triangulate");
+			Part prt = world.getPartAt(Screen.getMouseWorldPos());
+			if(prt == null) break;
+			Triangle[] triangles = ((Polygon) prt.getGlobalShape()).divideIntoTriangles();
+			
+			for(Triangle t:triangles)
+				Debug.logShape(new ConvexPolygon(t.getCorners()), Color.random().fuzzier(), Color.TRANSPARENT);
+			Screen.addDrawings();
 			break;
 		}
 		

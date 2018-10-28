@@ -68,13 +68,13 @@ public class Debug {
 		logForce(subject, relativeAttachment, force, DEFAULT_FORCE_COLOR);
 	}
 	public static void logForce(Physical subject, Vec2 relativeAttachment, Vec2 force, Color color) {
-		if(age >= 4900 && force.lengthSquared()/subject.mass >= 205.0){
+		/*if(age >= 4900 && force.lengthSquared()/subject.mass >= 205.0){
 			System.out.println("Large force: " + force + " causing accel: " + force.div(subject.mass));
 			Screen.markVector(subject.getCFrame().localToGlobal(relativeAttachment), force, Color.RED);
 			Screen.markPoint(subject.getCFrame().localToGlobal(relativeAttachment), Color.YELLOW);
 			subject.parts.get(0).properties = subject.parts.get(0).properties.withColor(Color.YELLOW);
 			stop = true;
-		}
+		}*/
 		if(MARK_FORCES) Screen.markVector(subject.getCFrame().localToGlobal(relativeAttachment), force, color);
 	}
 	public static void logPoint(Vec2 point){
@@ -229,6 +229,7 @@ public class Debug {
 	 * @param r Runnable to run every refresh
 	 */
 	public static void haltWithTickAction(Runnable r){
+		if(PAUSE_ENABLED)
 		while(!Screen.shouldClose()){
 			r.run();
 			Debug.endTick();

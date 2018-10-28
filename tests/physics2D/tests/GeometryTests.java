@@ -48,7 +48,7 @@ public class GeometryTests extends GUITestSuite {
 	public void testPolygonContainsPoint() {
 		Vertex2[] vertexes = Vertex2.convertToVertexes(polygon);
 		
-		AbstractPolygon p = new DummyPolygon(vertexes);
+		Polygon p = new CompositePolygon(polygon);
 		
 		Vec2[] givenInsidePoints = {new Vec2(0.0, 0.0), new Vec2(-1.0, 0.7), new Vec2(-2.0, 1.0)};
 		Vec2[] givenOutsidePoints = {new Vec2(-5.0, 1.0), new Vec2(-5.0, 0.7), new Vec2(-5.0, 1.5)};
@@ -97,10 +97,10 @@ public class GeometryTests extends GUITestSuite {
 		
 		RegularPolygon triangle = new RegularPolygon(3, new Vec2(1.0, 1.0));
 		
-		Vec2 d = triangle.vertexes[1].position.subtract(triangle.vertexes[0].position);
-		Vec2 center = triangle.vertexes[1].position.add(triangle.vertexes[0].position).div(2);
+		Vec2 d = triangle.getCorners()[1].subtract(triangle.getCorners()[0]);
+		Vec2 center = triangle.getCorners()[1].add(triangle.getCorners()[0]).div(2);
 		
-		PolygonTriangle tri = new PolygonTriangle(d.length(), Vec2.UNITY.mul(triangle.vertexes[2].position.subtract(center).length()));
+		PolygonTriangle tri = new PolygonTriangle(d.length(), Vec2.UNITY.mul(triangle.getCorners()[2].subtract(center).length()));
 		
 		assertEquals(tri.getArea(), triangle.getArea(), DELTA);
 		assertEquals(tri.getInertialArea(), triangle.getInertialArea(), DELTA);
@@ -128,18 +128,19 @@ public class GeometryTests extends GUITestSuite {
 	
 	@Test
 	public void testIntersect(){
-		Vec2[] poly1 = new PolygonTriangle(0.8, new Vec2(0.2, 0.4)).getCorners();
-		Vec2[] poly2 = new RegularPolygon(12, new Vec2(0.2, 0)).transformToCFrame(new CFrame(-0.2, 0.0)).getCorners();
-		Vec2[] poly3 = new DummyPolygon(convexPolygon).scale(0.2).transformToCFrame(new CFrame(-0.17, -0.03)).getCorners();
-		
-		Debug.logPolygon(Color.GREEN.fuzzier(), poly1);
-		Debug.logPolygon(Color.BLUE.fuzzier(), poly2);
-		Vec2[] intersect1 = ConvexPolygon.intersection(poly1, poly2);
-		Debug.logPolygon(Color.CYAN.fuzzier(), intersect1);
-		Debug.logPolygon(Color.ORANGE.fuzzier(0.5), poly3);
-		Vec2[] intersect2 = ConvexPolygon.intersection(intersect1, poly3);
-		Debug.logPolygon(Color.RED, intersect2);
-		
+		Debug.haltWithTickAction(() -> {
+			Vec2[] poly1 = new PolygonTriangle(0.8, new Vec2(0.2, 0.4)).getCorners();
+			Vec2[] poly2 = new RegularPolygon(12, new Vec2(0.2, 0)).transformToCFrame(new CFrame(-0.2, 0.0)).getCorners();
+			Vec2[] poly3 = new CompositePolygon(convexPolygon).scale(0.2).transformToCFrame(new CFrame(Debug.getMouseWorldPos())).getCorners();
+			
+			Debug.logPolygon(Color.GREEN.fuzzier(), poly1);
+			Debug.logPolygon(Color.BLUE.fuzzier(), poly2);
+			Vec2[] intersect1 = ConvexPolygon.intersection(poly1, poly2);
+			Debug.logPolygon(Color.CYAN.fuzzier(), intersect1);
+			Debug.logPolygon(Color.ORANGE.fuzzier(0.5), poly3);
+			Vec2[] intersect2 = ConvexPolygon.intersection(intersect1, poly3);
+			Debug.logPolygon(Color.RED, intersect2);
+		});
 	}
 	
 	/*@Test
@@ -223,19 +224,5 @@ public class GeometryTests extends GUITestSuite {
 				}
 			}
 		});
-	}
-	
-	private static final class DummyPolygon extends AbstractPolygon {
-		public DummyPolygon(Vec2... polygon) {
-			super(polygon);
-		}
-		
-		public DummyPolygon(Vertex2... vertexes) {
-			super(vertexes);
-		}
-		
-		@Override public double getArea() {return 0;}
-		@Override public double getInertialArea() {return 0;}
-		@Override public Vec2 getCenterOfMass() {return Vec2.ZERO;}
 	}
 }

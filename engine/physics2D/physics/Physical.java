@@ -194,7 +194,7 @@ public class Physical implements Locatable {
 		if(anchored) return;
 		totalForce = totalForce.add(force);
 		
-		Debug.logForce(this, Vec2.ZERO, force);
+		Debug.logForce(this, cframe.globalToLocal(getCenterOfMass()), force);
 	}
 	
 	/**

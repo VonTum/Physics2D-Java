@@ -5,7 +5,6 @@ import physics2D.math.Vec2;
 
 public class RegularPolygon extends ConvexPolygon {
 	
-	private final int cornerCount;
 	private final Vec2 startPoint;
 	
 	private static Vec2[] getRegularPolygonWithCornerCount(int n, Vec2 startPoint){
@@ -21,20 +20,19 @@ public class RegularPolygon extends ConvexPolygon {
 	
 	public RegularPolygon(int cornerCount, Vec2 startPoint) {
 		super(getRegularPolygonWithCornerCount(cornerCount, startPoint));
-		this.cornerCount = cornerCount;
 		this.startPoint = startPoint;
 	}
 	
 	@Override
 	public double getArea() {
-		return startPoint.cross(vertexes[1].position.subtract(vertexes[0].position)) / 2 * cornerCount;
+		return startPoint.cross(getCorners()[1].subtract(getCorners()[0])) / 2 * getCorners().length;
 	}
 
 	@Override
 	public double getInertialArea() {
-		Vec2 edge = vertexes[1].position.subtract(vertexes[0].position);
+		Vec2 edge = getCorners()[1].subtract(getCorners()[0]);
 		double triangleInertia = startPoint.cross(edge) * edge.lengthSquared() / 48 + Math.pow(startPoint.cross(edge), 3) / (4*edge.lengthSquared());
-		return triangleInertia * cornerCount;
+		return triangleInertia * getCorners().length;
 	}
 	
 	@Override
