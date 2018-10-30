@@ -153,7 +153,7 @@ public class StandardInputHandler implements InputHandler {
 		drawingPolygon.poly.remove(drawingPolygon.poly.size()-1);
 		Vec2[] polygon = drawingPolygon.poly.toArray(new Vec2[drawingPolygon.poly.size()]);
 		drawingPolygon = null;
-		if(polygon.length >= 3)
+		if(polygon.length >= 3 && Polygon.isValid(polygon))
 			return new CompositePolygon(polygon);
 		else
 			return null;

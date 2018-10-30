@@ -201,7 +201,7 @@ public class ConvexPolygon implements Convex, Polygon{
 		}
 		return points;
 	}
-
+	
 	/**
 	 * Gets all normal vectors of all sides, and ranks them based on their 'score'
 	 * 
@@ -213,6 +213,9 @@ public class ConvexPolygon implements Convex, Polygon{
 	 */
 	@Override
 	public DepthWithDirection getNormalVecAndDepthToSurface(Vec2 position, NormalizedVec2 orientation){
+		
+		System.out.println("Used getNormalVec1AndDepthToSurface!");
+		
 		Vertex2[] vertexes = Vertex2.convertToVertexes(getCorners());
 		
 		double bestDepth = Double.NaN;

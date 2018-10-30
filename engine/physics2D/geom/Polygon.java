@@ -25,8 +25,6 @@ public interface Polygon extends Shape {
 	@Override
 	public Polygon scale(double factor);
 	
-	
-	
 	public default Triangle[] divideIntoTriangles(){
 		Triangle[] triangles = new Triangle[getCorners().length-2];
 		int i = 0;
@@ -279,25 +277,42 @@ public interface Polygon extends Shape {
 	
 	@Override
 	public default double getArea() {
+		return getArea(getCorners());
+	}
+	
+	/**
+	 * Returns the total area of the given polygon
+	 * @param verts polygon
+	 * @return Polygon area
+	 */
+	public static double getArea(Vec2[] verts){
 		double total = 0;
-		Vec2[] verts = getCorners();
+		Vec2 A = verts[verts.length-1];
 		for(int i = 0; i < verts.length; i++){
-			Vec2 A = verts[i];
-			Vec2 B = verts[(i+1)%verts.length];
+			Vec2 B = verts[i];
 			total += (B.x+A.x)*(B.y-A.y);
+			A = B;
 		}
 		return total/2.0;
 	}
 	
 	@Override
 	public default double getInertialArea() {
+		return getInertialArea(getCorners(), getCenterOfMass());
+	}
+	
+	/**
+	 * Returns the inertial area relative to {@code refPoint}
+	 * @param verts corners of polygon
+	 * @param refPoint reference point to which to take inertial area
+	 * @return the inertial area
+	 */
+	public static double getInertialArea(Vec2[] verts, Vec2 refPoint) {
 		double total = 0;
-		Vec2 com = getCenterOfMass();
-		Vec2[] verts = getCorners();
 		
-		Vec2 A = verts[verts.length-1].subtract(com);
+		Vec2 A = verts[verts.length-1].subtract(refPoint);
 		for(int i = 0; i < verts.length; i++){
-			Vec2 B = verts[i].subtract(com);
+			Vec2 B = verts[i].subtract(refPoint);
 			Vec2 D = B.subtract(A);
 			double Dx = D.x, Dy=D.y, Ax=A.x, Ay=A.y;
 			
@@ -314,16 +329,39 @@ public interface Polygon extends Shape {
 	public default Vec2 getCenterOfMass(){
 		double x=0,y=0;
 		Vec2[] verts = getCorners();
+		Vec2 A = verts[verts.length-1];
 		for(int i = 0; i < verts.length; i++){
-			Vec2 A = verts[i];
-			Vec2 B = verts[(i+1)%verts.length];
+			Vec2 B = verts[i];
 			Vec2 D = B.subtract(A);
 			double Dx = D.x, Dy=D.y, Ax=A.x, Ay=A.y;
 			
 			x+=Dy*(Dx*Dx/3+Dx*Ax+Ax*Ax);
 			y+=Dx*(Dy*Dy/3+Dy*Ay+Ay*Ay);
+			
+			A=B;
 		}
 		return new Vec2(x, -y).div(2*getArea());
+	}
+	
+	/**
+	 * Returns the center of mass of the given polygon
+	 * @param verts polygon
+	 * @return Center of mass of the Polygon
+	 */
+	public static Vec2 getCenterOfMass(Vec2[] verts){
+		double x=0,y=0;
+		Vec2 A = verts[verts.length-1];
+		for(int i = 0; i < verts.length; i++){
+			Vec2 B = verts[i];
+			Vec2 D = B.subtract(A);
+			double Dx = D.x, Dy=D.y, Ax=A.x, Ay=A.y;
+			
+			x+=Dy*(Dx*Dx/3+Dx*Ax+Ax*Ax);
+			y+=Dx*(Dy*Dy/3+Dy*Ay+Ay*Ay);
+			
+			A=B;
+		}
+		return new Vec2(x, -y).div(2*getArea(verts));
 	}
 
 	@Override
@@ -428,6 +466,35 @@ public interface Polygon extends Shape {
 			current = next;
 			prevDelta = delta;
 		}
+		return true;
+	}
+	
+	/**
+	 * Returns true if the given polygon is positively oriented, meaning all vertexes follow eachother in a clockwise direction
+	 * @param polygon the polygon to be checked
+	 * @return true if the given polygon is positively oriented
+	 */
+	public static boolean isPositivelyOriented(Vec2[] polygon){
+		return getArea(polygon) > 0;
+	}
+	
+	/**
+	 * Checks if the given polygon is valid
+	 * 
+	 * For a polygon to be valid it must:
+	 * - be positively oriented {@link #isPositivelyOriented(Vec2[]) isPositivelyOriented()}
+	 * - no edge may intersect another edge
+	 * 
+	 * @param polygon the polygon to be checked
+	 * @return True if the given polygon is valid, false otherwise
+	 */
+	public static boolean isValid(Vec2[] polygon){
+		if(!isPositivelyOriented(polygon)) return false;
+		
+		for(int i = 0; i < polygon.length; i++)
+			if(doesDeltaIntersectPolygon(polygon, i, (i+1)%polygon.length))
+				return false;
+		
 		return true;
 	}
 	

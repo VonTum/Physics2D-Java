@@ -26,7 +26,9 @@ import org.lwjgl.opengl.GLCapabilities;
 import com.sun.org.apache.xpath.internal.operations.Or;
 
 import physics2D.Debug;
+import physics2D.geom.CompositePolygon;
 import physics2D.geom.Convex;
+import physics2D.geom.Polygon;
 import physics2D.geom.Shape;
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
@@ -658,7 +660,11 @@ public class Screen {
 		
 		@Override
 		public void draw(){
-			drawPolygon(poly, color, edge);
+			Vec2[] p = poly.toArray(new Vec2[poly.size()]);
+			if(Polygon.isValid(p))
+				drawShape(new CompositePolygon(p), color, edge);
+			else
+				drawPolygon(poly, Color.TRANSPARENT, edge);
 		}
 	}
 }
