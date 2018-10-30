@@ -398,7 +398,7 @@ public interface Polygon extends Shape {
 	}
 	
 	
-
+	
 	/*@Override
 	public Shape union(Shape other) {
 		// TODO Auto-generated method stub
@@ -550,5 +550,21 @@ public interface Polygon extends Shape {
 	
 	public static Vec2[] rotate(Vec2[] poly, double angle){
 		return rotate(poly, RotMat2.rotTransform(angle));
+	}
+
+	public static Vec2[] reverse(Vec2[] polygon){
+		Vec2[] newPoly = new Vec2[polygon.length];
+		for(int i = 0; i < polygon.length; i++)
+			newPoly[polygon.length-i-1] = polygon[i];
+		
+		return newPoly;
+	}
+	
+	public static void inPlaceReverse(Vec2[] polygon){
+		for(int i = 0; i < polygon.length/2; i++){
+			Vec2 tmp = polygon[i];
+			polygon[i] = polygon[polygon.length-1-i];
+			polygon[polygon.length-1-i] = tmp;
+		}
 	}
 }
