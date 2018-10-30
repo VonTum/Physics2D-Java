@@ -153,9 +153,10 @@ public class StandardInputHandler implements InputHandler {
 		drawingPolygon.poly.remove(drawingPolygon.poly.size()-1);
 		Vec2[] polygon = drawingPolygon.poly.toArray(new Vec2[drawingPolygon.poly.size()]);
 		drawingPolygon = null;
-		if(polygon.length >= 3 && Polygon.isValid(polygon))
+		if(polygon.length >= 3){
+			if(!Polygon.isPositivelyOriented(polygon)) polygon = Polygon.reverse(polygon);
 			return new CompositePolygon(polygon);
-		else
+		}else
 			return null;
 	}
 	
@@ -196,6 +197,17 @@ public class StandardInputHandler implements InputHandler {
 			for(Triangle t:triangles)
 				Debug.logShape(new ConvexPolygon(t.getCorners()), Color.random().fuzzier(), Color.TRANSPARENT);
 			Screen.addDrawings();
+			break;
+		case GLFW.GLFW_KEY_A:
+			System.out.println("Anchoring");
+			Part ap = world.getPartAt(Screen.getMouseWorldPos());
+			if(ap == null) break;
+			
+			if(ap.parent.isAnchored())
+				ap.parent.unAnchor();
+			else
+				ap.parent.anchor();
+			
 			break;
 		}
 		

@@ -661,6 +661,7 @@ public class Screen {
 		@Override
 		public void draw(){
 			Vec2[] p = poly.toArray(new Vec2[poly.size()]);
+			if(!Polygon.isPositivelyOriented(p)) p = Polygon.reverse(p);
 			if(Polygon.isValid(p))
 				drawShape(new CompositePolygon(p), color, edge);
 			else
