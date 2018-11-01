@@ -26,43 +26,43 @@ public class World {
 		this.gravity = gravity;
 	}
 	
-	public void addObject(Physical... objects){
+	public synchronized void addObject(Physical... objects){
 		for(Physical p:objects)
 			physicals.add(p);
 	}
 	
-	public void addConstraint(Constraint... consts){
+	public synchronized void addConstraint(Constraint... consts){
 		for(Constraint c:consts)
 			constraints.add(c);
 	}
 	
-	public void updatePhysicals(double deltaT) {
+	public synchronized void tick(double deltaT) {
+		updatePhysicals(deltaT);
+		applyExternalForces(deltaT);
+		computeInteractions(deltaT);
+		executeConstraints(deltaT);
+	}
+	
+	private void updatePhysicals(double deltaT) {
 		for(Physical p:physicals){
 			p.update(deltaT);
 		}
 	}
 	
-	public void applyExternalForces(double deltaT) {
+	private void applyExternalForces(double deltaT) {
 		for(Physical p:physicals){
 			// gravity
 			p.applyForceAtCenterOfMass(gravity.mul(p.getMass()));
 		}
 	}
 	
-	public void computeInteractions(double deltaT) {
+	private void computeInteractions(double deltaT) {
 		for(int i = 0; i < physicals.size(); i++){
 			for(int j = i+1; j < physicals.size(); j++){
 				physicals.get(i).interactWith(physicals.get(j));
 				Debug.logInteraction(physicals.get(i), physicals.get(j));
 			}
 		}
-	}
-	
-	public void tick(double deltaT) {
-		updatePhysicals(deltaT);
-		applyExternalForces(deltaT);
-		computeInteractions(deltaT);
-		executeConstraints(deltaT);
 	}
 	
 	private void executeConstraints(double deltaT){

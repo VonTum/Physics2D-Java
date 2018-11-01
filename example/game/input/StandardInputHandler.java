@@ -210,6 +210,21 @@ public class StandardInputHandler implements InputHandler {
 				ap.parent.anchor();
 			
 			break;
+		case GLFW.GLFW_KEY_F1:
+			Debug.MARK_FORCES = !Debug.MARK_FORCES;
+			break;
+		case GLFW.GLFW_KEY_F2:
+			Debug.MARK_VECTORS = !Debug.MARK_VECTORS;
+			break;
+		case GLFW.GLFW_KEY_F3:
+			Debug.MARK_POINTS = !Debug.MARK_POINTS;
+			break;
+		case GLFW.GLFW_KEY_F4:
+			Debug.MARK_SHAPES = !Debug.MARK_SHAPES;
+			break;
+		case GLFW.GLFW_KEY_F5:
+			Screen.DRAW_CENTER_OF_MASS = !Screen.DRAW_CENTER_OF_MASS;
+			break;
 		}
 		
 		// System.out.println(GLFW.glfwGetKeyName(key, scancode));

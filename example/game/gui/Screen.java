@@ -60,7 +60,7 @@ public class Screen {
 	public static final boolean DRAW_LOCAL_AXES = false;
 	public static final boolean DRAW_VERTEX_ORIENTATION = false;
 	public static final boolean DRAW_BLOCK_SPEEDS = false;
-	public static final boolean DRAW_CENTER_OF_MASS = true;
+	public static boolean DRAW_CENTER_OF_MASS = false;
 	
 	static final int DEFAULT_SIZE = 920;
 

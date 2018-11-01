@@ -15,7 +15,10 @@ import physics2D.geom.Rectangle;
 import physics2D.geom.RegularPolygon;
 import physics2D.math.CFrame;
 import physics2D.math.Vec2;
+import physics2D.physics.Constraint;
 import physics2D.physics.Physical;
+import physics2D.physics.PinConstraint;
+import physics2D.physics.SpringPinConstraint;
 import physics2D.physics.World;
 
 public class Physics2D {
@@ -44,7 +47,18 @@ public class Physics2D {
 		
 		new FluidWorld(20).build(w);
 		
+		w.addObject(ObjectLibrary.createBowl(new CFrame(-3.0, 0.7), ObjectLibrary.BASIC));
 		
+		Physical p1 = new Physical(new CFrame(-2.0, 0.5));
+		p1.addPart(new Rectangle(0.7, 0.2), CFrame.IDENTITY, ObjectLibrary.BASIC);
+		
+		Physical p2 = new Physical(new CFrame(-2.0, 1.2));
+		p2.addPart(new Rectangle(0.1, 0.2), CFrame.IDENTITY, ObjectLibrary.BASIC);
+		
+		Constraint c = new SpringPinConstraint(p1, p2, new CFrame(0.0, 1.0), new CFrame(0.0, 0.3), 10);
+		
+		w.addObject(p1, p2);
+		w.addConstraint(c);
 		
 		w.addObject(ObjectLibrary.createHammer(new CFrame(-0.5, 1.0, Math.PI*3/8)));
 		

@@ -20,10 +20,10 @@ public class Debug {
 	
 	private static final boolean PAUSE_ENABLED = "true".equalsIgnoreCase(System.getProperty("pauseEnabled"));
 	
-	private static final boolean MARK_FORCES = true;
-	private static final boolean MARK_POINTS = true;
-	private static final boolean MARK_VECTORS = true;
-	private static final boolean MARK_SHAPES = true;
+	public static boolean MARK_FORCES = false;
+	public static boolean MARK_POINTS = false;
+	public static boolean MARK_VECTORS = false;
+	public static boolean MARK_SHAPES = false;
 	
 	private static final HashSet<Class<?>> loggedClasses = new HashSet<>();
 	private static final HashSet<String> loggedMethods = new HashSet<>();

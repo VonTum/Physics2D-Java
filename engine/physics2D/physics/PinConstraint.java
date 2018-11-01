@@ -7,7 +7,7 @@ import physics2D.Debug;
 
 public class PinConstraint extends Constraint {
 	
-	private static final double PIN_DELTA_STRENGTH = 3000;
+	private static final double PIN_DELTA_STRENGTH = 300;
 	private static final double PIN_MOVEMENT_STRENGTH = 30;
 	
 	
