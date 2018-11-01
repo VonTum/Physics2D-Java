@@ -172,7 +172,7 @@ public class StandardInputHandler implements InputHandler {
 			System.out.println("Simulation speed: " + Physics2D.SIMULATION_SPEED);
 			break;
 		case GLFW.GLFW_KEY_O:
-			Physics2D.runTick(world);
+			if(Physics2D.SIMULATION_PAUSED) Physics2D.runTick(world);
 			System.out.println("Proceeded one step");
 			break;
 		case GLFW.GLFW_KEY_G:

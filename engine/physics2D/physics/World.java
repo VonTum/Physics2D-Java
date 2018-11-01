@@ -78,16 +78,17 @@ public class World {
 				
 				magnetSubject.applyTorque(rotTorque);
 				
-				Vec2 relSpeedForce = magnetSubject.getSpeedOfPoint(attachPoint).mul(-Constants.MAGNET_MOVEMENT_CANCEL_FACTOR*magnetSubject.mass);
+				Vec2 relSpeedForce = magnetSubject.getSpeedOfPoint(attachPoint).mul(-Constants.MAGNET_MOVEMENT_CANCEL_FACTOR);
 				
 				if(relSpeedForce.dot(delta) > 0){
 					relSpeedForce.add(delta.mul(relSpeedForce.dot(delta)));
 				}
 				
-				Vec2 deltaForce = delta.mul(magnetSubject.getMass() * Constants.MAGNET_STRENGTH);
+				Vec2 deltaForce = delta.mul(Constants.MAGNET_STRENGTH);
+				Vec2 relAttach = attachPoint.subtract(magnetSubject.getCenterOfMass());
 				
-				magnetSubject.applyForce(deltaForce, attachPoint);
-				magnetSubject.applyForce(relSpeedForce, attachPoint);
+				if(!deltaForce.equals(Vec2.ZERO)) magnetSubject.applyForce(deltaForce.mul(magnetSubject.getPointInertia(relAttach, deltaForce)), attachPoint);
+				if(!relSpeedForce.equals(Vec2.ZERO)) magnetSubject.applyForce(relSpeedForce.mul(magnetSubject.getPointInertia(relAttach, relSpeedForce)), attachPoint);
 				
 				
 				
