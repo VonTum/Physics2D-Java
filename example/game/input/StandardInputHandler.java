@@ -210,6 +210,9 @@ public class StandardInputHandler implements InputHandler {
 				ap.parent.anchor();
 			
 			break;
+		case GLFW.GLFW_KEY_D:
+			world.removeObject(world.getPartAt(Screen.getMouseWorldPos()));
+			break;
 		case GLFW.GLFW_KEY_F1:
 			Debug.MARK_FORCES = !Debug.MARK_FORCES;
 			break;

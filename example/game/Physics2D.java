@@ -17,7 +17,6 @@ import physics2D.math.CFrame;
 import physics2D.math.Vec2;
 import physics2D.physics.Constraint;
 import physics2D.physics.Physical;
-import physics2D.physics.PinConstraint;
 import physics2D.physics.SpringPinConstraint;
 import physics2D.physics.World;
 

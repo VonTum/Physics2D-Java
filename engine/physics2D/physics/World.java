@@ -31,6 +31,28 @@ public class World {
 			physicals.add(p);
 	}
 	
+	public synchronized boolean removeObject(Part part) {
+		for(int i = 0; i < physicals.size(); i++){
+			Physical p = physicals.get(i);
+			if(p.parts.remove(part)){
+				if(p.parts.size() == 0){
+					physicals.remove(i);
+					
+					for(int j = 0; j < constraints.size(); j++){
+						Constraint c = constraints.get(j);
+						if(c.part1 == p || c.part2 == p){
+							constraints.remove(j);
+						}
+					}
+				}else{
+					p.recalculate();
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public synchronized void addConstraint(Constraint... consts){
 		for(Constraint c:consts)
 			constraints.add(c);
