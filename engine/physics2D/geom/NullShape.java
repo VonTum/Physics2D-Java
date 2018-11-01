@@ -5,24 +5,11 @@ import java.util.List;
 
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
-import physics2D.math.NormalizedVec2;
-import physics2D.math.OrientedPoint;
 import physics2D.math.Range;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
-import physics2D.physics.DepthWithDirection;
 
 public final class NullShape implements Shape, Convex {
-	
-	@Override
-	public List<OrientedPoint> getIntersectionPoints(Shape other) {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public DepthWithDirection getNormalVecAndDepthToSurface(Vec2 position, NormalizedVec2 orientation) {
-		return null;
-	}
 
 	@Override
 	public boolean intersects(Shape other) {

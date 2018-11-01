@@ -15,11 +15,17 @@ public interface Convex extends Shape {
 	public Convex intersection(Convex other);
 	public Convex leftSlice(Vec2 origin, Vec2 direction);
 	
-	public default BasisWithDirection getNearestExit(Convex other){
+	/**
+	 * Returns the shortest distance this Convex would have to move to exit {@code other}
+	 * 
+	 * movement can only happen along SAT directions
+	 * 
+	 * @param other
+	 * @return
+	 */
+	public default Vec2 getNearestExit(Convex other){
 		Vec2[] SATDirs = getSATDirections();
-		Vec2[] otherSATDirs = other.getSATDirections();
 		
-		boolean callerIsBase = false;
 		Vec2 bestDir = new Vec2(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 		
 		for(Vec2 dir:SATDirs){
@@ -33,36 +39,11 @@ public interface Convex extends Shape {
 			
 			Vec2 depthVec = dir.reProject(w);
 			if(depthVec.lengthSquared() < bestDir.lengthSquared()){
-				callerIsBase = true;
-				bestDir = depthVec.rotate90CounterClockwise();
+				bestDir = depthVec;
 			}
 		}
-		for(Vec2 dir:otherSATDirs){
-			Range r1 = getBoundsAlongDirection(dir);
-			Range r2 = other.getBoundsAlongDirection(dir);
-			if(r1.isDisjunct(r2)) return null;
-			double d1 = r2.max-r1.min;
-			double d2 = r1.max-r2.min;
-			
-			double w = (d1 < d2)? -d1:d2;
-			
-			Vec2 depthVec = dir.reProject(w);
-			if(depthVec.lengthSquared() < bestDir.lengthSquared()){
-				callerIsBase = false;
-				bestDir = depthVec.rotate90Clockwise();
-			}
-		}
-		return new BasisWithDirection(callerIsBase, bestDir);
-	}
-	public static final class BasisWithDirection {
-		/** Denotes which of the objects' is determined to be the base where the other is the intersector
-		 * <br><br>true for caller is base<br>false for operand is base */
-		public final boolean callerIsBase;
-		public final Vec2 direction;
-		public BasisWithDirection(boolean callerIsBase, Vec2 direction){
-			this.callerIsBase = callerIsBase;
-			this.direction = direction;
-		}
+		
+		return bestDir.rotate90CounterClockwise();
 	}
 	
 	/**

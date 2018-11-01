@@ -1,17 +1,12 @@
 package physics2D.geom;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import physics2D.Debug;
 import physics2D.math.CFrame;
-import physics2D.math.NormalizedVec2;
-import physics2D.math.OrientedPoint;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
-import physics2D.math.Vertex2;
-import physics2D.physics.DepthWithDirection;
 
 public class ConvexPolygon implements Convex, Polygon{
 	
@@ -191,49 +186,4 @@ public class ConvexPolygon implements Convex, Polygon{
 	
 	@Override
 	public ConvexPolygon rotate(double angle){return rotate(RotMat2.rotTransform(angle));}
-
-	@Override
-	public List<OrientedPoint> getIntersectionPoints(Shape other) {
-		List<OrientedPoint> points = new ArrayList<OrientedPoint>();
-		for(Vertex2 vert:Vertex2.convertToVertexes(getCorners())){
-			if(other.containsPoint(vert.position))
-				points.add(new OrientedPoint(vert.position, vert.orientation));
-		}
-		return points;
-	}
-	
-	/**
-	 * Gets all normal vectors of all sides, and ranks them based on their 'score'
-	 * 
-	 * This score is calculated as follows: 
-	 * 		score = -normalVec . point.orientation / depth
-	 * 
-	 * @param point
-	 * @return the vector to the nearest surface
-	 */
-	@Override
-	public DepthWithDirection getNormalVecAndDepthToSurface(Vec2 position, NormalizedVec2 orientation){
-		
-		System.out.println("Used getNormalVec1AndDepthToSurface!");
-		
-		Vertex2[] vertexes = Vertex2.convertToVertexes(getCorners());
-		
-		double bestDepth = Double.NaN;
-		NormalizedVec2 bestNormalVec = null;
-		double bestScore = 0;
-		
-		for(int i = 0; i < vertexes.length; i++){
-			// Vec2 normalizedSide = vertexes[(i+1) % vertexes.length].position.subtract(vertexes[i].position).normalize();
-			NormalizedVec2 normalVec = vertexes[i].normalVec;
-			double depth = normalVec.rotate90CounterClockwise().pointToLineDistance(position.subtract(vertexes[i].position));
-			double score = -normalVec.dot(orientation) / depth;
-			if(score > bestScore){
-				bestScore = score;
-				bestDepth = depth;
-				bestNormalVec = normalVec;
-			}
-		}
-		
-		return new DepthWithDirection(bestNormalVec, bestDepth);
-	}
 }

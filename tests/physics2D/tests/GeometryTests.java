@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import physics2D.Debug;
 import physics2D.geom.*;
-import physics2D.geom.Convex.BasisWithDirection;
 import physics2D.math.CFrame;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
@@ -190,17 +189,14 @@ public class GeometryTests extends GUITestSuite {
 			Debug.logShape(poly1, Color.TRANSPARENT, Color.RED);
 			Debug.logShape(poly2, Color.TRANSPARENT, Color.GREEN);
 			
-			BasisWithDirection bd = poly1.getNearestExit(poly2);
+			Vec2 bd1 = poly1.getNearestExit(poly2);
+			Vec2 bd2 = poly2.getNearestExit(poly1);
 			
-			if(bd != null){
-				if(bd.callerIsBase){
-					Debug.logVector(poly1.getCenterOfMass(), bd.direction, Color.RED);
-					Debug.logShape(poly2.translate(bd.direction), Color.BLUE.fuzzier(0.2));
-				}else{
-					Debug.logVector(poly2.getCenterOfMass(), bd.direction, Color.GREEN);
-					Debug.logShape(poly1.translate(bd.direction), Color.BLUE.fuzzier(0.2));
-				}
-			}
+			if(bd1 == null || bd2 == null) return;
+			Vec2 direction = (bd1.lengthSquared() < bd2.lengthSquared())? bd1: bd2;
+			
+			Debug.logVector(poly1.getCenterOfMass(), direction, Color.RED);
+			Debug.logShape(poly2.translate(direction), Color.BLUE.fuzzier(0.2));
 		});
 	}
 	
@@ -213,16 +209,14 @@ public class GeometryTests extends GUITestSuite {
 			Debug.logShape(poly1, Color.TRANSPARENT, Color.RED);
 			Debug.logShape(poly2, Color.TRANSPARENT, Color.GREEN);
 			
-			BasisWithDirection bd = poly1.getNearestExit(poly2);
-			if(bd != null){
-				if(bd.callerIsBase){
-					Debug.logVector(poly1.getCenterOfMass(), bd.direction, Color.RED);
-					Debug.logShape(poly2.translate(bd.direction), Color.BLUE.fuzzier(0.2));
-				}else{
-					Debug.logVector(poly2.getCenterOfMass(), bd.direction, Color.GREEN);
-					Debug.logShape(poly1.translate(bd.direction), Color.BLUE.fuzzier(0.2));
-				}
-			}
+			Vec2 bd1 = poly1.getNearestExit(poly2);
+			Vec2 bd2 = poly2.getNearestExit(poly1);
+			
+			if(bd1 == null || bd2 == null) return;
+			Vec2 direction = (bd1.lengthSquared() < bd2.lengthSquared())? bd1: bd2;
+			
+			Debug.logVector(poly1.getCenterOfMass(), direction, Color.RED);
+			Debug.logShape(poly2.translate(direction), Color.BLUE.fuzzier(0.2));
 		});
 	}
 }

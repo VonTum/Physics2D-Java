@@ -4,25 +4,13 @@ import java.util.List;
 
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
-import physics2D.math.NormalizedVec2;
-import physics2D.math.OrientedPoint;
 import physics2D.math.Range;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
-import physics2D.physics.DepthWithDirection;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public interface Shape {
 	
-	/**
-	 * returns a list of points of this object that intersect other
-	 * 
-	 * @param other shape to be intersected
-	 * @return All points for which other.containsPoint(p)
-	 */
-	public List<OrientedPoint> getIntersectionPoints(Shape other);
-	public default DepthWithDirection getNormalVecAndDepthToSurface(OrientedPoint point){return getNormalVecAndDepthToSurface(point.position, point.orientation);};
-	public DepthWithDirection getNormalVecAndDepthToSurface(Vec2 position, NormalizedVec2 orientation);
 	public default boolean intersects(Shape other){
 		//quickfail on disjunct bounding boxes
 		if(!getBoundingBox().intersects(other.getBoundingBox())) return false;

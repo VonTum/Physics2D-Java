@@ -10,7 +10,6 @@ import physics2D.Debug;
 import physics2D.geom.Shape;
 import physics2D.math.BoundingBox;
 import physics2D.math.CFrame;
-import physics2D.math.Constants;
 import physics2D.math.Mat2;
 import physics2D.math.NormalizedVec2;
 import physics2D.math.OrientedPoint;
@@ -97,48 +96,11 @@ public class Physical implements Locatable {
 		if(this.boundsCache.intersects(otherObj.boundsCache)){
 			for(Part cur:parts){
 				for(Part other:otherObj.parts){
-					cur.getIntersectionPoints(other).forEach((point) -> {
-						double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
-						handleIntersectionPoint(other, smallestInertia, point);
-					});
-					other.getIntersectionPoints(cur).forEach((point) -> {
-						double smallestInertia = Math.min(getPointInertia(point), otherObj.getPointInertia(point));
-						otherObj.handleIntersectionPoint(cur, smallestInertia, point);
-					});
+					
+					cur.interactWith(other);
 				}
 			}
 		}
-	}
-	
-	private void handleIntersectionPoint(Part otherPart, double smallestInertia, OrientedPoint point) {
-		Vec2 position = point.position;
-		DepthWithDirection d = otherPart.getGlobalShape().getNormalVecAndDepthToSurface(point);
-		
-		NormalizedVec2 normalVec = d.direction;
-		
-		Debug.logVector(position, normalVec, Color.CYAN.darker());
-		
-		Vec2 repulsionForce = d.getVecToSurface().mul(Constants.REPULSION_FACTOR*smallestInertia);
-		
-		Vec2 relativeVelocity = this.getSpeedOfPoint(position).subtract(otherPart.getSpeedOfPoint(position));
-		
-		double normalComponent = normalVec.dot(relativeVelocity);
-		double sidewaysComponent = normalVec.cross(relativeVelocity);
-		
-		Debug.logVector(position, Vec2.UNITX.mul(sidewaysComponent), Color.GREEN);
-		Debug.logVector(position, Vec2.UNITY.mul(normalComponent), Color.RED);
-		
-		if(normalComponent > 0)
-			normalComponent = normalComponent * otherPart.properties.stickyness;
-		
-		sidewaysComponent = sidewaysComponent * otherPart.properties.friction;
-		
-		Vec2 normalForce = normalVec.mul(-normalComponent * Constants.VELOCITY_STOP_FACTOR * smallestInertia);
-		Vec2 frictionForce = normalVec.rotate90CounterClockwise().mul(-sidewaysComponent * Constants.VELOCITY_STOP_FACTOR * smallestInertia);
-		
-		this.actionReaction(otherPart.parent, position, repulsionForce);
-		this.actionReaction(otherPart.parent, position, normalForce);
-		this.actionReaction(otherPart.parent, position, frictionForce);
 	}
 	
 	public void actionReaction(Physical other, Vec2 globalPos, Vec2 force){
@@ -169,6 +131,22 @@ public class Physical implements Locatable {
 		return 1/(movementFactor + rotationFactor);
 	}
 	
+	/**
+	 * gets the point inertia of a given point in a given direction, the ratio of Force to Acceleration
+	 * 
+	 * getPointInertia(...) == F / a
+	 * 
+	 * @param relativePosition position relative to center of mass
+	 * @param direction direction, absolute
+	 * @return The inertia of the given point in the given direction
+	 */
+	public double getPointInertia(Vec2 relativePosition, Vec2 direction){
+		if(anchored) return Double.POSITIVE_INFINITY;
+		double movementFactor = 1/getMass();
+		double rotationFactor = Math.abs(relativePosition.cross(relativePosition.cross(direction)).dot(direction) / (getInertia()*direction.lengthSquared()));
+		return 1/(movementFactor + rotationFactor);
+	}
+	
 	public double getAngularImpulse(){
 		return angularVelocity * inertia;
 	}
@@ -176,7 +154,7 @@ public class Physical implements Locatable {
 	/**
 	 * Returns a matrix describing the given point's reaction to a force
 	 * 
-	 * PointAccel = M*Force
+	 * <code>PointAccel = M*Force</code>
 	 * 
 	 * @param point <i>global</i>
 	 * @return

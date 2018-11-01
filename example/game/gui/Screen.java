@@ -38,7 +38,6 @@ import physics2D.math.Vec2;
 import physics2D.math.Vertex2;
 import physics2D.math.WorldVec2;
 import physics2D.physics.Constraint;
-import physics2D.physics.DepthWithDirection;
 import physics2D.physics.Part;
 import physics2D.physics.Physical;
 import physics2D.physics.World;

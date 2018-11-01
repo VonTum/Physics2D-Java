@@ -45,8 +45,9 @@ public class StandardInputHandler implements InputHandler {
 				Part selectedPart = world.getPartAt(worldPos);
 				if(selectedPart != null){
 					onClickPart(worldPos, selectedPart);
+					System.out.println("Grabbing block: " + selectedPart);
+					world.grabBlock(worldPos);
 				}
-				world.grabBlock(worldPos);
 				break;
 			case DRAWING:
 				int size = drawingPolygon.poly.size();

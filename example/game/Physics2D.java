@@ -11,14 +11,17 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import physics2D.Debug;
+import physics2D.geom.Rectangle;
+import physics2D.geom.RegularPolygon;
 import physics2D.math.CFrame;
 import physics2D.math.Vec2;
+import physics2D.physics.Physical;
 import physics2D.physics.World;
 
 public class Physics2D {
 	
 	public static double SIMULATION_SPEED = 1.0;
-	public static final int SIMULATION_REPEATS_PER_TICK = 10;
+	public static final int SIMULATION_REPEATS_PER_TICK = 5;
 	public static boolean SIMULATION_PAUSED = true;
 	
 	public static final double deltaT = 0.01 / SIMULATION_REPEATS_PER_TICK;
@@ -30,14 +33,22 @@ public class Physics2D {
 		Screen.init(handler);
 		
 		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), ObjectLibrary.BASIC));
+		RegularPolygon circle = new RegularPolygon(200, new Vec2(0.3, 0.0));
+		Physical cir = new Physical(new CFrame(1.5, 0.7));
+		cir.addPart(circle, CFrame.IDENTITY, ObjectLibrary.BASIC.withStickyness(1.0));
+		w.addObject(cir);
 		
-		//new FluidWorld(20).build(w);
+		w.addObject(new Physical(ObjectLibrary.BASIC.withStickyness(1.0), new Rectangle(0.4, 0.4).translate(new Vec2(4.0, 1.0))));
+		w.addObject(new Physical(ObjectLibrary.BASIC.withStickyness(1.0), new Rectangle(0.4, 0.4).translate(new Vec2(4.0, 1.4))));
+		w.addObject(new Physical(ObjectLibrary.BASIC.withStickyness(1.0), new Rectangle(0.4, 0.4).translate(new Vec2(4.0, 1.8))));
+		
+		new FluidWorld(20).build(w);
 		
 		
 		
-		/*w.addObject(ObjectLibrary.createHammer(new CFrame(0.0, 1.5, Math.PI*3/8)));
+		w.addObject(ObjectLibrary.createHammer(new CFrame(-0.5, 1.0, Math.PI*3/8)));
 		
-		ConvexPolygon weirdthing = new ConvexPolygon(new Vec2[]{
+		/*ConvexPolygon weirdthing = new ConvexPolygon(new Vec2[]{
 			new Vec2(0.1,0.1),
 			new Vec2(0.3,0.5),
 			new Vec2(0.0,0.7),
