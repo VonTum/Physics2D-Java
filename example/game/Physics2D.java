@@ -37,14 +37,15 @@ public class Physics2D {
 		w.addObject(ObjectLibrary.createFloor(new CFrame(0.0, 0.0), ObjectLibrary.BASIC));
 		RegularPolygon circle = new RegularPolygon(200, new Vec2(0.3, 0.0));
 		Physical cir = new Physical(new CFrame(1.5, 0.7));
-		cir.addPart(circle, CFrame.IDENTITY, ObjectLibrary.BASIC.withStickyness(1.0));
+		cir.addPart(circle, CFrame.IDENTITY, ObjectLibrary.BASIC);
 		w.addObject(cir);
 		
 		w.addObject(new Physical(ObjectLibrary.BASIC.withStickyness(1.0), new Rectangle(0.4, 0.4).translate(new Vec2(4.0, 1.0))));
 		w.addObject(new Physical(ObjectLibrary.BASIC.withStickyness(1.0), new Rectangle(0.4, 0.4).translate(new Vec2(4.0, 1.4))));
 		w.addObject(new Physical(ObjectLibrary.BASIC.withStickyness(1.0), new Rectangle(0.4, 0.4).translate(new Vec2(4.0, 1.8))));
 		
-		new FluidWorld(20).build(w);
+		int fluidAmount = (args.length > 0)? Integer.parseInt(args[0]): 20;
+		new FluidWorld(fluidAmount).build(w);
 		
 		w.addObject(ObjectLibrary.createBowl(new CFrame(-3.0, 0.7), ObjectLibrary.BASIC));
 		

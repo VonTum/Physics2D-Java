@@ -193,10 +193,10 @@ public class GeometryTests extends GUITestSuite {
 			Vec2 bd2 = poly2.getNearestExit(poly1);
 			
 			if(bd1 == null || bd2 == null) return;
-			Vec2 direction = (bd1.lengthSquared() < bd2.lengthSquared())? bd1: bd2;
+			Vec2 direction = (bd1.lengthSquared() < bd2.lengthSquared())? bd1.neg(): bd2;
 			
 			Debug.logVector(poly1.getCenterOfMass(), direction, Color.RED);
-			Debug.logShape(poly2.translate(direction), Color.BLUE.fuzzier(0.2));
+			Debug.logShape(poly1.translate(direction), Color.BLUE.fuzzier(0.2));
 		});
 	}
 	
@@ -213,10 +213,10 @@ public class GeometryTests extends GUITestSuite {
 			Vec2 bd2 = poly2.getNearestExit(poly1);
 			
 			if(bd1 == null || bd2 == null) return;
-			Vec2 direction = (bd1.lengthSquared() < bd2.lengthSquared())? bd1: bd2;
+			Vec2 direction = (bd1.lengthSquared() < bd2.lengthSquared())? bd1.neg(): bd2;
 			
 			Debug.logVector(poly1.getCenterOfMass(), direction, Color.RED);
-			Debug.logShape(poly2.translate(direction), Color.BLUE.fuzzier(0.2));
+			Debug.logShape(poly1.translate(direction), Color.BLUE.fuzzier(0.2));
 		});
 	}
 }

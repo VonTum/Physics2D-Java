@@ -156,7 +156,8 @@ public class StandardInputHandler implements InputHandler {
 		drawingPolygon = null;
 		if(polygon.length >= 3){
 			if(!Polygon.isPositivelyOriented(polygon)) polygon = Polygon.reverse(polygon);
-			return new CompositePolygon(polygon);
+			if(Polygon.isValid(polygon)) return new CompositePolygon(polygon);
+			else return null;
 		}else
 			return null;
 	}
