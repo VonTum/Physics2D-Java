@@ -17,7 +17,7 @@ public class CompositePolygon implements Polygon {
 		List<Vec2[]> d = Polygon.convexDecomposition(outline);
 		decomposition = new ConvexPolygon[d.size()];
 		for(int i = 0; i < d.size(); i++)
-			decomposition[i] = new ConvexPolygon(d.get(i));
+			decomposition[i] = new SimpleConvexPolygon(d.get(i));
 	}
 	
 	private CompositePolygon(Vec2[] outline, ConvexPolygon[] decomposition){

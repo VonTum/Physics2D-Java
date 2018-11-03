@@ -96,10 +96,7 @@ public class GeometryTests extends GUITestSuite {
 		
 		RegularPolygon triangle = new RegularPolygon(3, new Vec2(1.0, 1.0));
 		
-		Vec2 d = triangle.getCorners()[1].subtract(triangle.getCorners()[0]);
-		Vec2 center = triangle.getCorners()[1].add(triangle.getCorners()[0]).div(2);
-		
-		PolygonTriangle tri = new PolygonTriangle(d.length(), Vec2.UNITY.mul(triangle.getCorners()[2].subtract(center).length()));
+		Triangle tri = new Triangle(triangle.getCorners()[0], triangle.getCorners()[1], triangle.getCorners()[2]);
 		
 		assertEquals(tri.getArea(), triangle.getArea(), DELTA);
 		assertEquals(tri.getInertialArea(), triangle.getInertialArea(), DELTA);
@@ -109,7 +106,7 @@ public class GeometryTests extends GUITestSuite {
 	public void testIntersection(){
 		Rectangle r1 = new Rectangle(0.3, 0.1);
 		Rectangle r2 = new Rectangle(0.2, 0.2);
-		ConvexPolygon b2 = new PolygonTriangle(0.3, new Vec2(0.2, 0.1));
+		ConvexPolygon b2 = new Triangle(new Vec2(-0.1, 0.0), new Vec2(0.1, 0.0), new Vec2(0.2, 0.1));
 		
 		Debug.logShape(r1, Color.BLUE);
 		
@@ -128,7 +125,7 @@ public class GeometryTests extends GUITestSuite {
 	@Test
 	public void testIntersect(){
 		Debug.haltWithTickAction(() -> {
-			Vec2[] poly1 = new PolygonTriangle(0.8, new Vec2(0.2, 0.4)).getCorners();
+			Vec2[] poly1 = {new Vec2(-0.4, 0.0), new Vec2(0.4, 0.0), new Vec2(0.0, 0.8)};
 			Vec2[] poly2 = new RegularPolygon(12, new Vec2(0.2, 0)).transformToCFrame(new CFrame(-0.2, 0.0)).getCorners();
 			Vec2[] poly3 = new CompositePolygon(convexPolygon).scale(0.2).transformToCFrame(new CFrame(Debug.getMouseWorldPos())).getCorners();
 			
@@ -183,8 +180,8 @@ public class GeometryTests extends GUITestSuite {
 		
 		Debug.haltWithTickAction(() -> {
 			
-			ConvexPolygon poly1 = new ConvexPolygon(convexPolygon).translate(Debug.getMouseWorldPos());
-			ConvexPolygon poly2 = new ConvexPolygon(spheroid);
+			ConvexPolygon poly1 = new SimpleConvexPolygon(convexPolygon).translate(Debug.getMouseWorldPos());
+			ConvexPolygon poly2 = new SimpleConvexPolygon(spheroid);
 			
 			Debug.logShape(poly1, Color.TRANSPARENT, Color.RED);
 			Debug.logShape(poly2, Color.TRANSPARENT, Color.GREEN);

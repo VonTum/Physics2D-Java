@@ -14,8 +14,8 @@ import org.lwjgl.glfw.GLFW;
 import physics2D.Debug;
 import physics2D.geom.CompositePolygon;
 import physics2D.geom.Convex;
-import physics2D.geom.ConvexPolygon;
 import physics2D.geom.Polygon;
+import physics2D.geom.SimpleConvexPolygon;
 import physics2D.geom.Triangle;
 import physics2D.math.CFrame;
 import physics2D.math.Vec2;
@@ -197,7 +197,7 @@ public class StandardInputHandler implements InputHandler {
 			Triangle[] triangles = ((Polygon) prt.getGlobalShape()).divideIntoTriangles();
 			
 			for(Triangle t:triangles)
-				Debug.logShape(new ConvexPolygon(t.getCorners()), Color.random().fuzzier(), Color.TRANSPARENT);
+				Debug.logShape(new SimpleConvexPolygon(t.getCorners()), Color.random().fuzzier(), Color.TRANSPARENT);
 			Screen.addDrawings();
 			break;
 		case GLFW.GLFW_KEY_A:

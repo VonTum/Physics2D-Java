@@ -40,7 +40,7 @@ public interface Polygon extends Shape {
 		ArrayList<Vec2[]> d = convexDecomposition(getCorners());
 		ArrayList<ConvexPolygon> convexDecomp = new ArrayList<ConvexPolygon>(d.size());
 		for(int i = 0; i < d.size(); i++)
-			convexDecomp.set(i, new ConvexPolygon(d.get(i)));
+			convexDecomp.set(i, new SimpleConvexPolygon(d.get(i)));
 		
 		return convexDecomp;
 	}

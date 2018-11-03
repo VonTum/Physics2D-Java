@@ -8,19 +8,28 @@ import physics2D.math.CFrame;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 
-public class ConvexPolygon implements Convex, Polygon{
-	
-	public final Vec2[] corners;
-	public ConvexPolygon(Vec2[] polygon) {
-		this.corners = polygon;
-	}
-	@Override
-	public Vec2[] getCorners() {
-		return corners;
-	}
+public interface ConvexPolygon extends Convex, Polygon{
 	
 	@Override
-	public boolean containsPoint(Vec2 point) {
+	public ConvexPolygon leftSlice(Vec2 origin, Vec2 direction);
+	
+	@Override
+	public ConvexPolygon scale(double factor);
+	
+	@Override
+	public ConvexPolygon transformToCFrame(CFrame frame);
+	
+	@Override
+	public ConvexPolygon translate(Vec2 offset);
+	
+	@Override
+	public ConvexPolygon rotate(RotMat2 rotation);
+	
+	@Override
+	public default ConvexPolygon rotate(double angle){return rotate(RotMat2.rotTransform(angle));}
+	
+	@Override
+	public default boolean containsPoint(Vec2 point) {
 		Vec2[] corners = getCorners();
 		Vec2 cur = corners[corners.length-1];
 		for(int i = 0; i < corners.length; i++){
@@ -32,11 +41,6 @@ public class ConvexPolygon implements Convex, Polygon{
 		}
 		
 		return true;
-	}
-	
-	@Override
-	public ConvexPolygon leftSlice(Vec2 origin, Vec2 direction){
-		return new ConvexPolygon(leftSlice(getCorners(), origin, direction));
 	}
 	
 	public static Vec2[] leftSlice(Vec2[] poly, Vec2 origin, Vec2 direction){
@@ -109,7 +113,7 @@ public class ConvexPolygon implements Convex, Polygon{
 	}
 	
 	@Override
-	public Vec2[] getSATDirections(){
+	public default Vec2[] getSATDirections(){
 		Vec2[] corners = getCorners();
 		Vec2[] directions = new Vec2[corners.length];
 		for(int i = 0; i < corners.length-1; i++)
@@ -118,19 +122,14 @@ public class ConvexPolygon implements Convex, Polygon{
 		
 		return directions;
 	}
-	
-	@Override
-	public ConvexPolygon scale(double factor){
-		return new ConvexPolygon(Polygon.scaled(getCorners(), factor));
-	}
 
 	@Override
-	public List<? extends ConvexPolygon> convexDecomposition() {
+	public default List<? extends ConvexPolygon> convexDecomposition() {
 		return Arrays.asList(new ConvexPolygon[]{this});
 	}
 	
 	@Override
-	public Triangle[] divideIntoTriangles(){
+	public default Triangle[] divideIntoTriangles(){
 		Vec2[] corners = getCorners();
 		Triangle[] triangles = new Triangle[corners.length-2];
 		
@@ -141,7 +140,7 @@ public class ConvexPolygon implements Convex, Polygon{
 	}
 
 	@Override
-	public Convex intersection(Convex other) {
+	public default Convex intersection(Convex other) {
 		Vec2[] corners = getCorners();
 		Vec2 curCorner = corners[corners.length-1];
 		Convex currentConv = other;
@@ -155,7 +154,7 @@ public class ConvexPolygon implements Convex, Polygon{
 		return currentConv;
 	}
 	
-	public ConvexPolygon intersection(ConvexPolygon other){
+	public default ConvexPolygon intersection(ConvexPolygon other){
 		Vec2[] corners = getCorners();
 		Vec2 curCorner = corners[corners.length-1];
 		ConvexPolygon currentConv = other;
@@ -168,22 +167,4 @@ public class ConvexPolygon implements Convex, Polygon{
 		}
 		return currentConv;
 	}
-	
-	@Override
-	public ConvexPolygon transformToCFrame(CFrame frame){
-		return new ConvexPolygon(Polygon.transformToCFrame(getCorners(), frame));
-	}
-	
-	@Override
-	public ConvexPolygon translate(Vec2 offset){
-		return new ConvexPolygon(Polygon.translate(getCorners(), offset));
-	}
-	
-	@Override
-	public ConvexPolygon rotate(RotMat2 rotation){
-		return new ConvexPolygon(Polygon.rotate(getCorners(), rotation));
-	}
-	
-	@Override
-	public ConvexPolygon rotate(double angle){return rotate(RotMat2.rotTransform(angle));}
 }

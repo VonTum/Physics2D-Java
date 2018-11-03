@@ -3,7 +3,7 @@ package physics2D.geom;
 import physics2D.math.RotMat2;
 import physics2D.math.Vec2;
 
-public class RegularPolygon extends ConvexPolygon {
+public class RegularPolygon extends SimpleConvexPolygon {
 	
 	private final Vec2 startPoint;
 	
