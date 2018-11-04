@@ -9,7 +9,7 @@ import java.util.List;
 import physics2D.geom.Shape;
 import physics2D.math.Vec2;
 import physics2D.math.WorldVec2;
-import physics2D.physics.Physical;
+import physics2D.physics.RigidBody;
 import physics2D.physics.World;
 import game.Physics2D;
 import game.gui.Screen;
@@ -65,10 +65,10 @@ public class Debug {
 		return false;
 	}
 	
-	public static void logForce(Physical subject, Vec2 relativeAttachment, Vec2 force){
+	public static void logForce(RigidBody subject, Vec2 relativeAttachment, Vec2 force){
 		logForce(subject, relativeAttachment, force, DEFAULT_FORCE_COLOR);
 	}
-	public static void logForce(Physical subject, Vec2 relativeAttachment, Vec2 force, Color color) {
+	public static void logForce(RigidBody subject, Vec2 relativeAttachment, Vec2 force, Color color) {
 		/*if(age >= 4900 && force.lengthSquared()/subject.mass >= 205.0){
 			System.out.println("Large force: " + force + " causing accel: " + force.div(subject.mass));
 			Screen.markVector(subject.getCFrame().localToGlobal(relativeAttachment), force, Color.RED);
@@ -96,7 +96,7 @@ public class Debug {
 	public static void logVector(Vec2 origin, Vec2 vector, Color color){
 		if(MARK_VECTORS) Screen.markVector(origin, vector, color);
 	}
-	public static void logInteraction(Physical first, Physical second){
+	public static void logInteraction(RigidBody first, RigidBody second){
 		INTERACTION_COUNT++;
 	}
 	public static void logPolygon(Vec2... polygon){
@@ -301,12 +301,12 @@ public class Debug {
 	}
 	
 	private static class LoggedObject {
-		public final Physical subject;
+		public final RigidBody subject;
 		public final String type, group;
 		public final Vec2 gPosition;
 		public final Object data;
 		
-		public LoggedObject(Physical subject, String type, String group, Vec2 gPosition, Object data){
+		public LoggedObject(RigidBody subject, String type, String group, Vec2 gPosition, Object data){
 			this.subject = subject;
 			this.type = type;
 			this.group = group;

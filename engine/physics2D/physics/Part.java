@@ -15,9 +15,9 @@ public class Part {
 	public final Shape shape;
 	public CFrame relativeCFrame;
 	public PhysicalProperties properties;
-	public final Physical parent;
+	public final RigidBody parent;
 	
-	public Part(Physical parent, Shape shape, CFrame relativeCFrame, PhysicalProperties properties) {
+	public Part(RigidBody parent, Shape shape, CFrame relativeCFrame, PhysicalProperties properties) {
 		this.shape = shape;
 		this.relativeCFrame = relativeCFrame;
 		this.parent = parent;
@@ -25,7 +25,7 @@ public class Part {
 	}
 	
 	public CFrame getGlobalCFrame(){
-		return parent.cframe.localToGlobal(relativeCFrame);
+		return parent.getCFrame().localToGlobal(relativeCFrame);
 	}
 	
 	public Shape getGlobalShape(){
