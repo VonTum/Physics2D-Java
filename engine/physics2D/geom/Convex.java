@@ -12,7 +12,25 @@ public interface Convex extends Shape {
 	 * @return an array of the found directions
 	 */
 	public Vec2[] getSATDirections();
+	
+	/**
+	 * Returns the intersection of this Convex with another convex, this intersection will either be a new Convex, or the NullShape
+	 * @param other other shape to intersect
+	 * @return the intersection of both
+	 */
 	public Convex intersection(Convex other);
+	
+	/**
+	 * Slices this shape along the given direction, and returns the slice to the left of the cut.
+	 * 
+	 * A leftSlice of a Shape which is entirely to the left of the slicing axis is the shape itself.
+	 * 
+	 * A leftSlice of a Shape which is entirely to the right should return a NullShape
+	 * 
+	 * @param origin origin of the slice line, may be moved along {@code direction}
+	 * @param direction direction of the slice line
+	 * @return the left slice of the shape
+	 */
 	public Convex leftSlice(Vec2 origin, Vec2 direction);
 	
 	/**
@@ -56,6 +74,11 @@ public interface Convex extends Shape {
 		return convex;
 	}
 	
+	/**
+	 * Checks if two Convexes intersect, equivalent to <br> {@code !(this.intersect(other) instanceof NullShape)}
+	 * @param other other shape
+	 * @return True if they intersect, False otherwise
+	 */
 	public default boolean intersects(Convex other){
 		for(Vec2 direction:getSATDirections())
 			if(getBoundsAlongDirection(direction).isDisjunct(other.getBoundsAlongDirection(direction)))
@@ -66,6 +89,11 @@ public interface Convex extends Shape {
 		return true;
 	}
 	
+	/**
+	 * Checks if this Convex intersects with the given Shape, equivalent to <br> {@code !(this.intersect(other) instanceof NullShape)}
+	 * @param other other shape
+	 * @return True if they intersect, False otherwise
+	 */
 	@Override
 	public default boolean intersects(Shape other){
 		for(Convex c:other.convexDecomposition())

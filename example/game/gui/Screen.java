@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import javafx.collections.SetChangeListener;
+
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;import org.lwjgl.opengl.GL11;
@@ -61,6 +63,8 @@ public class Screen {
 	public static final boolean DRAW_VERTEX_ORIENTATION = false;
 	public static final boolean DRAW_BLOCK_SPEEDS = false;
 	public static boolean DRAW_CENTER_OF_MASS = false;
+	
+	public static boolean DRAW_VERTEX_CORNERS = false;
 	
 	static final int DEFAULT_SIZE = 920;
 
@@ -183,9 +187,16 @@ public class Screen {
 		
 		for(Physical obj: w.physicals){
 			for(Part p:obj.parts){
-				if(p == selectedPart)
+				if(p == selectedPart){
 					drawShape(p.getGlobalShape(), p.properties.color.darker(0.8));
-				else if(selectedPart != null && obj == selectedPart.parent)
+					
+					if(DRAW_VERTEX_CORNERS){
+						color(Color.GREEN);
+						for(Vec2 corner:p.getGlobalShape().getDrawingVertexes()){
+							drawPoint(corner);
+						}
+					}
+				}else if(selectedPart != null && obj == selectedPart.parent)
 					drawShape(p.getGlobalShape(), p.properties.color.darker(0.9));
 				else
 					drawShape(p.getGlobalShape(), p.properties.color);

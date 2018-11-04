@@ -11,6 +11,11 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public interface Shape {
 	
+	/**
+	 * Checks if this Shape intersects with the given Shape
+	 * @param other other shape
+	 * @return True if they intersect, False otherwise
+	 */
 	public default boolean intersects(Shape other){
 		//quickfail on disjunct bounding boxes
 		if(!getBoundingBox().intersects(other.getBoundingBox())) return false;
@@ -49,18 +54,6 @@ public interface Shape {
 	public Range getBoundsAlongDirection(Vec2 direction);
 	
 	public default Shape union(Shape other){throw new NotImplementedException();};
-	/**
-	 * Slices this shape along the given direction, and returns the slice to the left of the cut.
-	 * 
-	 * A leftSlice of a Shape which is entirely to the left of the slicing axis is the shape itself.
-	 * 
-	 * A leftSlice of a Shape which is entirely to the right should return a NullShape
-	 * 
-	 * @param origin
-	 * @param direction
-	 * @return the left slice of the shape
-	 */
-	//public Shape leftSlice(Vec2 origin, Vec2 direction);
 	/**
 	 * returns a convex decomposition of this object, may be an approximation
 	 */

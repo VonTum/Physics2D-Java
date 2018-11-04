@@ -117,9 +117,26 @@ public class StandardInputHandler implements InputHandler {
 				setMode(InputMode.STANDARD);
 				break;
 			}
+		case GLFW.GLFW_KEY_V:
+			Screen.DRAW_VERTEX_CORNERS = true;
+			break;
 		}
 	}
 	
+	@Override
+	public void keyUp(int key, int scancode, int modifiers) {
+		switch(key){
+		case GLFW.GLFW_KEY_V:
+			Screen.DRAW_VERTEX_CORNERS = false;
+			break;
+		}
+	}
+
+	@Override
+	public void keyRepeat(int key, int scancode, int modifiers) {
+		keyDownOrRepeat(key, scancode, modifiers);
+	}
+
 	public void setMode(InputMode newMode){
 		switch(newMode){
 		case STANDARD:
@@ -232,16 +249,6 @@ public class StandardInputHandler implements InputHandler {
 		}
 		
 		// System.out.println(GLFW.glfwGetKeyName(key, scancode));
-	}
-	
-	@Override
-	public void keyUp(int key, int scancode, int modifiers) {
-		
-	}
-	
-	@Override
-	public void keyRepeat(int key, int scancode, int modifiers) {
-		keyDownOrRepeat(key, scancode, modifiers);
 	}
 	
 	@Override

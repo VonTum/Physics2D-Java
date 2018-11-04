@@ -25,9 +25,10 @@ public class Physical implements Locatable {
 	public Vec2 velocity = Vec2.ZERO;
 	/** angular velocity of center of mass */
 	public double angularVelocity = 0;
-	
+	/** cumulative force that has been applied so far this tick */
 	public Vec2 totalForce = Vec2.ZERO;
-	public double totalMoment = 0;	// counterclockwise is positive
+	/** cumulative moment that has been applied so far this tick<br>counterclockwise is positive */
+	public double totalMoment = 0;
 	
 	public double mass;
 	public double inertia;
@@ -39,20 +40,6 @@ public class Physical implements Locatable {
 	public String name = super.toString();
 	
 	private BoundingBox boundsCache;
-	
-	/*public Physical(Shape... shapes){
-		for(Shape s:shapes)
-			this.parts.add(new Part(this, s, s.cframe, ObjectLibrary.BASIC));
-		
-		recalculate();
-		
-		for(Shape shape:shapes){
-			CFrame relativecframe = this.cframe.globalToLocal(shape.getCFrame());
-			shape.attach(this, relativecframe);
-		}
-		
-		boundsCache = calculateBoundingBox();
-	}*/
 	
 	public Physical(CFrame location){
 		mass = 0;
@@ -147,6 +134,10 @@ public class Physical implements Locatable {
 		return 1/(movementFactor + rotationFactor);
 	}
 	
+	/**
+	 * Returns the angular impulse of this object, eg a measure of how much rotational oempf this object has
+	 * @return The angular impulse, <code>angularVelocity * inertia</code>
+	 */
 	public double getAngularImpulse(){
 		return angularVelocity * inertia;
 	}
@@ -168,10 +159,6 @@ public class Physical implements Locatable {
 		Mat2 rotFactor = new Mat2(-y*y, x*y, x*y, -x*x).mul(-1/inertia);
 		
 		return massFactor.add(rotFactor);
-	}
-	
-	public Vec2 getConcentratedForceInPoint(Vec2 point){
-		return totalForce.add(point.subtract(getCenterOfMass()).cross(-totalMoment));
 	}
 	
 	/**
@@ -272,9 +259,6 @@ public class Physical implements Locatable {
 		velocity = velocity.add(acceleration.mul(deltaT));
 		angularVelocity += angularAcceleration * deltaT;
 		
-		// Vec2 movement = velocity.mul(deltaT);
-		// double rotation = angularVelocity * deltaT;
-		
 		Vec2 relCOM = cframe.localToGlobalRotation(centerOfMassRelative);
 		
 		RotMat2 rot = new RotMat2(rotation);
@@ -319,19 +303,6 @@ public class Physical implements Locatable {
 		Vec2 COMRelative = this.cframe.globalToLocal(centerOfMass);
 		
 		this.centerOfMassRelative = COMRelative;
-		
-		/*RotMat2 rotationMat = parts.get(0).relativeCFrame.rotation;
-		
-		CFrame newCFrame = new CFrame(centerOfMass, rotationMat);
-		
-		for(Part p:parts)
-			p.relativeCFrame = newCFrame.globalToLocal(this.cframe.localToGlobal(p.relativeCFrame));
-		
-		this.cframe = newCFrame;*/
-		
-		//for(Part p:parts)
-		// 	p.relativeCFrame = p.relativeCFrame.add(COMRelative.neg());
-		
 		
 		this.mass = totalMass;
 	}
@@ -401,6 +372,11 @@ public class Physical implements Locatable {
 		cframe = cframe.rotated(rotation);
 	}
 	
+	/**
+	 * Returns the acceleration of a point, were it to lie on this object. 
+	 * @param point <i>global</i>
+	 * @return The acceleration of this point
+	 */
 	public Vec2 getAccelerationOfPoint(Vec2 point){
 		Vec2 relativeDist = point.subtract(getCenterOfMass());
 		Vec2 accelerationOfCenterOfMass = getAcceleration();
@@ -411,12 +387,6 @@ public class Physical implements Locatable {
 	
 	public Vec2 getAcceleration(){return totalForce.div(mass);}
 	public double getRotAccelertation(){return totalMoment / inertia;}
-	/**
-	 * 
-	 * @param relativePoint relative to Center Of Mass
-	 * @return acceleration of the given point
-	 */
-	// public Vec2 getAccelerationOfPoint(Vec2 relativePoint){}
 	
 	public void anchor() {anchored = true;}
 	public void unAnchor() {anchored = false;}
@@ -455,18 +425,6 @@ public class Physical implements Locatable {
 	 * @return
 	 */
 	public Vec2 getPullForceTowardsPointDampened(Vec2 attachPoint, Vec2 pullPoint, Vec2 pullPointVelocity, double acceleration){
-		/*Vec2 desiredSpeed = getDesiredSpeedTowardsPoint(relativePos, acceleration).add(pullPointVelocity);
-		
-		Vec2 thisPointVelocity = getSpeedOfPoint(relativePos.add(getCenterOfMass()));
-		
-		Vec2 delta = thisPointVelocity.subtract(desiredSpeed).maxLength(acceleration);
-		
-		double inertia = getPointInertia(relativePos, delta.normalize());
-		
-		Vec2 force = delta.mul(inertia);
-		
-		return force;*/
-		
 		Vec2 globalAttach = cframe.localToGlobal(attachPoint);
 		Vec2 vecToDest = pullPoint.subtract(globalAttach);
 		

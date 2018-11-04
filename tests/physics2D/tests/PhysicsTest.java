@@ -187,7 +187,6 @@ public class PhysicsTest {
 					assertBoundingBoxEquals(p1.getBoundingBox(), p2.getBoundingBox(), D);
 					assertVecEquals(p1.getSpeedOfPoint(point), p2.getSpeedOfPoint(point), D);
 					assertVecEquals(p1.getAccelerationOfPoint(point), p1.getAccelerationOfPoint(point), D);
-					assertVecEquals(p1.getConcentratedForceInPoint(point), p2.getConcentratedForceInPoint(point), D);
 					assertEquals(p1.getEnergy(gravity), p2.getEnergy(gravity), D);
 					assertEquals(p1.getPotentialEnergy(gravity), p2.getPotentialEnergy(gravity), D);
 					assertEquals(p1.getKineticEnergy(), p2.getKineticEnergy(), D);

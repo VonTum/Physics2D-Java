@@ -225,23 +225,6 @@ public interface Polygon extends Shape {
 		Vec2 next = polygon[(i+1)%L];
 		return isConcave(cur.subtract(prev), next.subtract(cur));
 	}
-	
-	/*@Override
-	public default List<OrientedPoint> getIntersectionPoints(Shape other) {
-		List<OrientedPoint> points = new ArrayList<>();
-		
-		for(Vec2 c:getCorners())
-			if(other.containsPoint(c))
-				points.add(new OrientedPoint(c, new NormalizedVec2(Double.NaN)));
-		
-		return points;
-	}
-	
-	@Override
-	public DepthWithDirection getNormalVecAndDepthToSurface(Vec2 position, NormalizedVec2 orientation) {
-		// TODO Auto-generated method stub
-		return null;
-	}*/
 
 	@Override
 	public default boolean containsPoint(Vec2 point){
@@ -396,20 +379,6 @@ public interface Polygon extends Shape {
 		
 		return new Range(min, max);
 	}
-	
-	
-	
-	/*@Override
-	public Shape union(Shape other) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Shape leftSlice(Vec2 origin, Vec2 direction) {
-		// TODO Auto-generated method stub
-		return null;
-	}*/
 	
 	/**
 	 * Returns a new polygon, using the given start and end indices
