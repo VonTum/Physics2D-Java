@@ -21,7 +21,7 @@ public class MathTests {
 	
 	Mat2 testRotMat = Mat2.rotTransform(0.3);
 	
-	CFrame identityCFrame = new CFrame();
+	CFrame identityCFrame = new CFrame(0.0, 0.0);
 	CFrame justPosition = new CFrame(new Vec2(0.7, -0.3), Mat2.IDENTITY);
 	CFrame justRotation = new CFrame(Vec2.ZERO, new RotMat2(0.3));
 	CFrame fullCFrame = new CFrame(new Vec2(-0.3, 0.4), new RotMat2(-0.4));
@@ -109,6 +109,31 @@ public class MathTests {
 		assertVecEquals(testVec, justPosition.localToGlobal(justPosition.globalToLocal(testVec)));
 		assertVecEquals(testVec, justRotation.localToGlobal(justRotation.globalToLocal(testVec)));
 		assertVecEquals(testVec, fullCFrame.localToGlobal(fullCFrame.globalToLocal(testVec)));
+	}
+	
+	@Test
+	public void testCFrameInverse(){
+		assertVecEquals(testVec, identityCFrame.localToGlobal(identityCFrame.inv().localToGlobal(testVec)));
+		assertVecEquals(testVec, justPosition.localToGlobal(justPosition.inv().localToGlobal(testVec)));
+		assertVecEquals(testVec, justRotation.localToGlobal(justRotation.inv().localToGlobal(testVec)));
+		assertVecEquals(testVec, fullCFrame.localToGlobal(fullCFrame.inv().localToGlobal(testVec)));
+		
+		assertVecEquals(identityCFrame.localToGlobal(testVec), identityCFrame.inv().globalToLocal(testVec));
+		assertVecEquals(justPosition.localToGlobal(testVec), justPosition.inv().globalToLocal(testVec));
+		assertVecEquals(justRotation.localToGlobal(testVec), justRotation.inv().globalToLocal(testVec));
+		assertVecEquals(fullCFrame.localToGlobal(testVec), fullCFrame.inv().globalToLocal(testVec));
+		
+		assertVecEquals(identityCFrame.globalToLocal(testVec), identityCFrame.inv().localToGlobal(testVec));
+		assertVecEquals(justPosition.globalToLocal(testVec), justPosition.inv().localToGlobal(testVec));
+		assertVecEquals(justRotation.globalToLocal(testVec), justRotation.inv().localToGlobal(testVec));
+		assertVecEquals(fullCFrame.globalToLocal(testVec), fullCFrame.inv().localToGlobal(testVec));
+		
+		assertCFrameEquals(identityCFrame, identityCFrame.inv().inv());
+		assertCFrameEquals(justPosition, justPosition.inv().inv());
+		assertCFrameEquals(justRotation, justRotation.inv().inv());
+		assertCFrameEquals(fullCFrame, fullCFrame.inv().inv());
+		
+		assertCFrameEquals(identityCFrame, identityCFrame.inv());
 	}
 	
 	/*@Test

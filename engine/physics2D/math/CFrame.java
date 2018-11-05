@@ -20,7 +20,6 @@ public final class CFrame implements Describable {
 	public CFrame(double x, double y, RotMat2 rotation){this(new Vec2(x, y), rotation);}
 	public CFrame(double x, double y, double angle){this(new Vec2(x, y), angle);}
 	public CFrame(double x, double y){this(new Vec2(x, y), Mat2.IDENTITY);}
-	public CFrame(){this(Vec2.ZERO, Mat2.IDENTITY);}
 	
 	public Vec2 globalToLocal(Vec2 vec){
 		return rotation.inv().mul(vec.subtract(position));
@@ -52,6 +51,11 @@ public final class CFrame implements Describable {
 	
 	public CFrame globalToLocal(CFrame cframe){
 		return new CFrame(globalToLocal(cframe.position), rotation.inv().mul(cframe.rotation));
+	}
+	
+	public CFrame inv(){
+		RotMat2 iR = rotation.inv();
+		return new CFrame(iR.mul(position).neg(), iR);
 	}
 	
 	public Vec2[] globalToLocalArray(Vec2... vecs){
