@@ -75,45 +75,36 @@ public class Part {
 				Convex intersection = c.intersection(oc);
 				
 				Vec2 forcePoint = intersection.getCenterOfMass();
+				Vec2 otherForcePoint = invTransform.localToGlobal(forcePoint);
 				
 				Debug.logShape(intersection.transformToCFrame(getGlobalCFrame()), Color.PURPLE.fuzzier(0.2));
 				
-				Part base, intersector;
-				Vec2 intersectDepth;
+				
 				if(travelVec1.lengthSquared() < travelVec2.lengthSquared()){
 					// use travelVec1, c is base
 					
-					base = this; intersector = other;
-					intersectDepth = travelVec1;
+					Vec2 intersectDepth = getGlobalCFrame().localToGlobalRotation(travelVec1);
+					
+					enactTouchyForce(this, other, forcePoint, otherForcePoint, intersectDepth);
 				}else{
 					// use travelVec2, oc is base
 					
-					base = other; intersector = this;
-					intersectDepth = invTransform.localToGlobalRotation(travelVec2);
+					Vec2 intersectDepth = getGlobalCFrame().localToGlobalRotation(travelVec2);
 					
-					forcePoint = invTransform.localToGlobal(forcePoint);
+					enactTouchyForce(other, this, otherForcePoint, forcePoint, intersectDepth);
 				}
-				
-				enactTouchyForce(base, intersector, forcePoint, intersectDepth);
 			}
 		}
 	}
 	
 	/**
-	 * 
 	 * @param base
 	 * @param intersector
-	 * @param forceOrigin relative to base's CFrame
-	 * @param intersectDepth
+	 * @param bForceOrigin relative to base's CFrame
+	 * @param iForceOrigin relative to intersector's CFrame
+	 * @param intersectDepth in global axes
 	 */
-	private static void enactTouchyForce(Part base, Part intersector, Vec2 bForceOrigin, Vec2 bIntersectDepth){
-		CFrame deltaCFrame = base.getGlobalCFrame().globalToLocal(intersector.getGlobalCFrame());
-		
-		Vec2 iForceOrigin = deltaCFrame.globalToLocal(bForceOrigin);
-		//Vec2 iIntersectDepth = deltaCFrame.globalToLocalRotation(bIntersectDepth);
-		
-		Vec2 forceOrigin = base.getGlobalCFrame().localToGlobal(bForceOrigin);
-		Vec2 intersectDepth = base.getGlobalCFrame().localToGlobalRotation(bIntersectDepth);
+	private static void enactTouchyForce(Part base, Part intersector, Vec2 bForceOrigin, Vec2 iForceOrigin, Vec2 intersectDepth){
 		
 		Vec2 FOLocToBase = base.relativeCFrame.localToGlobal(bForceOrigin).subtract(base.parent.centerOfMassRelative);
 		Vec2 FOLocToInter = intersector.relativeCFrame.localToGlobal(iForceOrigin).subtract(intersector.parent.centerOfMassRelative);
@@ -121,35 +112,28 @@ public class Part {
 		Vec2 FORelToBase = base.parent.getCFrame().localToGlobalRotation(FOLocToBase);
 		Vec2 FORelToInter = intersector.parent.getCFrame().localToGlobalRotation(FOLocToInter);
 		
-		double inertiaOfPoint = 1/(1/base.parent.getPointInertia(FORelToBase, intersectDepth) + 
-										1/intersector.parent.getPointInertia(FORelToInter, intersectDepth));
+		double baseInertia = base.parent.getPointInertia(FORelToBase, intersectDepth);
+		double intersectorInertia = intersector.parent.getPointInertia(FORelToInter, intersectDepth);
 		
-		// Vec2 relativeVelocity = intersector.getSpeedOfPoint(forceOrigin).subtract(base.getSpeedOfPoint(forceOrigin));
+		double inertiaOfPoint = 1/(1/baseInertia + 1/intersectorInertia);
+		
 		Vec2 relativeVelocity = intersector.parent.getSpeedOfRelPoint(FORelToInter).subtract(base.parent.getSpeedOfRelPoint(FORelToBase));
 		
-		// if(relativeVelocity.subtract(relativeVelocity2).lengthSquared() > 1E-20) System.out.println(relativeVelocity + " vs " + relativeVelocity2);
-		
 		double normalComponent = intersectDepth.dot(relativeVelocity);
-		double sidewaysComponent = intersectDepth.cross(relativeVelocity);
+		normalComponent *= (normalComponent > 0)? base.properties.getStickynessWith(intersector.properties) : 1.0;
 		
+		double sidewaysComponent = intersectDepth.cross(relativeVelocity) * base.properties.getFrictionWith(intersector.properties);
 		
+		double normalAccel = Constants.REPULSION_FACTOR - normalComponent * Constants.VELOCITY_STOP_FACTOR / intersectDepth.lengthSquared();
 		
-		if(normalComponent > 0)
-			normalComponent = normalComponent * base.properties.stickyness;
+		Vec2 normalForce = intersectDepth.mul(normalAccel*inertiaOfPoint);
 		
-		sidewaysComponent = sidewaysComponent * base.properties.friction;
-		
-		Vec2 normalForce = intersectDepth.reProject(-normalComponent * Constants.VELOCITY_STOP_FACTOR * inertiaOfPoint);
 		Vec2 frictionForce = intersectDepth.rotate90CounterClockwise().reProject(-sidewaysComponent * Constants.VELOCITY_STOP_FACTOR * inertiaOfPoint);
 		
-		Debug.logVector(forceOrigin, normalForce, Color.RED);
-		Debug.logVector(forceOrigin, frictionForce, Color.GREY);
-		
-		Vec2 baseForce = intersectDepth.mul(Constants.REPULSION_FACTOR*inertiaOfPoint);
-		
-		intersector.parent.actionReaction(base.parent, forceOrigin, baseForce);
-		intersector.parent.actionReaction(base.parent, forceOrigin, normalForce);
-		intersector.parent.actionReaction(base.parent, forceOrigin, frictionForce);
+		Vec2 totalForce = Vec2.sum(normalForce, frictionForce);
+
+		base.parent.applyForceRelative(totalForce.neg(), FORelToBase);
+		intersector.parent.applyForceRelative(totalForce, FORelToInter);
 	}
 	
 	@Override

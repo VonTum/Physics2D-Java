@@ -143,12 +143,23 @@ public abstract class RigidBody implements Locatable {
 	 * @param attachment origin of the force <br><i>global</i>
 	 */
 	public void applyForce(Vec2 force, Vec2 attachment){
-		if(anchored) return;
 		Vec2 relative = attachment.subtract(getCenterOfMass());
-		totalForce = totalForce.add(force);
-		totalMoment += relative.cross(force);
 		
-		Debug.logForce(this, getCFrame().globalToLocal(attachment), force);
+		applyForceRelative(force, relative);
+	}
+	
+	/**
+	 * Applies a force to the object, attached to a point relative to the center of mass
+	 * @param force force vector to be applied
+	 * @param relativeAttachment origin of the force <br><i>relative to COM</i>
+	 */
+	public void applyForceRelative(Vec2 force, Vec2 relativeAttachment){
+		if(anchored) return;
+		
+		totalForce = totalForce.add(force);
+		totalMoment += relativeAttachment.cross(force);
+		
+		Debug.logForce(this, getCFrame().globalToLocalRotation(relativeAttachment.add(centerOfMassRelative)), force);
 	}
 	
 	public void actionReaction(RigidBody other, Vec2 globalPos, Vec2 force){

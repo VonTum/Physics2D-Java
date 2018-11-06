@@ -11,7 +11,7 @@ import physics2D.physics.PhysicalProperties;
 
 public class ObjectLibrary {
 	
-	public static final PhysicalProperties BASIC = new PhysicalProperties(10.0, 0.05, 0.0, Color.DEFAULT_BRICK_COLOR);
+	public static final PhysicalProperties BASIC = new PhysicalProperties(10.0, Math.sqrt(0.05), 0.0, Color.DEFAULT_BRICK_COLOR);
 	
 	public static Physical createFloor(CFrame cframe, PhysicalProperties properties){
 		Shape floorShape = new Rectangle(20.0, 0.2);
