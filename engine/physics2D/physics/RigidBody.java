@@ -15,10 +15,6 @@ import physics2D.math.Vec2;
 
 public abstract class RigidBody implements Locatable {
 	
-	
-	
-	
-	
 	public double mass = 0;
 	public double inertia = 0;
 	
@@ -31,7 +27,7 @@ public abstract class RigidBody implements Locatable {
 	
 	public final List<Part> parts = new ArrayList<>();
 	
-	protected Vec2 centerOfMassRelative = Vec2.ZERO;
+	public Vec2 centerOfMassRelative = Vec2.ZERO;
 	
 	protected BoundingBox boundsCache = new BoundingBox(0.0, 0.0, 0.0, 0.0);
 	
@@ -74,24 +70,23 @@ public abstract class RigidBody implements Locatable {
 		for(Part p:parts){
 			double partMass = p.getMass();
 			totalMass += partMass;
-			weighedAverage = weighedAverage.add(p.getCenterOfMass().mul(partMass));
+			Vec2 weighedCOM = p.relativeCFrame.localToGlobal(p.getLocalCenterOfMass()).mul(partMass);
+			weighedAverage = weighedAverage.add(weighedCOM);
 		}
 		
 		Vec2 centerOfMass = weighedAverage.div(totalMass);
 		
-		Vec2 COMRelative = this.getCFrame().globalToLocal(centerOfMass);
-		
-		this.centerOfMassRelative = COMRelative;
+		this.centerOfMassRelative = centerOfMass;
 		
 		this.mass = totalMass;
 	}
 	
 	private void recalculateInertia(){
-		Vec2 objCenter = getCenterOfMass();
 		double totalInertia = 0;
 		
 		for(Part p:parts){
-			Vec2 delta = p.getCenterOfMass().subtract(objCenter);
+			Vec2 localCOM = p.relativeCFrame.localToGlobal(p.getLocalCenterOfMass());
+			Vec2 delta = localCOM.subtract(centerOfMassRelative);
 			
 			totalInertia += p.getInertia() + delta.lengthSquared() * p.getMass();
 		}
@@ -112,14 +107,19 @@ public abstract class RigidBody implements Locatable {
 	@Override
 	public abstract CFrame getCFrame();
 	
+	public Vec2 getLocalCenterOfMass(){
+		return centerOfMassRelative;
+	}
+	
 	public Vec2 getCenterOfMass(){
 		return getCFrame().localToGlobal(centerOfMassRelative);
 	}
 	
 	public abstract Vec2 getSpeedOfPoint(Vec2 point);
+	public abstract Vec2 getSpeedOfRelPoint(Vec2 relPoint);
 	
 	public void update(double deltaT){
-
+		
 		totalForce = Vec2.ZERO;
 		totalMoment = 0.0;
 		
@@ -213,6 +213,15 @@ public abstract class RigidBody implements Locatable {
 	 */
 	public double getPointInertia(Vec2 relativePosition, Vec2 direction){
 		if(anchored) return Double.POSITIVE_INFINITY;
+		double movementFactor = 1/getMass();
+		double rotationFactor = Math.abs(relativePosition.cross(relativePosition.cross(direction)).dot(direction) / (getInertia()*direction.lengthSquared()));
+		return 1/(movementFactor + rotationFactor);
+	}
+	
+	public double getLocalPointInertia(Vec2 localPosition, Vec2 localDirection){
+		if(anchored) return Double.POSITIVE_INFINITY;
+		Vec2 relativePosition = getCFrame().localToGlobalRotation(localPosition.subtract(centerOfMassRelative));
+		Vec2 direction = getCFrame().localToGlobalRotation(localDirection);
 		double movementFactor = 1/getMass();
 		double rotationFactor = Math.abs(relativePosition.cross(relativePosition.cross(direction)).dot(direction) / (getInertia()*direction.lengthSquared()));
 		return 1/(movementFactor + rotationFactor);

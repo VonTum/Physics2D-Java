@@ -51,6 +51,10 @@ public class Physical extends RigidBody {
 		return velocity.add(point.subtract(getCenterOfMass()).cross(-angularVelocity));
 	}
 	
+	public Vec2 getSpeedOfRelPoint(Vec2 relPoint){
+		return velocity.add(relPoint.cross(-angularVelocity));
+	}
+	
 	/**
 	 * Returns the angular impulse of this object, eg a measure of how much rotational oempf this object has
 	 * @return The angular impulse, <code>angularVelocity * inertia</code>
