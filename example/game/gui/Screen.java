@@ -12,6 +12,7 @@ import static org.lwjgl.opengl.GL11.*;
 import game.input.InputHandler;
 import game.util.Color;
 import game.util.Dimentions;
+import game.util.IntDimentions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class Screen {
 	
 	public static boolean DRAW_VERTEX_CORNERS = false;
 	
-	static final int DEFAULT_SIZE = 920;
+	static final int DEFAULT_SIZE = 800;
 
 	static Font font;
 	
@@ -74,6 +75,7 @@ public class Screen {
 	static int height = DEFAULT_SIZE;
 	
 	public static void init(InputHandler handler) throws IOException{
+		try{
 		if(!glfwInit()){
 			System.out.println("GLFW Failed to initialize");
 			System.exit(1);
@@ -107,7 +109,7 @@ public class Screen {
 		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 		// glEnable(GL_MULTISAMPLE);
 		
-		font = new Font(Screen.class.getResource("/ascii.png"));
+		font = new Font(Screen.class.getResource("/arvo.fnt"));
 		
 		glfwSetWindowSizeCallback(window, (win, newWidth, newHeight) -> {
 			glViewport(0, 0, newWidth, newHeight);
@@ -149,16 +151,20 @@ public class Screen {
 		
 		glClearColor(0.7f,  0.8f, 1.0f, 0.0f);
 		glLineWidth(2.0f);
+		}catch(IOException ex){
+			close();
+			throw ex;
+		}
 	}
 	
 	public static void close(){
 		GLFW.glfwDestroyWindow(window);
 	}
 	
-	public static Dimentions getWindowSize(){
+	public static IntDimentions getWindowSize(){
 		int[] x = new int[1], y = new int[1];
 		GLFW.glfwGetWindowSize(window, x, y);
-		return new Dimentions(x[0], y[0]);
+		return new IntDimentions(x[0], y[0]);
 	}
 	
 	public static Vec2 getMousePos(){
@@ -232,26 +238,15 @@ public class Screen {
 		
 		applyMarkings();
 		
-		
-		/*for(Physical obj:w.physicals){
-			Font.Text text = font.new Text("Hello", 36f, 1f);
-			annotate(text, obj.getCenterOfMass());
-		}*/
-		
 		color(Color.BLACK);
 		if(selectedPart != null){
 			font.drawString(selectedPart.toString(), 36f, 1f, 0.999f * (float) getLeftBorderX(), 0.999f);
 		}
 		
-		Font.Text text = font.createText(Debug.getDebugInfo(), 36f, 1f);
-		double textHeight = text.getTextDimentions().height;
-		text.draw(0.999f * (float) getLeftBorderX(), -0.999f+(float)textHeight);
+		font.drawStringBottom(Debug.getDebugInfo(), 36f, 1f, 0.999f * (float) getLeftBorderX(), -0.999f);
 		
-		Font.Text mouseCoordsText = font.createText(String.format("%.6f\n%.6f", worldMousePos.x, worldMousePos.y), 36f, 0.999f);
-		Dimentions textDims = mouseCoordsText.getTextDimentions();
-		mouseCoordsText.drawRightAligned(0.999f * (float) getRightBorderX(), -0.999f + (float) textDims.height);
-		
-		
+		String coordText = String.format("%.6f\n%.6f", worldMousePos.x, worldMousePos.y);
+		font.drawStringRightAlignedBottom(coordText, 36f, 0.999f, 0.999f * (float) getRightBorderX(), -0.999f);
 		
 		glfwSwapBuffers(window);
 	}
@@ -310,15 +305,19 @@ public class Screen {
 		glEnd();
 	}
 	
-	private static void annotate(Font.Text annotation, Vec2 annotationPosition){
+	private static void annotate(String annotation, Vec2 annotationPosition){
+		float fontSize = 10f;
+		float lineSpacing = 1f;
+		
 		double padding = 0.005;
 		color(Color.GREY.alpha(0.5));
-		float fontSize = annotation.getActualFontSize();
-		drawRectangle(annotationPosition.add(fontSize/2-padding, -fontSize/2-padding), annotation.getTextDimentions().expand(padding*2));
+		float actualFontSize = font.getActualFontSize(10f);
+		Dimentions d = font.getTextDimentions(annotation, fontSize, lineSpacing);
+		drawRectangle(annotationPosition.add(actualFontSize/2-padding, -actualFontSize/2-padding), d.expand(padding*2));
 		
 		color(Color.GREEN);
 		
-		annotation.draw(camera.toCameraSpace(annotationPosition).add(fontSize/2, fontSize/2));
+		font.drawString(annotation, fontSize, lineSpacing, camera.toCameraSpace(annotationPosition).add(actualFontSize/2, actualFontSize/2));
 	}
 	
 	private static void applyMarkings(){
@@ -573,9 +572,9 @@ public class Screen {
 	
 	public static Vec2 mouseToScreenCoords(Vec2 mouseCoords){
 		
-		Dimentions screenSize = getWindowSize();
+		IntDimentions screenSize = getWindowSize();
 		
-		Vec2 translatedCoords = mouseCoords.subtract(new Vec2(screenSize.width/2, screenSize.height/2));
+		Vec2 translatedCoords = mouseCoords.subtract(new Vec2(screenSize.width/2.0, screenSize.height/2.0));
 		
 		Vec2 screenCoords = translatedCoords.div(screenSize.height/2).mulXY(1, -1); // invert y axis
 		

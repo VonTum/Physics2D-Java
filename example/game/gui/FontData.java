@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -15,14 +16,14 @@ public class FontData {
 	public final Map<Character, CharDisplayData> charData;
 	public final String[] pages;
 	public final Map<CharPair, Integer> kernings;
-	public final int size, stretchH, lineHeight, base, scaleW, scaleH, pageCount;
+	public final int size, stretchH, lineHeight, base, scaleW, scaleH;
 	public final boolean bold, italic, unicode, smooth, aa, packed;
 	public final String face, charset;
 	public final int[] padding, spacing;
 	
 	private FontData(Map<Character, CharDisplayData> charData, String[] pages,
 			Map<CharPair, Integer> kernings, int size, int stretchH,
-			int lineHeight, int base, int scaleW, int scaleH, int pageCount,
+			int lineHeight, int base, int scaleW, int scaleH, 
 			boolean bold, boolean italic, boolean unicode, boolean smooth,
 			boolean aa, boolean packed, String face, String charset,
 			int[] padding, int[] spacing) {
@@ -36,7 +37,6 @@ public class FontData {
 		this.base = base;
 		this.scaleW = scaleW;
 		this.scaleH = scaleH;
-		this.pageCount = pageCount;
 		this.bold = bold;
 		this.italic = italic;
 		this.unicode = unicode;
@@ -118,14 +118,14 @@ public class FontData {
 					break;
 				case "kerning":
 					char first = (char) getInt(a, "first");
-					char second = (char) getInt(a, "first");
+					char second = (char) getInt(a, "second");
 					int amount = getInt(a, "amount");
 					
 					kernings.put(new CharPair(first, second), amount);
 					break;
 				}
 			}while(reader.ready());
-			return new FontData(charData, pages, kernings, size, stretchH, lineHeight, base, scaleW, scaleH, pageCount, bold, italic, unicode, smooth, aa, packed, face, charset, padding, spacing);
+			return new FontData(charData, pages, kernings, size, stretchH, lineHeight, base, scaleW, scaleH, bold, italic, unicode, smooth, aa, packed, face, charset, padding, spacing);
 		}
 	}
 	
@@ -162,6 +162,16 @@ public class FontData {
 		return values;
 	}
 	
+	@Override
+	public String toString() {
+		return String
+				.format("FontData [size=%s, stretchH=%s, lineHeight=%s, base=%s, scaleW=%s, scaleH=%s, bold=%s, italic=%s, unicode=%s, smooth=%s, aa=%s, packed=%s, face=%s, charset=%s, padding=%s, spacing=%s, pages=%s, charData=%s, kernings=%s]",
+						size, stretchH, lineHeight, base, scaleW, scaleH,
+						bold, italic, unicode, smooth, aa, packed, face,
+						charset, Arrays.toString(padding),
+						Arrays.toString(spacing), Arrays.toString(pages), charData, kernings);
+	}
+	
 	public static final class CharDisplayData {
 		public final int x, y, w, h, xoffset, yoffset, xadvance, page;
 		
@@ -174,6 +184,11 @@ public class FontData {
 			this.yoffset = yoffset;
 			this.xadvance = xadvance;
 			this.page = page;
+		}
+		
+		@Override
+		public String toString(){
+			return String.format("{x: %d, y: %d, w: %d, h: %d, xoffset: %d, yoffset: %d, xadvance: %d, page: %d}", x, y, w, h, xoffset, yoffset, xadvance, page);
 		}
 	}
 	

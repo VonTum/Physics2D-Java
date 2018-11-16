@@ -1,25 +1,28 @@
 package game.gui;
 
-import static org.lwjgl.opengl.GL11.GL_QUADS;
-import static org.lwjgl.opengl.GL11.GL_RGBA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
-import static org.lwjgl.opengl.GL11.GL_UNPACK_ALIGNMENT;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glDeleteTextures;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glGenTextures;
-import static org.lwjgl.opengl.GL11.glPixelStorei;
-import static org.lwjgl.opengl.GL11.glTexCoord2f;
-import static org.lwjgl.opengl.GL11.glTexImage2D;
-import static org.lwjgl.opengl.GL11.glTexParameteri;
-import static org.lwjgl.opengl.GL11.glVertex2f;
+import static org.lwjgl.opengl.GL30.GL_QUADS;
+import static org.lwjgl.opengl.GL30.GL_RGBA;
+import static org.lwjgl.opengl.GL30.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL30.GL_TEXTURE_MAG_FILTER;
+import static org.lwjgl.opengl.GL30.GL_TEXTURE_MIN_FILTER;
+import static org.lwjgl.opengl.GL30.GL_TEXTURE_WRAP_S;
+import static org.lwjgl.opengl.GL30.GL_TEXTURE_WRAP_T;
+import static org.lwjgl.opengl.GL30.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL30.glBegin;
+import static org.lwjgl.opengl.GL30.glBindTexture;
+import static org.lwjgl.opengl.GL30.glDeleteTextures;
+import static org.lwjgl.opengl.GL30.glEnable;
+import static org.lwjgl.opengl.GL30.glEnd;
+import static org.lwjgl.opengl.GL30.glGenTextures;
+import static org.lwjgl.opengl.GL30.glTexCoord2i;
+import static org.lwjgl.opengl.GL30.glTexImage2D;
+import static org.lwjgl.opengl.GL30.glTexParameteri;
+import static org.lwjgl.opengl.GL30.glVertex2f;
+import static org.lwjgl.opengl.GL30.glMatrixMode;
+import static org.lwjgl.opengl.GL30.glScaled;
+import static org.lwjgl.opengl.GL30.GL_TEXTURE;
+import static org.lwjgl.opengl.GL30.GL_MODELVIEW;
+import game.gui.FontData.CharDisplayData;
 import game.util.Dimentions;
 
 import java.io.IOException;
@@ -28,7 +31,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 
 import physics2D.math.Vec2;
 import de.matthiasmann.twl.utils.PNGDecoder;
@@ -39,24 +42,27 @@ public class Font {
 	public final int textureWidth;
 	public final int textureHeight;
 	
-	private final int[] char_widths;
+	public final FontData font;
 	
 	public static final int TAB_SIZE = 3;
 	
-	public Font(URL inputURL) throws IOException {
-		this(inputURL, GL11.GL_LINEAR);
-	}
-
-	public Font(URL inputURL, int filter) throws IOException {
-		this(inputURL, filter, GL11.GL_REPEAT);
-	}
-
-	public Font(URL inputURL, int filter, int wrap) throws IOException {
-		try(InputStream input = inputURL.openStream()) {
+	public Font(URL fntURL) throws IOException {
+		long startTime = System.currentTimeMillis();
+		this.font = FontData.parseFont(fntURL);
+		System.out.printf("Font load time: %dms\n", System.currentTimeMillis()-startTime);
+		
+		// print the parsed data
+		System.out.println(font.toString().replaceAll("},", "},\n"));
+		
+		URL imgURL = new URL(fntURL, font.pages[0]);
+		System.out.println(fntURL);
+		System.out.println(imgURL);
+		
+		try(InputStream input = imgURL.openStream()) {
 			
 			//initialize the decoder
 			PNGDecoder dec = new PNGDecoder(input);
-
+			
 			//set up image dimensions 
 			textureWidth = dec.getWidth();
 			textureHeight = dec.getHeight();
@@ -73,72 +79,29 @@ public class Font {
 			//flip the buffer into "read mode" for OpenGL
 			buf.flip();
 			
-			boolean[] solid = new boolean[textureWidth*textureHeight];
-			
-			for(int i = 0; i < textureWidth*textureHeight; i++){
-				byte r = buf.get();
-				buf.get();
-				buf.get();
-				buf.get();
-				
-				solid[i] = r!=0;
-			}
-			
-			buf.flip();
-			
-			for(int i = 0; i < textureWidth*textureHeight; i++){
-				if(solid[i]){
-					buf.put((byte) -1);buf.put((byte) -1);buf.put((byte) -1);buf.put((byte) -1);
-				}else{
-					buf.put((byte) 0);buf.put((byte) 0);buf.put((byte) 0);buf.put((byte) 0);
-				}
-			}
-			
-			buf.flip();
-			
-			// initialize char widths
-			int char_width = getCharWidthInPixels();
-			int char_height = getCharHeightInPixels();
-			
-			char_widths = new int[256];
-			
-			for(int row = 0; row < 16; row++){
-				for(int col = 0; col < 16; col++){
-					int furthest_x = 0;
-					for(int y = 0; y < char_height; y++){
-						for(int x = furthest_x+1; x < char_width; x++){
-							int bufIndex = (row*char_height+y)*textureWidth + col*char_width+x;
-							if(buf.get(bufIndex*4) != 0)
-								furthest_x = x;
-						}
-					}
-					char_widths[row*16+col] = furthest_x+1;
-				}
-			}
-			
-			char_widths[asByte(' ')] = 2;
-			
-			
 			//enable textures and generate an ID
 			glEnable(GL_TEXTURE_2D);
 			id = glGenTextures();
-
+			
 			//bind texture
 			bind();
-
-			//setup unpack mode
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-			//setup parameters
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 			
 			//pass RGBA data to OpenGL
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
 			
+			GL30.glGenerateMipmap(GL_TEXTURE_2D);
+			
+			//setup parameters
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL30.GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL30.GL_LINEAR_MIPMAP_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL30.GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL30.GL_REPEAT);
+			
 			unbind();
+			
+			glMatrixMode(GL_TEXTURE);
+			glScaled(1f/textureWidth, 1f/textureHeight, 1.0);
+			glMatrixMode(GL_MODELVIEW);
 		}
 	}
 	
@@ -154,162 +117,169 @@ public class Font {
 	}
 	
 	public void drawString(String text, float fontSize, float lineSpacing, float x, float y){
-		Text t = new Text(text, fontSize, lineSpacing);
-		t.draw(x, y);
+		float actualFontSize = getActualFontSize(fontSize);
+		float actualLineSpacing = getActualLineSpacing(lineSpacing);
+		String[] lines = text.split("\n");
+		bind();
+		for(String line:lines){
+			drawLine(line, x, y, actualFontSize);
+			y -= actualFontSize + actualLineSpacing;
+		}
+		unbind();
 	}
 	
-	public void drawString(String text, float fontSize, float lineSpacing, Vec2 pos){
-		Text t = new Text(text, fontSize, lineSpacing);
-		t.draw(pos);
+	public void drawStringRightAligned(String text, float fontSize, float lineSpacing, float x, float y) {
+		float actualFontSize = getActualFontSize(fontSize);
+		float actualLineSpacing = getActualLineSpacing(lineSpacing);
+		String[] lines = text.split("\n");
+		bind();
+		for(String line:lines){
+			drawLineRightAligned(line, x, y, actualFontSize);
+			y -= actualFontSize + actualLineSpacing;
+		}
+		unbind();
 	}
 	
-	private void drawChar(char c, float x, float y, float dx, float dy){
-		byte bc = (byte) c;
+	public void drawStringBottom(String text, float fontSize, float lineSpacing, float x, float y){
+		float actualFontSize = getActualFontSize(fontSize);
+		float actualLineSpacing = getActualLineSpacing(lineSpacing);
+		float textHeight = getTextHeightActuals(text, actualFontSize, actualLineSpacing);
+
+		drawString(text, fontSize, lineSpacing, x, y+textHeight);
+	}
+	
+	public void drawStringRightAlignedBottom(String text, float fontSize, float lineSpacing, float x, float y){
+		float actualFontSize = getActualFontSize(fontSize);
+		float actualLineSpacing = getActualLineSpacing(lineSpacing);
+		float textHeight = getTextHeightActuals(text, actualFontSize, actualLineSpacing);
+
+		drawStringRightAligned(text, fontSize, lineSpacing, x, y+textHeight);
+	}
+	
+	private void drawLine(String s, float xpos, float ypos, float height){
+		float x = xpos;
+		float y = ypos;
 		
-		byte firstFourBits = (byte) (bc >> 4);
-		byte lastFourBits = (byte) (bc & 0x0F);
+		float f2sCoords = height / font.lineHeight;
 		
-		float u = lastFourBits / 16f - 1f/textureWidth;
-		float v = firstFourBits / 16f - 1f/textureHeight;
-		float u2 = u+1f/16;
-		float v2 = v+1f/16;
+		char lastChar = '\n';
 		
-		glBegin(GL_QUADS);
-			glTexCoord2f(u, v);
-			glVertex2f(x, y);
-			glTexCoord2f(u, v2);
-			glVertex2f(x, y - dy);
-			glTexCoord2f(u2, v2);
-			glVertex2f(x + dx, y - dy);
-			glTexCoord2f(u2, v);
-			glVertex2f(x + dx, y);
-		glEnd();
+		for(char c:s.toCharArray()){
+			if(c == '\t'){
+				x = getNextTabTarget(x, height);
+				lastChar = c;
+				continue;
+			}
+			CharDisplayData data = font.charData.get(c);
+			
+			x += font.kernings.getOrDefault(new FontData.CharPair(lastChar, c), 0)*f2sCoords;
+			
+			int u = data.x;
+			int v = data.y;
+			
+			float w = data.w*f2sCoords;
+			float h = data.h*f2sCoords;
+			
+			drawTexturedRectangle(x+data.xoffset*f2sCoords, y-data.yoffset*f2sCoords, w, h, u, v, data.w, data.h);
+			
+			x += data.xadvance*f2sCoords;
+			lastChar = c;
+		}
 	}
 	
-	
-	
-	private int getWidthOfChar(char c){
-		return char_widths[asByte(c)];
-	}
-	
-	private int asByte(char c){
-		int b = (byte) c;
-		if(b < 0)
-			return b+256;
-		else
-			return b;
+	private void drawLineRightAligned(String s, float xpos, float ypos, float height){
+		drawLine(s, xpos-getLineLength(s, height), ypos, height);
 	}
 	
 	private float getNextTabTarget(float curX, float actualFontSize){
 		return (float) (Math.ceil(curX / (actualFontSize*TAB_SIZE))+0.1f) * actualFontSize*TAB_SIZE;
 	}
 	
-	private float computeNextXPos(float curX, char c, float actualFontSize){
-		switch(c){
-		case '\n':
-			return 0;
-		case '\t':
-			return getNextTabTarget(curX, actualFontSize);
-		default:
-			return curX+(actualFontSize * (getWidthOfChar(c)+1)*16)/this.textureWidth;
-		}
+	public float getActualFontSize(float fontSize){
+		double screenHeight = Screen.getWindowSize().height;
+		double actualFontSize = fontSize / screenHeight;
+		return (float) actualFontSize;
 	}
 	
-	private int getCharHeightInPixels(){return textureHeight / 16;}
-	private int getCharWidthInPixels(){return textureWidth / 16;}
-	
-	public Text createText(String text, float fontSize, float lineSpacing){
-		return new Text(text, fontSize, lineSpacing);
+	public float getActualLineSpacing(float lineSpacing){
+		double screenHeight = Screen.getWindowSize().height;
+		double actualLineSpacing = lineSpacing / screenHeight;
+		return (float) actualLineSpacing;
 	}
 	
-	public class Text {
-		private final float fontSize;
-		private final float lineSpacing;
-		private final String text;
+	public Dimentions getTextDimentions(String text, float fontSize, float lineSpacing){
+		float actualFontSize = getActualFontSize(fontSize);
 		
-		public Text(String text, float fontSize, float lineSpacing){
-			this.text = text;
-			this.fontSize = fontSize;
-			this.lineSpacing = lineSpacing;
-		}
+		String[] lines = text.split("\n");
 		
-		public void draw(Vec2 position){
-			draw((float) position.x, (float) position.y);
-		}
+		return new Dimentions(getTextWidth(text, actualFontSize), lines.length*actualFontSize+(lines.length-1)*getActualLineSpacing(lineSpacing));
+	}
+	
+	public float getTextHeight(String text, float fontSize, float lineSpacing){
+		return getTextHeightActuals(text, getActualFontSize(fontSize), getActualLineSpacing(lineSpacing));
+	}
+	
+	public float getTextWidth(String text, float fontSize){
+		return getTextWidthActualFontSize(text, getActualFontSize(fontSize));
+	}
+	
+	private float getTextHeightActuals(String text, float actualFontSize, float actualLineSpacing){
+		int newLineCount = 0; for(char c:text.toCharArray()) if(c == '\n') newLineCount++;
 		
-		public void drawRightAligned(Vec2 position){
-			drawRightAligned((float) position.x, (float) position.y);
-		}
+		return (newLineCount+1)*actualFontSize+newLineCount*actualLineSpacing;
 		
-		public void drawRightAligned(float x, float y) {
-			float actualFontSize = getActualFontSize();
-			String[] lines = text.split("\n");
-			bind();
-			for(String line:lines){
-				float actualX = x-getLineLength(line);
-				drawLine(line, actualX, y, actualFontSize);
-				y -= actualFontSize + getActualLineSpacing();
-			}
-			unbind();
-		}
-
-		public void draw(float x, float y){
-			float actualFontSize = getActualFontSize();
-			String[] lines = text.split("\n");
-			bind();
-			for(String line:lines){
-				drawLine(line, x, y, actualFontSize);
-				y -= actualFontSize + getActualLineSpacing();
-			}
-			unbind();
-		}
+	}
+	
+	private float getTextWidthActualFontSize(String text, float actualFontSize){
+		float maxWidth = 0;
 		
-		private void drawLine(String line, float x, float y, float actualFontSize){
-			float curX = 0;
-			for(char c:line.toCharArray()){
-				switch(c){
-				case '\t':
-					curX = getNextTabTarget(curX, actualFontSize);
-					break;
-				default:
-					float w = (actualFontSize * (getWidthOfChar(c)+1)*16)/textureWidth;
-					drawChar(c, curX+x, y, actualFontSize, actualFontSize);
-					curX += w;
-					break;
-				}
-			}
+		String[] lines = text.split("\n");
+		for(String line:lines)
+			maxWidth = Math.max(maxWidth, getLineLength(line, actualFontSize));
+		
+		return maxWidth;
+	}
+	
+	public void drawString(String text, float fontSize, float lineSpacing, Vec2 pos){drawString(text, fontSize, lineSpacing, (float) pos.x, (float) pos.y);}
+	public void drawStringRightAligned(String text, float fontSize, float lineSpacing, Vec2 position){drawStringRightAligned(text, fontSize, lineSpacing, (float) position.x, (float) position.y);}
+	
+	private float getLineLength(String line, float actualFontSize){
+		float f2sCoords = actualFontSize / font.lineHeight;
+		
+		float curX = 0;
+		char lastChar = '\n';
+		for(char c:line.toCharArray()){
+			curX += (font.charData.get(c).xadvance+font.kernings.getOrDefault(new FontData.CharPair(lastChar, c), 0))*f2sCoords;
+			lastChar = c;
 		}
 		
-		private float getLineLength(String line){
-			float actualFontSize = getActualFontSize();
-			
-			float curX = 0;
-			for(char c:line.toCharArray())
-				curX = computeNextXPos(curX, c, actualFontSize);
-			
-			return curX - (actualFontSize*16)/textureWidth;
-		}
-		
-		public Dimentions getTextDimentions(){
-			float maxWidth = 0;
-			
-			String[] lines = text.split("\n");
-			for(String line:lines)
-				maxWidth = Math.max(maxWidth, getLineLength(line));
-			
-			return new Dimentions(maxWidth, lines.length*getActualFontSize()+(lines.length-1)*getActualLineSpacing());
-		}
-		
-		public float getActualFontSize(){
-			double screenHeight = Screen.getWindowSize().height;
-			double actualFontSize = fontSize / screenHeight;
-			return (float) actualFontSize;
-		}
-		
-		public float getActualLineSpacing(){
-			double screenHeight = Screen.getWindowSize().height;
-			double actualLineSpacing = lineSpacing / screenHeight;
-			return (float) actualLineSpacing;
-		}
+		return curX;
+	}
+	
+	/**
+	 * Draws a textured rectangle at screen pos x, y. bottom corner
+	 * 
+	 * u and v are in texture coords, integers
+	 * 
+	 * @param x
+	 * @param y
+	 * @param w
+	 * @param h
+	 * @param u
+	 * @param v
+	 * @param du
+	 * @param dv
+	 */
+	private void drawTexturedRectangle(float x, float y, float w, float h, int u, int v, int du, int dv){
+		glBegin(GL_QUADS);
+		glTexCoord2i(u, v);
+		glVertex2f(x, y);
+		glTexCoord2i(u, v+dv);
+		glVertex2f(x, y-h);
+		glTexCoord2i(u+du, v+dv);
+		glVertex2f(x+w, y-h);
+		glTexCoord2i(u+du, v);
+		glVertex2f(x+w, y);
+		glEnd();
 	}
 }
